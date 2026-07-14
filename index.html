@@ -20,143 +20,46 @@
   --line:rgba(33,27,20,0.18);
   --line-strong:rgba(33,27,20,0.35);
 }
-
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{
-  background:var(--paper);
-  color:var(--espresso);
-  font-family:'Source Serif 4', Georgia, serif;
-  line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
+body{background:var(--paper);color:var(--espresso);font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
 img,svg{display:block;}
 a{color:inherit;}
 button{font-family:inherit;cursor:pointer;}
 input,select,textarea{font-family:inherit;font-size:1rem;}
+.mono{font-family:'IBM Plex Mono',monospace;}
 
-.mono{font-family:'IBM Plex Mono', monospace;}
-.chalk{font-family:'Kalam', cursive;}
-
-/* ---------- layout shell ---------- */
 #app{max-width:900px;margin:0 auto;padding:0 20px 80px;}
 
-.topbar{
-  background:var(--ink);
-  color:var(--paper-light);
-  padding:14px 20px;
-}
-.topbar-inner{
-  max-width:900px;margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:10px;
-}
-.brand{
-  font-family:'Kalam',cursive;
-  font-weight:700;
-  font-size:1.35rem;
-  letter-spacing:.3px;
-}
+.topbar{background:var(--ink);color:var(--paper-light);padding:14px 20px;}
+.topbar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.brand{font-family:'Kalam',cursive;font-weight:700;font-size:1.35rem;letter-spacing:.3px;}
 .brand span{color:var(--ochre);}
 nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
-nav.tabs button{
-  background:none;border:1px solid transparent;color:var(--paper-light);
-  padding:7px 12px;border-radius:3px;font-size:.92rem;
-  font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;
-  opacity:.8;
-}
+nav.tabs button{background:none;border:1px solid transparent;color:var(--paper-light);padding:7px 12px;border-radius:3px;font-size:.92rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;opacity:.8;}
 nav.tabs button:hover{opacity:1;border-color:rgba(232,225,206,.3);}
 nav.tabs button.active{opacity:1;background:var(--ochre);color:var(--ink);font-weight:600;}
 
-/* ---------- hero ---------- */
-.hero{
-  background:var(--ink);
-  color:var(--paper-light);
-  margin:0 -20px 36px;
-  padding:44px 20px 36px;
-  position:relative;
-  background-image:
-    radial-gradient(circle at 15% 20%, rgba(255,255,255,.035), transparent 40%),
-    radial-gradient(circle at 85% 70%, rgba(255,255,255,.03), transparent 45%);
-}
-.hero-eyebrow{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ochre);margin-bottom:10px;
-}
-.hero h1{
-  font-family:'Kalam',cursive;
-  font-weight:700;
-  font-size:clamp(2rem,5vw,3rem);
-  line-height:1.1;
-  margin:0 0 12px;
-  text-shadow:0 0 1px rgba(255,255,255,.25);
-}
-.hero p.tagline{
-  max-width:520px;
-  color:var(--paper-dark);
-  font-size:1.05rem;
-  margin:0 0 22px;
-}
-.hero-session-card{
-  background:rgba(232,225,206,.06);
-  border:1px solid rgba(232,225,206,.22);
-  border-radius:6px;
-  padding:16px 18px;
-  max-width:460px;
-}
-.hero-session-card .label{
-  font-family:'IBM Plex Mono',monospace;font-size:.72rem;
-  letter-spacing:.12em;text-transform:uppercase;color:var(--ochre);margin-bottom:6px;
-}
+.hero{background:var(--ink);color:var(--paper-light);margin:0 -20px 36px;padding:44px 20px 36px;position:relative;background-image:radial-gradient(circle at 15% 20%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 85% 70%,rgba(255,255,255,.03),transparent 45%);}
+.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);margin-bottom:10px;}
+.hero h1{font-family:'Kalam',cursive;font-weight:700;font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:0 0 12px;text-shadow:0 0 1px rgba(255,255,255,.25);}
+.hero p.tagline{max-width:520px;color:var(--paper-dark);font-size:1.05rem;margin:0 0 22px;}
+.hero-session-card{background:rgba(232,225,206,.06);border:1px solid rgba(232,225,206,.22);border-radius:6px;padding:16px 18px;max-width:460px;}
+.hero-session-card .label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ochre);margin-bottom:6px;}
 .hero-session-date{font-size:1.25rem;font-weight:600;margin-bottom:8px;}
 .hero-session-empty{color:var(--paper-dark);font-style:italic;}
 
-/* ---------- sections/cards ---------- */
-h2.section-title{
-  font-family:'Kalam',cursive;
-  font-size:1.6rem;font-weight:700;
-  margin:0 0 6px;
-  color:var(--espresso);
-}
+h2.section-title{font-family:'Kalam',cursive;font-size:1.6rem;font-weight:700;margin:0 0 6px;color:var(--espresso);}
 p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;}
-
 .hairline{border:none;border-top:1px solid var(--line);margin:28px 0;}
+.card{background:var(--paper-light);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:16px;}
 
-.card{
-  background:var(--paper-light);
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:20px;
-  margin-bottom:16px;
-}
-
-/* agenda-style event card */
-.event-card{
-  display:grid;
-  grid-template-columns:64px 1fr auto;
-  gap:16px;
-  align-items:start;
-  background:var(--paper-light);
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:18px 20px;
-  margin-bottom:14px;
-}
-@media (max-width:640px){
-  .event-card{grid-template-columns:1fr;}
-}
-.event-num{
-  font-family:'IBM Plex Mono',monospace;
-  font-size:1.5rem;font-weight:600;color:var(--ochre-dark);
-  line-height:1;
-}
+.event-card{display:grid;grid-template-columns:64px 1fr auto;gap:16px;align-items:start;background:var(--paper-light);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:14px;}
+@media(max-width:640px){.event-card{grid-template-columns:1fr;}}
+.event-num{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;color:var(--ochre-dark);line-height:1;}
 .event-main .date{font-weight:700;font-size:1.15rem;}
 .event-main .label{color:var(--espresso);opacity:.8;margin:2px 0 8px;}
-.event-meta{
-  font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--espresso);opacity:.75;
-  display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;
-}
+.event-meta{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--espresso);opacity:.75;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
 .cup-row{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:4px;}
 .cup-icon{width:16px;height:16px;overflow:visible;flex:none;}
 .cup-body{fill:none;stroke:var(--espresso);stroke-width:1.6;stroke-linejoin:round;}
@@ -165,92 +68,42 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .fill-bar{height:10px;border:1px solid var(--espresso);border-radius:2px;overflow:hidden;width:180px;background:var(--paper);}
 .fill-bar-inner{height:100%;background:var(--ochre);}
 
-.badge{
-  display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.72rem;
-  padding:3px 8px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;
-}
+.badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.72rem;padding:3px 8px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;}
 .badge-open{background:rgba(95,111,78,.15);color:var(--sage);}
 .badge-closed{background:rgba(156,74,52,.15);color:var(--brick);}
 .badge-full{background:rgba(156,74,52,.15);color:var(--brick);}
 .badge-pending{background:rgba(189,139,46,.18);color:var(--ochre-dark);}
 .badge-approved{background:rgba(95,111,78,.15);color:var(--sage);}
 
-/* buttons */
-.btn{
-  display:inline-block;
-  background:var(--espresso);color:var(--paper-light);
-  border:none;padding:10px 16px;border-radius:4px;
-  font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;
-  letter-spacing:.02em;
-}
+.btn{display:inline-block;background:var(--espresso);color:var(--paper-light);border:none;padding:10px 16px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;}
 .btn:hover{background:var(--ink);}
 .btn:disabled{background:var(--line-strong);color:var(--paper);cursor:not-allowed;}
-.btn-outline{
-  background:none;border:1px solid var(--espresso);color:var(--espresso);
-}
+.btn-outline{background:none;border:1px solid var(--espresso);color:var(--espresso);}
 .btn-outline:hover{background:var(--espresso);color:var(--paper-light);}
 .btn-small{padding:6px 10px;font-size:.75rem;}
 .btn-danger{background:none;border:1px solid var(--brick);color:var(--brick);}
 .btn-danger:hover{background:var(--brick);color:#fff;}
 
-/* forms */
 .field{margin-bottom:14px;}
-.field label{
-  display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;
-  letter-spacing:.05em;text-transform:uppercase;color:var(--espresso);opacity:.8;margin-bottom:5px;
-}
-.field input,.field select,.field textarea{
-  width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;
-  background:var(--paper-light);color:var(--espresso);
-}
+.field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;color:var(--espresso);opacity:.8;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;background:var(--paper-light);color:var(--espresso);}
 .field textarea{min-height:80px;resize:vertical;}
 .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
 .checkbox-list{display:flex;flex-direction:column;gap:6px;}
-.checkbox-list label{
-  display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;
-  text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;
-}
+.checkbox-list label{display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;}
 .checkbox-list input{width:auto;}
-
-.form-panel{
-  background:var(--paper);
-  border:1px dashed var(--line-strong);
-  border-radius:6px;
-  padding:18px;
-  margin-top:12px;
-}
-
-.notice{
-  padding:12px 14px;border-radius:4px;margin-bottom:16px;font-size:.92rem;
-}
+.form-panel{background:var(--paper);border:1px dashed var(--line-strong);border-radius:6px;padding:18px;margin-top:12px;}
+.notice{padding:12px 14px;border-radius:4px;margin-bottom:16px;font-size:.92rem;}
 .notice-success{background:rgba(95,111,78,.15);border:1px solid var(--sage);color:var(--sage);}
 .notice-error{background:rgba(156,74,52,.12);border:1px solid var(--brick);color:var(--brick);}
-
-.empty-state{
-  border:1px dashed var(--line-strong);border-radius:6px;padding:28px;text-align:center;
-  color:var(--espresso);opacity:.7;font-style:italic;
-}
-
+.empty-state{border:1px dashed var(--line-strong);border-radius:6px;padding:28px;text-align:center;color:var(--espresso);opacity:.7;font-style:italic;}
 table.admin-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.9rem;}
-table.admin-table th,table.admin-table td{
-  text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;
-}
-table.admin-table th{
-  font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;
-}
-
+table.admin-table th,table.admin-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
 .admin-subnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
-.admin-subnav button{
-  background:var(--paper-light);border:1px solid var(--line-strong);padding:8px 14px;border-radius:4px;
-  font-family:'IBM Plex Mono',monospace;font-size:.82rem;
-}
+.admin-subnav button{background:var(--paper-light);border:1px solid var(--line-strong);padding:8px 14px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;}
 .admin-subnav button.active{background:var(--espresso);color:var(--paper-light);}
-
-.footer{
-  text-align:center;padding:30px 20px 10px;
-  font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;
-}
-
+.footer{text-align:center;padding:30px 20px 10px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;}
 .loading-line{font-family:'IBM Plex Mono',monospace;opacity:.6;padding:40px 0;text-align:center;}
 </style>
 </head>
@@ -269,120 +122,115 @@ table.admin-table th{
 </div>
 
 <div id="app"><div class="loading-line">brewing the page…</div></div>
-
 <div class="footer">Small room. Small groups. One good idea a month.</div>
 
 <script>
-/* ===================== storage helpers ===================== */
-async function sGet(key, shared){
-  try{ const r = await window.storage.get(key, shared); return r ? r.value : null; }
-  catch(e){ return null; }
-}
-async function sSet(key, value, shared){
-  try{ return await window.storage.set(key, value, shared); }
-  catch(e){ console.error('storage set failed', key, e); return null; }
-}
-async function sDelete(key, shared){
-  try{ return await window.storage.delete(key, shared); }
-  catch(e){ console.error('storage delete failed', key, e); return null; }
-}
-async function sList(prefix, shared){
-  try{ const r = await window.storage.list(prefix, shared); return r ? r.keys : []; }
-  catch(e){ return []; }
-}
-function uid(){ return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7); }
+/* ===================== Supabase config ===================== */
+const SUPA_URL = 'https://lhiquhhpiofcjlnrhiif.supabase.co';
+const SUPA_KEY = 'sb_publishable_LjqgeRMTPkd3z07rOPMVoQ_O-O4juOj';
 
-/* ===================== data model ===================== */
-const DEFAULT_CAFE_INFO = {
-  name: 'The Lecture Cafe',
-  tagline: 'Coffee, conversation, and one good idea a month.',
-  about: 'The Lecture Cafe is a tiny monthly gathering — part coffeehouse, part seminar room. Once a month we open our doors, pull in a small handful of chairs, and someone shares an idea worth talking about over coffee. Space is intentionally small, so we ask everyone to reserve a seat ahead of time.',
-  address: 'Add your address in the Admin tab',
-  hours: 'Open one day a month — see the next session above'
-};
-
-async function loadCafeInfo(){
-  const raw = await sGet('cafeinfo', true);
-  if(!raw) return {...DEFAULT_CAFE_INFO};
-  try{ return {...DEFAULT_CAFE_INFO, ...JSON.parse(raw)}; }catch(e){ return {...DEFAULT_CAFE_INFO}; }
-}
-async function saveCafeInfo(info){ await sSet('cafeinfo', JSON.stringify(info), true); }
-
-async function loadEvents(){
-  const raw = await sGet('events', true);
-  if(!raw) return [];
-  try{ return JSON.parse(raw); }catch(e){ return []; }
-}
-async function saveEvents(events){ await sSet('events', JSON.stringify(events), true); }
-
-async function loadReservations(eventId){
-  const keys = await sList('reservation:'+eventId+':', true);
-  const out = [];
-  for(const k of keys){
-    const raw = await sGet(k, true);
-    if(raw){ try{ out.push({...JSON.parse(raw), _key:k}); }catch(e){} }
+async function supaFetch(path, opts = {}) {
+  const url = SUPA_URL + '/rest/v1/' + path;
+  const headers = {
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + SUPA_KEY,
+    'Content-Type': 'application/json',
+    'Prefer': opts.prefer || 'return=representation',
+    ...opts.headers
+  };
+  const res = await fetch(url, { method: opts.method || 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error('Supabase error ' + res.status + ': ' + err);
   }
-  out.sort((a,b)=> (a.createdAt||0) - (b.createdAt||0));
-  return out;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
 }
-async function addReservation(eventId, data){
-  const id = uid();
-  const key = 'reservation:'+eventId+':'+id;
-  await sSet(key, JSON.stringify({...data, id, eventId, createdAt: Date.now()}), true);
-}
-async function deleteReservationByKey(key){ await sDelete(key, true); }
 
-async function loadAllTalks(){
-  const keys = await sList('talk:', true);
-  const out = [];
-  for(const k of keys){
-    const raw = await sGet(k, true);
-    if(raw){ try{ out.push(JSON.parse(raw)); }catch(e){} }
-  }
-  out.sort((a,b)=> (b.createdAt||0) - (a.createdAt||0));
-  return out;
-}
-async function addTalk(data){
-  const id = uid();
-  await sSet('talk:'+id, JSON.stringify({...data, id, status:'pending', createdAt: Date.now()}), true);
-}
-async function updateTalk(talk){ await sSet('talk:'+talk.id, JSON.stringify(talk), true); }
-async function deleteTalk(id){ await sDelete('talk:'+id, true); }
+/* ===================== data helpers ===================== */
 
-async function loadPasscode(){ return await sGet('admin-passcode', true); }
-async function savePasscode(code){ await sSet('admin-passcode', code, true); }
+async function loadCafeInfo() {
+  const rows = await supaFetch('cafe_info?id=eq.1&select=*');
+  return rows && rows[0] ? rows[0] : {
+    name:'The Lecture Cafe', tagline:'Coffee, conversation, and one good idea a month.',
+    about:'The Lecture Cafe is a tiny monthly gathering — part coffeehouse, part seminar room. Once a month we open our doors, pull in a small handful of chairs, and someone shares an idea worth talking about over coffee.',
+    address:'Add your address in the Admin tab', hours:'Open one day a month — see the next session above'
+  };
+}
+async function saveCafeInfo(info) {
+  await supaFetch('cafe_info?id=eq.1', { method:'PATCH', body:{ name:info.name, tagline:info.tagline, about:info.about, address:info.address, hours:info.hours } });
+}
+
+async function loadEvents() {
+  return await supaFetch('events?select=*&order=date.asc') || [];
+}
+async function createEvent(ev) {
+  return await supaFetch('events', { method:'POST', body:{ date:ev.date, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
+}
+async function deleteEvent(id) {
+  await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
+}
+
+async function loadReservations(eventId) {
+  return await supaFetch('reservations?event_id=eq.' + eventId + '&select=*&order=created_at.asc') || [];
+}
+async function addReservation(eventId, data) {
+  return await supaFetch('reservations', { method:'POST', body:{ event_id:eventId, name:data.name, email:data.email, party_size:data.partySize, notes:data.notes||'' } });
+}
+async function deleteReservation(id) {
+  await supaFetch('reservations?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
+}
+
+async function loadAllTalks() {
+  return await supaFetch('talks?select=*&order=created_at.desc') || [];
+}
+async function addTalk(data) {
+  return await supaFetch('talks', { method:'POST', body:{ name:data.name, email:data.email, topic:data.topic, description:data.description, available_dates:data.availableDates, notes:data.notes||'', status:'pending', assigned_event_id:null } });
+}
+async function updateTalk(talk) {
+  await supaFetch('talks?id=eq.' + talk.id, { method:'PATCH', body:{ status:talk.status, assigned_event_id:talk.assigned_event_id||null } });
+}
+async function deleteTalk(id) {
+  await supaFetch('talks?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
+}
+
+async function loadPasscode() {
+  const rows = await supaFetch('admin_config?id=eq.1&select=passcode');
+  return rows && rows[0] ? rows[0].passcode : '';
+}
+async function savePasscode(code) {
+  await supaFetch('admin_config?id=eq.1', { method:'PATCH', body:{ passcode:code } });
+}
 
 /* ===================== utils ===================== */
-function fmtDate(iso){
-  if(!iso) return '—';
-  const d = new Date(iso+'T00:00:00');
-  if(isNaN(d)) return iso;
-  return d.toLocaleDateString(undefined, {weekday:'short', year:'numeric', month:'short', day:'numeric'});
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  if (isNaN(d)) return iso;
+  return d.toLocaleDateString(undefined, { weekday:'short', year:'numeric', month:'short', day:'numeric' });
 }
-function todayISO(){ return new Date().toISOString().slice(0,10); }
-function isFuture(iso){ return iso >= todayISO(); }
-function reservedCount(list){ return list.reduce((sum,r)=> sum + (parseInt(r.partySize)||0), 0); }
-
-function cupIcon(filled){
-  return '<svg class="cup-icon '+(filled?'is-filled':'')+'" viewBox="0 0 22 22" aria-hidden="true">'
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function isFuture(iso) { return iso >= todayISO(); }
+function reservedCount(list) { return list.reduce((s, r) => s + (parseInt(r.party_size) || 0), 0); }
+function cupIcon(filled) {
+  return '<svg class="cup-icon ' + (filled ? 'is-filled' : '') + '" viewBox="0 0 22 22" aria-hidden="true">'
     + '<path class="cup-body" d="M4 4h11v8a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 4 12V4z"/>'
     + '<path class="cup-handle" d="M15 6.5h1.6a2 2 0 1 1 0 4H15"/>'
-    + '<line class="cup-base" x1="5.5" y1="18.5" x2="13.5" y2="18.5"/>'
-    + '</svg>';
+    + '<line class="cup-base" x1="5.5" y1="18.5" x2="13.5" y2="18.5"/></svg>';
 }
-function capacityWidget(capacity, reserved){
-  const cap = parseInt(capacity)||0;
+function capacityWidget(capacity, reserved) {
+  const cap = parseInt(capacity) || 0;
   const res = Math.min(reserved, cap);
-  if(cap <= 24 && cap > 0){
+  if (cap > 0 && cap <= 24) {
     let cups = '';
-    for(let i=0;i<cap;i++){ cups += cupIcon(i < res); }
-    return '<div class="cup-row">'+cups+'</div>';
+    for (let i = 0; i < cap; i++) cups += cupIcon(i < res);
+    return '<div class="cup-row">' + cups + '</div>';
   }
-  const pct = cap>0 ? Math.min(100, Math.round((res/cap)*100)) : 0;
-  return '<div class="fill-bar"><div class="fill-bar-inner" style="width:'+pct+'%"></div></div>';
+  const pct = cap > 0 ? Math.min(100, Math.round((res / cap) * 100)) : 0;
+  return '<div class="fill-bar"><div class="fill-bar-inner" style="width:' + pct + '%"></div></div>';
 }
-function escapeHtml(str){
-  return String(str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 }
 
 /* ===================== state ===================== */
@@ -391,246 +239,203 @@ let STATE = {
   cafeInfo: null,
   events: [],
   talks: [],
-  reservationsByEvent: {},
   adminUnlocked: false,
-  passcodeExists: null,
   notice: null,
   openReserveFormFor: null
 };
 
-async function refreshCore(){
+async function refreshCore() {
   STATE.cafeInfo = await loadCafeInfo();
   STATE.events = await loadEvents();
 }
 
-function upcomingEvents(){
-  return STATE.events.filter(e => isFuture(e.date)).sort((a,b)=> a.date.localeCompare(b.date));
-}
-function pastEvents(){
-  return STATE.events.filter(e => !isFuture(e.date)).sort((a,b)=> b.date.localeCompare(a.date));
+function upcomingEvents() {
+  return STATE.events.filter(e => isFuture(e.date)).sort((a,b) => a.date.localeCompare(b.date));
 }
 
-/* ===================== render: shell ===================== */
-function setActiveTab(){
-  document.querySelectorAll('#navTabs button').forEach(b=>{
+/* ===================== nav ===================== */
+function setActiveTab() {
+  document.querySelectorAll('#navTabs button').forEach(b => {
     b.classList.toggle('active', b.dataset.nav === STATE.view);
   });
 }
-
-async function navigate(view){
-  STATE.view = view;
-  STATE.notice = null;
+async function navigate(view) {
+  STATE.view = view; STATE.notice = null;
   window.location.hash = view;
   setActiveTab();
   await render();
 }
 
-async function render(){
+/* ===================== render shell ===================== */
+async function render() {
   const app = document.getElementById('app');
   app.innerHTML = '<div class="loading-line">loading…</div>';
   let html = '';
-  if(STATE.view === 'home') html = await renderHome();
-  else if(STATE.view === 'reserve') html = await renderReserve();
-  else if(STATE.view === 'talk') html = await renderTalk();
-  else if(STATE.view === 'admin') html = await renderAdmin();
-  else html = await renderHome();
+  try {
+    if (STATE.view === 'home')    html = await renderHome();
+    else if (STATE.view === 'reserve') html = await renderReserve();
+    else if (STATE.view === 'talk')    html = await renderTalk();
+    else if (STATE.view === 'admin')   html = await renderAdmin();
+    else html = await renderHome();
+  } catch(e) {
+    html = '<div class="notice notice-error">Could not load data. Check your Supabase connection.<br><small>' + escapeHtml(e.message) + '</small></div>';
+  }
   app.innerHTML = html;
-  document.getElementById('brandTitle').textContent = '';
-  document.getElementById('brandTitle').innerHTML = escapeHtml(STATE.cafeInfo.name.split(' ').slice(0,-1).join(' ')) +
-    ' <span>' + escapeHtml(STATE.cafeInfo.name.split(' ').slice(-1)[0]||'') + '</span>';
+  // update brand
+  const parts = (STATE.cafeInfo && STATE.cafeInfo.name || 'The Lecture Cafe').split(' ');
+  const last = parts.pop();
+  document.getElementById('brandTitle').innerHTML = escapeHtml(parts.join(' ')) + ' <span>' + escapeHtml(last) + '</span>';
 }
 
-/* ===================== render: home ===================== */
-async function renderHome(){
+/* ===================== home ===================== */
+async function renderHome() {
   const info = STATE.cafeInfo;
   const next = upcomingEvents()[0];
   let sessionBlock = '<div class="hero-session-empty">No session scheduled yet — check back soon.</div>';
-  if(next){
+  if (next) {
     const res = await loadReservations(next.id);
     const rc = reservedCount(res);
-    const cap = parseInt(next.capacity)||0;
+    const cap = parseInt(next.capacity) || 0;
     const spotsLeft = Math.max(0, cap - rc);
     sessionBlock =
-      '<div class="hero-session-date">'+fmtDate(next.date)+'</div>'+
-      (next.label ? '<div style="opacity:.85;margin-bottom:10px;">'+escapeHtml(next.label)+'</div>' : '') +
+      '<div class="hero-session-date">' + fmtDate(next.date) + '</div>' +
+      (next.label ? '<div style="opacity:.85;margin-bottom:10px;">' + escapeHtml(next.label) + '</div>' : '') +
       capacityWidget(cap, rc) +
-      '<div style="margin-top:8px;font-family:\\'IBM Plex Mono\\',monospace;font-size:.82rem;opacity:.85;">'+spotsLeft+' of '+cap+' seats left · RSVP by '+fmtDate(next.rsvpBy)+'</div>';
+      '<div style="margin-top:8px;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem;opacity:.85;">' +
+      spotsLeft + ' of ' + cap + ' seats left · RSVP by ' + fmtDate(next.rsvp_by) + '</div>';
   }
-
   return `
   <div class="hero" style="margin-top:0;">
     <div class="hero-eyebrow">Next Session</div>
     <h1>${escapeHtml(info.tagline)}</h1>
-    <p class="tagline">${escapeHtml(info.about).slice(0,140)}${info.about.length>140?'…':''}</p>
+    <p class="tagline">${escapeHtml(info.about.slice(0,160))}${info.about.length>160?'…':''}</p>
     <div class="hero-session-card">
       <div class="label">This month</div>
       ${sessionBlock}
     </div>
   </div>
-
   <h2 class="section-title">About the cafe</h2>
   <p class="section-sub">${escapeHtml(info.about)}</p>
-
   <div class="card" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-    <div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Where</div>
-      <div>${escapeHtml(info.address)}</div>
-    </div>
-    <div>
-      <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Hours</div>
-      <div>${escapeHtml(info.hours)}</div>
-    </div>
+    <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Where</div><div>${escapeHtml(info.address)}</div></div>
+    <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Hours</div><div>${escapeHtml(info.hours)}</div></div>
   </div>
-
   <hr class="hairline"/>
   <div style="display:flex;gap:14px;flex-wrap:wrap;">
     <button class="btn" data-nav="reserve">Reserve a seat →</button>
     <button class="btn btn-outline" data-nav="talk">Propose a talk →</button>
-  </div>
-  `;
+  </div>`;
 }
 
-/* ===================== render: reserve ===================== */
-async function renderReserve(){
+/* ===================== reserve ===================== */
+async function renderReserve() {
   const events = upcomingEvents();
   let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
-
-  if(events.length === 0){
-    return `
-      <h2 class="section-title">Reserve a seat</h2>
-      <p class="section-sub">Seats are limited, so we ask everyone to reserve ahead of time.</p>
-      ${noticeHtml}
-      <div class="empty-state">No sessions are open for reservations right now. Check back soon.</div>
-    `;
-  }
+  if (!events.length) return `
+    <h2 class="section-title">Reserve a seat</h2>
+    <p class="section-sub">Seats are limited, so we ask everyone to reserve ahead of time.</p>
+    ${noticeHtml}
+    <div class="empty-state">No sessions are open for reservations right now. Check back soon.</div>`;
 
   let cardsHtml = '';
   let num = 1;
-  for(const ev of events){
+  for (const ev of events) {
     const res = await loadReservations(ev.id);
     const rc = reservedCount(res);
-    const cap = parseInt(ev.capacity)||0;
+    const cap = parseInt(ev.capacity) || 0;
     const spotsLeft = Math.max(0, cap - rc);
-    const rsvpClosed = !isFuture(ev.rsvpBy);
+    const rsvpClosed = !isFuture(ev.rsvp_by);
     const full = spotsLeft <= 0;
-    let statusBadge = '';
-    if(full) statusBadge = '<span class="badge badge-full">Full</span>';
-    else if(rsvpClosed) statusBadge = '<span class="badge badge-closed">RSVP closed</span>';
-    else statusBadge = '<span class="badge badge-open">Open</span>';
+    let statusBadge = full ? '<span class="badge badge-full">Full</span>'
+      : rsvpClosed ? '<span class="badge badge-closed">RSVP closed</span>'
+      : '<span class="badge badge-open">Open</span>';
 
     const formOpen = STATE.openReserveFormFor === ev.id;
     let formHtml = '';
-    if(formOpen && !full && !rsvpClosed){
+    if (formOpen && !full && !rsvpClosed) {
       let options = '';
-      for(let i=1;i<=Math.min(spotsLeft,8);i++) options += `<option value="${i}">${i} ${i===1?'seat':'seats'}</option>`;
+      for (let i = 1; i <= Math.min(spotsLeft, 8); i++)
+        options += `<option value="${i}">${i} ${i===1?'seat':'seats'}</option>`;
       formHtml = `
       <div class="form-panel">
         <form data-form="reserve" data-event-id="${ev.id}">
-          <div class="field"><label>Name</label><input type="text" name="name" required /></div>
-          <div class="field"><label>Email</label><input type="email" name="email" required /></div>
-          <div class="field">
-            <label>Party size</label>
-            <select name="partySize">${options}</select>
-            <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left for this session.</div>
-          </div>
-          <div class="field">
-            <label>Notes (optional)</label>
-            <textarea name="notes" placeholder="e.g. would like to sit with another registered guest, dietary notes, etc."></textarea>
-          </div>
+          <div class="field"><label>Name</label><input type="text" name="name" required/></div>
+          <div class="field"><label>Email</label><input type="email" name="email" required/></div>
+          <div class="field"><label>Party size</label><select name="partySize">${options}</select>
+            <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left.</div></div>
+          <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. seating with another guest, accessibility needs"></textarea></div>
           <button class="btn" type="submit">Confirm reservation</button>
           <button class="btn btn-outline" type="button" data-action="cancel-reserve-form" style="margin-left:8px;">Cancel</button>
         </form>
       </div>`;
     }
-
     cardsHtml += `
     <div class="event-card">
       <div class="event-num mono">${String(num).padStart(2,'0')}</div>
       <div class="event-main">
         <div class="date">${fmtDate(ev.date)} ${statusBadge}</div>
         ${ev.label ? `<div class="label">${escapeHtml(ev.label)}</div>` : ''}
-        <div class="event-meta">
-          <span>RSVP by ${fmtDate(ev.rsvpBy)}</span>
-          <span>${spotsLeft} of ${cap} seats left</span>
-        </div>
+        <div class="event-meta"><span>RSVP by ${fmtDate(ev.rsvp_by)}</span><span>${spotsLeft} of ${cap} seats left</span></div>
         ${capacityWidget(cap, rc)}
         ${ev.notes ? `<div class="field-hint" style="margin-top:8px;">${escapeHtml(ev.notes)}</div>` : ''}
         ${formHtml}
       </div>
-      <div>
-        ${(!full && !rsvpClosed && !formOpen) ? `<button class="btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>` : ''}
-      </div>
+      <div>${(!full && !rsvpClosed && !formOpen) ? `<button class="btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>` : ''}</div>
     </div>`;
     num++;
   }
-
   return `
     <h2 class="section-title">Reserve a seat</h2>
     <p class="section-sub">We're a very small room, so we seat people in small clusters. Reserve ahead — once a session fills up, it's full.</p>
-    ${noticeHtml}
-    ${cardsHtml}
-  `;
+    ${noticeHtml}${cardsHtml}`;
 }
 
-/* ===================== render: talk ===================== */
-async function renderTalk(){
+/* ===================== talk ===================== */
+async function renderTalk() {
   const events = upcomingEvents();
   let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
-
-  let dateCheckboxes = '';
-  if(events.length){
-    dateCheckboxes = events.map(ev =>
-      `<label><input type="checkbox" name="availableDates" value="${ev.id}"/> ${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label) : ''}</label>`
-    ).join('');
-  } else {
-    dateCheckboxes = '<div class="field-hint">No dates are scheduled yet — tell us your availability in the notes below and we\\'ll follow up.</div>';
-  }
-
+  let dateCheckboxes = events.length
+    ? events.map(ev => `<label><input type="checkbox" name="availableDates" value="${ev.id}"/> ${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label) : ''}</label>`).join('')
+    : '<div class="field-hint">No dates scheduled yet — describe your availability in the notes below.</div>';
   return `
     <h2 class="section-title">Give a talk</h2>
     <p class="section-sub">Have an idea worth sharing over coffee? Tell us about it. We'll follow up to confirm a date.</p>
     ${noticeHtml}
     <div class="card">
       <form data-form="talk">
-        <div class="field"><label>Name</label><input type="text" name="name" required /></div>
-        <div class="field"><label>Email</label><input type="email" name="email" required /></div>
-        <div class="field"><label>Talk topic / title</label><input type="text" name="topic" required /></div>
+        <div class="field"><label>Name</label><input type="text" name="name" required/></div>
+        <div class="field"><label>Email</label><input type="email" name="email" required/></div>
+        <div class="field"><label>Talk topic / title</label><input type="text" name="topic" required/></div>
         <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?" required></textarea></div>
-        <div class="field">
-          <label>Which dates could you present?</label>
-          <div class="checkbox-list">${dateCheckboxes}</div>
-        </div>
+        <div class="field"><label>Which dates could you present?</label><div class="checkbox-list">${dateCheckboxes}</div></div>
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Other dates that could work, format needs, etc."></textarea></div>
         <button class="btn" type="submit">Submit proposal</button>
       </form>
-    </div>
-  `;
+    </div>`;
 }
 
-/* ===================== render: admin ===================== */
+/* ===================== admin ===================== */
 let ADMIN_TAB = 'overview';
 
-async function renderAdmin(){
+async function renderAdmin() {
   const code = await loadPasscode();
-  if(!STATE.adminUnlocked){
-    if(!code){
-      return `
-        <h2 class="section-title">Set up admin access</h2>
-        <p class="section-sub">No admin passcode has been set yet. Choose one now — you'll use it to manage sessions and reservations. This is a simple gate, not secure login, so don't reuse an important password.</p>
-        <div class="card" style="max-width:360px;">
-          <form data-form="set-passcode">
-            <div class="field"><label>Choose a passcode</label><input type="text" name="passcode" required minlength="4"/></div>
-            <button class="btn" type="submit">Set passcode</button>
-          </form>
-        </div>`;
-    }
+  if (!STATE.adminUnlocked) {
+    if (!code) return `
+      <h2 class="section-title">Set up admin access</h2>
+      <p class="section-sub">No admin passcode set yet. Choose one now.</p>
+      <div class="card" style="max-width:360px;">
+        <form data-form="set-passcode">
+          <div class="field"><label>Choose a passcode</label><input type="text" name="passcode" required minlength="4"/></div>
+          <button class="btn" type="submit">Set passcode</button>
+        </form>
+      </div>`;
     return `
       <h2 class="section-title">Admin</h2>
       <p class="section-sub">Enter the admin passcode to manage sessions, reservations, and talk proposals.</p>
       ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
       <div class="card" style="max-width:360px;">
         <form data-form="unlock-admin">
-          <div class="field"><label>Passcode</label><input type="password" name="passcode" required /></div>
+          <div class="field"><label>Passcode</label><input type="password" name="passcode" required/></div>
           <button class="btn" type="submit">Unlock</button>
         </form>
       </div>`;
@@ -638,17 +443,15 @@ async function renderAdmin(){
 
   STATE.talks = await loadAllTalks();
   const upEvents = upcomingEvents();
-  const pending = STATE.talks.filter(t=>t.status==='pending').length;
-
+  const pending = STATE.talks.filter(t => t.status === 'pending').length;
   let subnav = ['overview','cafe info','sessions','talks'].map(tab =>
-    `<button class="${ADMIN_TAB===tab?'active':''}" data-action="admin-tab" data-tab="${tab}">${tab}</button>`
-  ).join('');
+    `<button class="${ADMIN_TAB===tab?'active':''}" data-action="admin-tab" data-tab="${tab}">${tab}</button>`).join('');
 
   let body = '';
-  if(ADMIN_TAB === 'overview') body = renderAdminOverview(upEvents, pending);
-  else if(ADMIN_TAB === 'cafe info') body = renderAdminCafeInfo();
-  else if(ADMIN_TAB === 'sessions') body = await renderAdminSessions();
-  else if(ADMIN_TAB === 'talks') body = renderAdminTalks();
+  if (ADMIN_TAB === 'overview') body = renderAdminOverview(upEvents, pending);
+  else if (ADMIN_TAB === 'cafe info') body = renderAdminCafeInfo();
+  else if (ADMIN_TAB === 'sessions') body = await renderAdminSessions();
+  else if (ADMIN_TAB === 'talks') body = renderAdminTalks();
 
   return `
     <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -657,38 +460,35 @@ async function renderAdmin(){
     </div>
     ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
     <div class="admin-subnav">${subnav}</div>
-    ${body}
-  `;
+    ${body}`;
 }
 
-function renderAdminOverview(upEvents, pending){
+function renderAdminOverview(upEvents, pending) {
   return `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;">
       <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">UPCOMING SESSIONS</div><div style="font-size:1.8rem;font-weight:700;">${upEvents.length}</div></div>
       <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">PENDING TALK PROPOSALS</div><div style="font-size:1.8rem;font-weight:700;">${pending}</div></div>
       <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">TOTAL SESSIONS EVER</div><div style="font-size:1.8rem;font-weight:700;">${STATE.events.length}</div></div>
     </div>
-    <p class="field-hint" style="margin-top:16px;">Use "Cafe info" to edit the About text visitors see, "Sessions" to create sessions and manage reservations, and "Talks" to review talk proposals.</p>
-  `;
+    <p class="field-hint" style="margin-top:16px;">Use "cafe info" to edit your About text, "sessions" to create sessions and manage reservations, and "talks" to review proposals.</p>`;
 }
 
-function renderAdminCafeInfo(){
+function renderAdminCafeInfo() {
   const info = STATE.cafeInfo;
   return `
     <div class="card">
       <form data-form="cafe-info">
         <div class="field"><label>Cafe name</label><input type="text" name="name" value="${escapeHtml(info.name)}" required/></div>
-        <div class="field"><label>Tagline (shown big in the hero)</label><input type="text" name="tagline" value="${escapeHtml(info.tagline)}" required/></div>
+        <div class="field"><label>Tagline</label><input type="text" name="tagline" value="${escapeHtml(info.tagline)}" required/></div>
         <div class="field"><label>About</label><textarea name="about" required>${escapeHtml(info.about)}</textarea></div>
         <div class="field"><label>Address</label><input type="text" name="address" value="${escapeHtml(info.address)}"/></div>
         <div class="field"><label>Hours note</label><input type="text" name="hours" value="${escapeHtml(info.hours)}"/></div>
-        <button class="btn" type="submit">Save cafe info</button>
+        <button class="btn" type="submit">Save</button>
       </form>
-    </div>
-  `;
+    </div>`;
 }
 
-async function renderAdminSessions(){
+async function renderAdminSessions() {
   let createForm = `
     <div class="card">
       <div style="font-weight:600;margin-bottom:10px;">Create a new session</div>
@@ -705,50 +505,40 @@ async function renderAdminSessions(){
     </div>`;
 
   let sessionsHtml = '';
-  const allSorted = [...STATE.events].sort((a,b)=> b.date.localeCompare(a.date));
-  for(const ev of allSorted){
+  const allSorted = [...STATE.events].sort((a,b) => b.date.localeCompare(a.date));
+  for (const ev of allSorted) {
     const res = await loadReservations(ev.id);
     const rc = reservedCount(res);
     const rows = res.map(r => `
       <tr>
-        <td>${escapeHtml(r.name)}</td>
-        <td>${escapeHtml(r.email)}</td>
-        <td>${r.partySize}</td>
-        <td>${escapeHtml(r.notes||'')}</td>
-        <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-key="${r._key}" data-event-id="${ev.id}">Remove</button></td>
+        <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
+        <td>${r.party_size}</td><td>${escapeHtml(r.notes||'')}</td>
+        <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
       </tr>`).join('');
-
     sessionsHtml += `
     <div class="card">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;">
         <div>
-          <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)} ${ev.label ? '— '+escapeHtml(ev.label):''}</div>
-          <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvpBy)} · ${rc}/${ev.capacity} seats reserved ${isFuture(ev.date) ? '' : '· past'}</div>
+          <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
+          <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvp_by)} · ${rc}/${ev.capacity} seats reserved${isFuture(ev.date)?'':' · past'}</div>
         </div>
         <button class="btn-danger btn btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete session</button>
       </div>
-      ${res.length ? `
-      <table class="admin-table">
-        <thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
+      ${res.length ? `<table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
     </div>`;
   }
-  if(!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
-
+  if (!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
   return createForm + sessionsHtml;
 }
 
-function renderAdminTalks(){
-  if(!STATE.talks.length) return `<div class="empty-state">No talk proposals yet.</div>`;
+function renderAdminTalks() {
+  if (!STATE.talks.length) return '<div class="empty-state">No talk proposals yet.</div>';
   const evLookup = {};
   STATE.events.forEach(e => evLookup[e.id] = e);
-
   return STATE.talks.map(t => {
     const dateOptions = upcomingEvents().map(ev =>
-      `<option value="${ev.id}" ${t.assignedEventId===ev.id?'selected':''}>${fmtDate(ev.date)}${ev.label?' — '+escapeHtml(ev.label):''}</option>`
-    ).join('');
-    const availableLabels = (t.availableDates||[]).map(id => evLookup[id] ? fmtDate(evLookup[id].date) : null).filter(Boolean).join(', ') || '—';
+      `<option value="${ev.id}" ${t.assigned_event_id===ev.id?'selected':''}>${fmtDate(ev.date)}${ev.label?' — '+escapeHtml(ev.label):''}</option>`).join('');
+    const availableLabels = (t.available_dates||[]).map(id => evLookup[id] ? fmtDate(evLookup[id].date) : null).filter(Boolean).join(', ') || '—';
     const statusClass = t.status === 'approved' ? 'badge-approved' : 'badge-pending';
     return `
     <div class="card">
@@ -760,13 +550,12 @@ function renderAdminTalks(){
         <button class="btn-danger btn btn-small" data-action="delete-talk" data-id="${t.id}">Delete</button>
       </div>
       <p style="margin:10px 0;">${escapeHtml(t.description)}</p>
-      <div class="field-hint" style="margin-bottom:10px;">Said they're available: ${availableLabels}${t.notes ? ' · Notes: '+escapeHtml(t.notes) : ''}</div>
+      <div class="field-hint" style="margin-bottom:10px;">Available: ${availableLabels}${t.notes ? ' · Notes: '+escapeHtml(t.notes) : ''}</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
         <select data-role="assign-select" data-id="${t.id}" style="padding:6px 8px;border:1px solid var(--line-strong);border-radius:4px;">
-          <option value="">Assign to a session…</option>
-          ${dateOptions}
+          <option value="">Assign to a session…</option>${dateOptions}
         </select>
-        <button class="btn btn-small" data-action="assign-talk" data-id="${t.id}">Save assignment</button>
+        <button class="btn btn-small" data-action="assign-talk" data-id="${t.id}">Save</button>
         ${t.status!=='approved' ? `<button class="btn btn-outline btn-small" data-action="approve-talk" data-id="${t.id}">Mark approved</button>` : ''}
       </div>
     </div>`;
@@ -776,141 +565,105 @@ function renderAdminTalks(){
 /* ===================== event delegation ===================== */
 document.addEventListener('click', async (e) => {
   const navBtn = e.target.closest('[data-nav]');
-  if(navBtn){ await navigate(navBtn.dataset.nav); return; }
-
+  if (navBtn) { await navigate(navBtn.dataset.nav); return; }
   const actionEl = e.target.closest('[data-action]');
-  if(!actionEl) return;
+  if (!actionEl) return;
   const action = actionEl.dataset.action;
 
-  if(action === 'open-reserve-form'){
-    STATE.openReserveFormFor = actionEl.dataset.eventId;
-    await render();
-  } else if(action === 'cancel-reserve-form'){
-    STATE.openReserveFormFor = null;
-    await render();
-  } else if(action === 'admin-tab'){
-    ADMIN_TAB = actionEl.dataset.tab;
-    await render();
-  } else if(action === 'lock-admin'){
-    STATE.adminUnlocked = false;
-    await render();
-  } else if(action === 'delete-event'){
-    if(confirm('Delete this session? This cannot be undone.')){
-      STATE.events = STATE.events.filter(ev => ev.id !== actionEl.dataset.eventId);
-      await saveEvents(STATE.events);
-      STATE.notice = {type:'success', text:'Session deleted.'};
-      await render();
+  if (action === 'open-reserve-form') {
+    STATE.openReserveFormFor = actionEl.dataset.eventId; await render();
+  } else if (action === 'cancel-reserve-form') {
+    STATE.openReserveFormFor = null; await render();
+  } else if (action === 'admin-tab') {
+    ADMIN_TAB = actionEl.dataset.tab; await render();
+  } else if (action === 'lock-admin') {
+    STATE.adminUnlocked = false; await render();
+  } else if (action === 'delete-event') {
+    if (confirm('Delete this session? All reservations for it will also be deleted.')) {
+      await deleteEvent(actionEl.dataset.eventId);
+      STATE.events = await loadEvents();
+      STATE.notice = { type:'success', text:'Session deleted.' }; await render();
     }
-  } else if(action === 'delete-reservation'){
-    if(confirm('Remove this reservation?')){
-      await deleteReservationByKey(actionEl.dataset.key);
-      STATE.notice = {type:'success', text:'Reservation removed.'};
-      await render();
+  } else if (action === 'delete-reservation') {
+    if (confirm('Remove this reservation?')) {
+      await deleteReservation(actionEl.dataset.id);
+      STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
-  } else if(action === 'delete-talk'){
-    if(confirm('Delete this talk proposal?')){
+  } else if (action === 'delete-talk') {
+    if (confirm('Delete this talk proposal?')) {
       await deleteTalk(actionEl.dataset.id);
-      STATE.notice = {type:'success', text:'Talk proposal deleted.'};
-      await render();
+      STATE.talks = STATE.talks.filter(t => t.id !== actionEl.dataset.id);
+      STATE.notice = { type:'success', text:'Talk proposal deleted.' }; await render();
     }
-  } else if(action === 'approve-talk'){
-    const t = STATE.talks.find(x=>x.id===actionEl.dataset.id);
-    if(t){ t.status = 'approved'; await updateTalk(t); STATE.notice={type:'success',text:'Marked approved.'}; await render(); }
-  } else if(action === 'assign-talk'){
-    const select = document.querySelector('select[data-role="assign-select"][data-id="'+actionEl.dataset.id+'"]');
-    const t = STATE.talks.find(x=>x.id===actionEl.dataset.id);
-    if(t && select){ t.assignedEventId = select.value || null; await updateTalk(t); STATE.notice={type:'success',text:'Assignment saved.'}; await render(); }
+  } else if (action === 'approve-talk') {
+    const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
+    if (t) { t.status = 'approved'; await updateTalk(t); STATE.notice = { type:'success', text:'Marked approved.' }; await render(); }
+  } else if (action === 'assign-talk') {
+    const sel = document.querySelector('select[data-role="assign-select"][data-id="'+actionEl.dataset.id+'"]');
+    const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
+    if (t && sel) { t.assigned_event_id = sel.value || null; await updateTalk(t); STATE.notice = { type:'success', text:'Assignment saved.' }; await render(); }
   }
 });
 
 document.addEventListener('submit', async (e) => {
   const form = e.target.closest('form[data-form]');
-  if(!form) return;
+  if (!form) return;
   e.preventDefault();
   const type = form.dataset.form;
   const fd = new FormData(form);
 
-  if(type === 'reserve'){
+  if (type === 'reserve') {
     const eventId = form.dataset.eventId;
-    const ev = STATE.events.find(x=>x.id===eventId);
-    const partySize = parseInt(fd.get('partySize'))||1;
+    const ev = STATE.events.find(x => x.id === eventId);
+    const partySize = parseInt(fd.get('partySize')) || 1;
     const res = await loadReservations(eventId);
     const rc = reservedCount(res);
-    if(rc + partySize > (parseInt(ev.capacity)||0)){
-      STATE.notice = {type:'error', text:'Sorry — that session just filled up. Try a smaller party size or another date.'};
+    if (rc + partySize > (parseInt(ev.capacity) || 0)) {
+      STATE.notice = { type:'error', text:'Sorry — that session just filled up. Try a smaller party or another date.' };
     } else {
-      await addReservation(eventId, {
-        name: fd.get('name'), email: fd.get('email'),
-        partySize, notes: fd.get('notes')||''
-      });
-      STATE.notice = {type:'success', text:'You\\'re booked! See you at the cafe.'};
+      await addReservation(eventId, { name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'' });
+      STATE.notice = { type:'success', text:"You're booked! See you at the cafe." };
     }
-    STATE.openReserveFormFor = null;
-    await render();
+    STATE.openReserveFormFor = null; await render();
 
-  } else if(type === 'talk'){
-    const availableDates = fd.getAll('availableDates');
-    await addTalk({
-      name: fd.get('name'), email: fd.get('email'),
-      topic: fd.get('topic'), description: fd.get('description'),
-      availableDates, notes: fd.get('notes')||'', assignedEventId: null
-    });
-    STATE.notice = {type:'success', text:'Thanks! We\\'ll follow up to confirm a date.'};
-    form.reset();
-    await render();
+  } else if (type === 'talk') {
+    await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates:fd.getAll('availableDates'), notes:fd.get('notes')||'' });
+    STATE.notice = { type:'success', text:"Thanks! We'll follow up to confirm a date." };
+    form.reset(); await render();
 
-  } else if(type === 'set-passcode'){
+  } else if (type === 'set-passcode') {
     await savePasscode(fd.get('passcode'));
     STATE.adminUnlocked = true;
-    STATE.notice = {type:'success', text:'Passcode set. Welcome in.'};
-    await render();
+    STATE.notice = { type:'success', text:'Passcode set. Welcome in.' }; await render();
 
-  } else if(type === 'unlock-admin'){
+  } else if (type === 'unlock-admin') {
     const code = await loadPasscode();
-    if(fd.get('passcode') === code){
-      STATE.adminUnlocked = true;
-      STATE.notice = null;
-    } else {
-      STATE.notice = {type:'error', text:'Incorrect passcode.'};
-    }
+    if (fd.get('passcode') === code) { STATE.adminUnlocked = true; STATE.notice = null; }
+    else { STATE.notice = { type:'error', text:'Incorrect passcode.' }; }
     await render();
 
-  } else if(type === 'cafe-info'){
-    STATE.cafeInfo = {
-      name: fd.get('name'), tagline: fd.get('tagline'), about: fd.get('about'),
-      address: fd.get('address'), hours: fd.get('hours')
-    };
+  } else if (type === 'cafe-info') {
+    STATE.cafeInfo = { name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), address:fd.get('address'), hours:fd.get('hours') };
     await saveCafeInfo(STATE.cafeInfo);
-    STATE.notice = {type:'success', text:'Cafe info saved.'};
-    await render();
+    STATE.notice = { type:'success', text:'Cafe info saved.' }; await render();
 
-  } else if(type === 'create-event'){
-    const newEvent = {
-      id: uid(), date: fd.get('date'), rsvpBy: fd.get('rsvpBy'),
-      capacity: parseInt(fd.get('capacity'))||1, label: fd.get('label')||'',
-      notes: fd.get('notes')||''
-    };
-    STATE.events.push(newEvent);
-    await saveEvents(STATE.events);
-    STATE.notice = {type:'success', text:'Session created.'};
-    await render();
+  } else if (type === 'create-event') {
+    await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    STATE.events = await loadEvents();
+    STATE.notice = { type:'success', text:'Session created.' }; await render();
   }
 });
 
 /* ===================== init ===================== */
 window.addEventListener('hashchange', async () => {
-  const v = window.location.hash.replace('#','') || 'home';
-  STATE.view = v;
-  setActiveTab();
-  await render();
+  STATE.view = window.location.hash.replace('#','') || 'home';
+  setActiveTab(); await render();
 });
 
-(async function init(){
+(async function init() {
   await refreshCore();
-  const v = window.location.hash.replace('#','') || 'home';
-  STATE.view = v;
-  setActiveTab();
-  await render();
+  STATE.view = window.location.hash.replace('#','') || 'home';
+  setActiveTab(); await render();
 })();
 </script>
 </body>
