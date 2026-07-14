@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Lecture Cafe</title>
+<title>Cafe Gestalt</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
@@ -170,6 +170,9 @@ async function createEvent(ev) {
 async function deleteEvent(id) {
   await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
 }
+  async function updateEvent(ev) {
+  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
+}
 
 async function loadReservations(eventId) {
   return await supaFetch('reservations?event_id=eq.' + eventId + '&select=*&order=created_at.asc') || [];
@@ -241,7 +244,8 @@ let STATE = {
   talks: [],
   adminUnlocked: false,
   notice: null,
-  openReserveFormFor: null
+   openReserveFormFor: null,
+  openEditEventFor: null
 };
 
 async function refreshCore() {
@@ -509,6 +513,24 @@ async function renderAdminSessions() {
   for (const ev of allSorted) {
     const res = await loadReservations(ev.id);
     const rc = reservedCount(res);
+    const isEditing = STATE.openEditEventFor === ev.id;
+    const editForm = isEditing ? `
+      <div class="form-panel" style="margin-top:14px;">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:12px;">Edit session</div>
+        <form data-form="edit-event" data-event-id="${ev.id}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="field"><label>Date</label><input type="date" name="date" value="${ev.date}" required/></div>
+            <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" value="${ev.rsvp_by}" required/></div>
+            <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="${ev.capacity}" required/></div>
+            <div class="field"><label>Theme / label</label><input type="text" name="label" value="${escapeHtml(ev.label||'')}"/></div>
+          </div>
+          <div class="field"><label>Notes shown to guests</label><textarea name="notes">${escapeHtml(ev.notes||'')}</textarea></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn" type="submit">Save changes</button>
+            <button class="btn btn-outline" type="button" data-action="cancel-edit-event">Cancel</button>
+          </div>
+        </form>
+      </div>` : '';
     const rows = res.map(r => `
       <tr>
         <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
@@ -522,9 +544,11 @@ async function renderAdminSessions() {
           <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
           <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvp_by)} · ${rc}/${ev.capacity} seats reserved${isFuture(ev.date)?'':' · past'}</div>
         </div>
-        <button class="btn-danger btn btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete session</button>
+        ${!isEditing ? `<button class="btn btn-outline btn-small" data-action="open-edit-event" data-event-id="${ev.id}">Edit</button>` : ''}
+          <button class="btn-danger btn btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete</button>
       </div>
-      ${res.length ? `<table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
+      ${editForm}
+      ${res.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
     </div>`;
   }
   if (!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
@@ -578,6 +602,10 @@ document.addEventListener('click', async (e) => {
     ADMIN_TAB = actionEl.dataset.tab; await render();
   } else if (action === 'lock-admin') {
     STATE.adminUnlocked = false; await render();
+  } else if (action === 'open-edit-event') {
+    STATE.openEditEventFor = actionEl.dataset.eventId; await render();
+  } else if (action === 'cancel-edit-event') {
+    STATE.openEditEventFor = null; await render();
   } else if (action === 'delete-event') {
     if (confirm('Delete this session? All reservations for it will also be deleted.')) {
       await deleteEvent(actionEl.dataset.eventId);
@@ -651,6 +679,12 @@ document.addEventListener('submit', async (e) => {
     await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
     STATE.events = await loadEvents();
     STATE.notice = { type:'success', text:'Session created.' }; await render();
+
+  } else if (type === 'edit-event') {
+    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    STATE.events = await loadEvents();
+    STATE.openEditEventFor = null;
+    STATE.notice = { type:'success', text:'Session updated.' }; await render();
   }
 });
 
