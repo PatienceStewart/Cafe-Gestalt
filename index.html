@@ -152,8 +152,8 @@ async function supaFetch(path, opts = {}) {
 async function loadCafeInfo() {
   const rows = await supaFetch('cafe_info?id=eq.1&select=*');
   return rows && rows[0] ? rows[0] : {
-    name:'The Lecture Cafe', tagline:'Coffee, conversation, and one good idea a month.',
-    about:'The Lecture Cafe is a tiny monthly gathering — part coffeehouse, part seminar room. Once a month we open our doors, pull in a small handful of chairs, and someone shares an idea worth talking about over coffee.',
+    name:'Cafe Gestalt', tagline:'Coffee, conversation, and one good idea a month.',
+    about:'Cafe Gestalt is a tiny monthly gathering — part coffeehouse, part seminar room. Once a month we open our doors, pull in a small handful of chairs, and someone shares an idea worth talking about over coffee.',
     address:'Add your address in the Admin tab', hours:'Open one day a month — see the next session above'
   };
 }
@@ -170,7 +170,7 @@ async function createEvent(ev) {
 async function deleteEvent(id) {
   await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
 }
-  async function updateEvent(ev) {
+async function updateEvent(ev) {
   await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
 }
 
@@ -244,7 +244,7 @@ let STATE = {
   talks: [],
   adminUnlocked: false,
   notice: null,
-   openReserveFormFor: null,
+  openReserveFormFor: null,
   openEditEventFor: null
 };
 
@@ -286,7 +286,7 @@ async function render() {
   }
   app.innerHTML = html;
   // update brand
-  const parts = (STATE.cafeInfo && STATE.cafeInfo.name || 'The Lecture Cafe').split(' ');
+  const parts = (STATE.cafeInfo && STATE.cafeInfo.name || 'Cafe Gestalt').split(' ');
   const last = parts.pop();
   document.getElementById('brandTitle').innerHTML = escapeHtml(parts.join(' ')) + ' <span>' + escapeHtml(last) + '</span>';
 }
@@ -514,6 +514,14 @@ async function renderAdminSessions() {
     const res = await loadReservations(ev.id);
     const rc = reservedCount(res);
     const isEditing = STATE.openEditEventFor === ev.id;
+
+    const rows = res.map(r => `
+      <tr>
+        <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
+        <td>${r.party_size}</td><td>${escapeHtml(r.notes||'')}</td>
+        <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
+      </tr>`).join('');
+
     const editForm = isEditing ? `
       <div class="form-panel" style="margin-top:14px;">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:12px;">Edit session</div>
@@ -531,12 +539,7 @@ async function renderAdminSessions() {
           </div>
         </form>
       </div>` : '';
-    const rows = res.map(r => `
-      <tr>
-        <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
-        <td>${r.party_size}</td><td>${escapeHtml(r.notes||'')}</td>
-        <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
-      </tr>`).join('');
+
     sessionsHtml += `
     <div class="card">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;">
@@ -544,8 +547,10 @@ async function renderAdminSessions() {
           <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
           <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvp_by)} · ${rc}/${ev.capacity} seats reserved${isFuture(ev.date)?'':' · past'}</div>
         </div>
-        ${!isEditing ? `<button class="btn btn-outline btn-small" data-action="open-edit-event" data-event-id="${ev.id}">Edit</button>` : ''}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          ${!isEditing ? `<button class="btn btn-outline btn-small" data-action="open-edit-event" data-event-id="${ev.id}">Edit</button>` : ''}
           <button class="btn-danger btn btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete</button>
+        </div>
       </div>
       ${editForm}
       ${res.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
