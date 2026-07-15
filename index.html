@@ -307,18 +307,29 @@ async function renderHome() {
     const rc = reservedCount(res);
     const cap = parseInt(next.capacity) || 0;
     const spotsLeft = Math.max(0, cap - rc);
+    const rsvpClosed = !isFuture(next.rsvp_by);
+    const full = spotsLeft <= 0;
+    let ctaBtn = '';
+    if (full) {
+      ctaBtn = '<div style="margin-top:14px;font-family:\'IBM Plex Mono\',monospace;font-size:.8rem;opacity:.7;letter-spacing:.04em;">This session is full.</div>';
+    } else if (rsvpClosed) {
+      ctaBtn = '<div style="margin-top:14px;font-family:\'IBM Plex Mono\',monospace;font-size:.8rem;opacity:.7;letter-spacing:.04em;">RSVP is now closed.</div>';
+    } else {
+      ctaBtn = '<button data-nav="reserve" style="margin-top:14px;display:inline-block;background:var(--ochre);color:var(--ink);border:none;padding:9px 16px;border-radius:4px;font-family:\'IBM Plex Mono\',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;cursor:pointer;">Reserve a seat →</button>';
+    }
     sessionBlock =
       '<div class="hero-session-date">' + fmtDate(next.date) + '</div>' +
       (next.label ? '<div style="opacity:.85;margin-bottom:10px;">' + escapeHtml(next.label) + '</div>' : '') +
       capacityWidget(cap, rc) +
       '<div style="margin-top:8px;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem;opacity:.85;">' +
-      spotsLeft + ' of ' + cap + ' seats left · RSVP by ' + fmtDate(next.rsvp_by) + '</div>';
+      spotsLeft + ' of ' + cap + ' seats left · RSVP by ' + fmtDate(next.rsvp_by) + '</div>' +
+      ctaBtn;
   }
   return `
   <div class="hero" style="margin-top:0;">
+    <div class="hero-eyebrow">Next Session</div>
     <h1>${escapeHtml(info.tagline)}</h1>
     <p class="tagline">${escapeHtml(info.about.slice(0,160))}${info.about.length>160?'…':''}</p>
-        <div class="hero-eyebrow">Next Session</div>
     <div class="hero-session-card">
       <div class="label">This month</div>
       ${sessionBlock}
