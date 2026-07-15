@@ -338,8 +338,10 @@ async function renderHome() {
   <h2 class="section-title">About the cafe</h2>
   <p class="section-sub">${escapeHtml(info.about)}</p>
   <div class="card" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-    <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Where</div><div>${escapeHtml(info.address)}</div></div>
-    <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Hours</div><div>${escapeHtml(info.hours)}</div></div>
+    <div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;opacity:.6;margin-bottom:4px;">Hours</div>
+    <div>${escapeHtml(info.hours)}</div>
+    </div>
   </div>
   `;
 }
@@ -592,7 +594,6 @@ function renderAdminCafeInfo() {
         <div class="field"><label>Cafe name</label><input type="text" name="name" value="${escapeHtml(info.name)}" required/></div>
         <div class="field"><label>Tagline</label><input type="text" name="tagline" value="${escapeHtml(info.tagline)}" required/></div>
         <div class="field"><label>About</label><textarea name="about" required>${escapeHtml(info.about)}</textarea></div>
-        <div class="field"><label>Address</label><input type="text" name="address" value="${escapeHtml(info.address)}"/></div>
         <div class="field"><label>Hours note</label><input type="text" name="hours" value="${escapeHtml(info.hours)}"/></div>
         <button class="btn" type="submit">Save</button>
       </form>
