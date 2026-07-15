@@ -28,7 +28,7 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{background:var(--paper);color:var(--espresso);font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+body{background-color:var(--paper);background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj4KICA8ZmlsdGVyIGlkPSJwYXBlciIgeD0iMCUiIHk9IjAlIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj4KICAgIDxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSI0IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIiByZXN1bHQ9Im5vaXNlIi8+CiAgICA8ZmVDb2xvck1hdHJpeCB0eXBlPSJzYXR1cmF0ZSIgdmFsdWVzPSIwIiBpbj0ibm9pc2UiIHJlc3VsdD0iZ3JleSIvPgogICAgPGZlQmxlbmQgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iZ3JleSIgbW9kZT0ibXVsdGlwbHkiIHJlc3VsdD0iYmxlbmQiLz4KICAgIDxmZUNvbXBvc2l0ZSBpbj0iYmxlbmQiIGluMj0iU291cmNlR3JhcGhpYyIgb3BlcmF0b3I9ImluIi8+CiAgPC9maWx0ZXI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNFNEQ5QzAiLz4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI3BhcGVyKSIgZmlsbD0iI0M4QkE5QSIgb3BhY2l0eT0iMC4xOCIvPgo8L3N2Zz4=');background-repeat:repeat;background-size:300px 300px;color:var(--espresso);font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
 img,svg{display:block;}
 a{color:inherit;}
 button{font-family:inherit;cursor:pointer;}
@@ -316,9 +316,9 @@ async function renderHome() {
   }
   return `
   <div class="hero" style="margin-top:0;">
-    <div class="hero-eyebrow">Next Session</div>
     <h1>${escapeHtml(info.tagline)}</h1>
     <p class="tagline">${escapeHtml(info.about.slice(0,160))}${info.about.length>160?'…':''}</p>
+        <div class="hero-eyebrow">Next Session</div>
     <div class="hero-session-card">
       <div class="label">This month</div>
       ${sessionBlock}
