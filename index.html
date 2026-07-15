@@ -218,7 +218,10 @@ function fmtDate(iso) {
   if (isNaN(d)) return iso;
   return d.toLocaleDateString(undefined, { weekday:'short', year:'numeric', month:'short', day:'numeric' });
 }
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function isFuture(iso) { return iso >= todayISO(); }
 function reservedCount(list) { return list.reduce((s, r) => s + (parseInt(r.party_size) || 0), 0); }
 function cupIcon(filled) {
@@ -420,7 +423,7 @@ function pickerMonthOptions() {
   const now = new Date();
   for (let i = 0; i < 12; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const key = d.toISOString().slice(0, 7); // 'YYYY-MM'
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
     const label = d.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
     options.push({ key, label });
   }
