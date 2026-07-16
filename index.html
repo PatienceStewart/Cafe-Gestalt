@@ -137,6 +137,70 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 const SUPA_URL = 'https://lhiquhhpiofcjlnrhiif.supabase.co';
 const SUPA_KEY = 'sb_publishable_LjqgeRMTPkd3z07rOPMVoQ_O-O4juOj';
 
+/* ===================== Email proxy (Vercel) ===================== */
+// Replace this with your Vercel deployment URL once deployed
+const PROXY_URL = 'cafe-gestalt-api-o5fr.vercel.app';
+const SITE_URL  = 'https://patiencestewart.github.io/Cafe-Gestalt/'; // replace with your GitHub Pages URL
+
+async function sendEmail(to, subject, htmlBody) {
+  try {
+    const res = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, html: htmlBody })
+    });
+    if (!res.ok) console.error('Email send failed:', await res.text());
+  } catch(e) {
+    console.error('Email proxy error:', e);
+  }
+}
+
+function genToken() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(18)))
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function hoursUntil(isoDate) {
+  const event = new Date(isoDate + 'T00:00:00');
+  return (event - Date.now()) / 36e5;
+}
+
+// ── Email templates ────────────────────────────────────────────
+function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">You're booked for Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, your seat is reserved. We look forward to seeing you.</p>
+    <p>If your plans change, please cancel so your seat can go to someone on the waitlist:</p>
+    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
+    <p style="font-size:.85rem;opacity:.6;">This link will work until the day of the session.</p>
+  </div>`;
+}
+
+function emailWaitlistNotify(name, eventDate, eventLabel, claimUrl) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">A seat has opened up at Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, you're next on the waitlist and a seat has just become available.</p>
+    <p>Claim your seat before it's gone — this link is valid for 48 hours before the event:</p>
+    <p><a href="${claimUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Claim my seat</a></p>
+    <p style="font-size:.85rem;opacity:.6;">If you no longer need a seat, no action is needed.</p>
+  </div>`;
+}
+
+function emailWaitlistConfirm(name, eventDate, eventLabel, cancelUrl) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your seat is confirmed — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, great news — your waitlisted seat is now confirmed. See you there.</p>
+    <p>Need to cancel?</p>
+    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
+  </div>`;
+}
+
 async function supaFetch(path, opts = {}) {
   const url = SUPA_URL + '/rest/v1/' + path;
   const headers = {
@@ -186,10 +250,50 @@ async function loadReservations(eventId) {
   return await supaFetch('reservations?event_id=eq.' + eventId + '&select=*&order=created_at.asc') || [];
 }
 async function addReservation(eventId, data) {
-  return await supaFetch('reservations', { method:'POST', body:{ event_id:eventId, name:data.name, email:data.email, party_size:data.partySize, notes:data.notes||'' } });
+  const token = genToken();
+  const rows = await supaFetch('reservations', { method:'POST', body:{
+    event_id: eventId, name: data.name, email: data.email,
+    party_size: data.partySize, notes: data.notes||'', cancel_token: token
+  }});
+  return rows && rows[0] ? rows[0] : null;
 }
 async function deleteReservation(id) {
   await supaFetch('reservations?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
+}
+
+async function loadWaitlist(eventId) {
+  return await supaFetch('waitlist?event_id=eq.' + eventId + '&order=created_at.asc&select=*') || [];
+}
+async function addToWaitlist(eventId, data) {
+  return await supaFetch('waitlist', { method:'POST', body:{
+    event_id: eventId, name: data.name, email: data.email,
+    party_size: data.partySize, notes: data.notes||'',
+    claim_token: genToken(), claimed: false, notified: false
+  }});
+}
+async function updateWaitlistEntry(entry) {
+  await supaFetch('waitlist?id=eq.' + entry.id, { method:'PATCH', body:{
+    claimed: entry.claimed, notified: entry.notified
+  }});
+}
+async function deleteWaitlistEntry(id) {
+  await supaFetch('waitlist?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' }});
+}
+
+// After a cancellation: notify the next unclaimed, un-notified waitlist person if >48h to event
+async function promoteWaitlist(eventId, eventDate, eventLabel) {
+  if (hoursUntil(eventDate) < 48) return; // window closed
+  const list = await loadWaitlist(eventId);
+  const next = list.find(w => !w.claimed && !w.notified);
+  if (!next) return;
+  const claimUrl = SITE_URL + '/#claim?token=' + next.claim_token;
+  await sendEmail(
+    next.email,
+    'A seat has opened at Café Gestalt — ' + fmtDate(eventDate),
+    emailWaitlistNotify(next.name, fmtDate(eventDate), eventLabel, claimUrl)
+  );
+  next.notified = true;
+  await updateWaitlistEntry(next);
 }
 
 async function loadAllTalks() {
@@ -256,7 +360,9 @@ let STATE = {
   adminUnlocked: false,
   notice: null,
   openReserveFormFor: null,
-  openEditEventFor: null
+  openEditEventFor: null,
+  cancelToken: null,   // set from URL hash for cancel flow
+  claimToken: null,    // set from URL hash for waitlist claim flow
 };
 
 async function refreshCore() {
@@ -287,10 +393,12 @@ async function render() {
   app.innerHTML = '<div class="loading-line">loading…</div>';
   let html = '';
   try {
-    if (STATE.view === 'home')    html = await renderHome();
+    if (STATE.view === 'home')         html = await renderHome();
     else if (STATE.view === 'reserve') html = await renderReserve();
     else if (STATE.view === 'talk')    html = await renderTalk();
     else if (STATE.view === 'admin')   html = await renderAdmin();
+    else if (STATE.view === 'cancel')  html = await renderCancel();
+    else if (STATE.view === 'claim')   html = await renderClaim();
     else html = await renderHome();
   } catch(e) {
     html = '<div class="notice notice-error">Could not load data. Check your Supabase connection.<br><small>' + escapeHtml(e.message) + '</small></div>';
@@ -362,17 +470,22 @@ async function renderReserve() {
   let num = 1;
   for (const ev of events) {
     const res = await loadReservations(ev.id);
+    const wl  = await loadWaitlist(ev.id);
     const rc = reservedCount(res);
     const cap = parseInt(ev.capacity) || 0;
     const spotsLeft = Math.max(0, cap - rc);
     const rsvpClosed = !isFuture(ev.rsvp_by);
     const full = spotsLeft <= 0;
+    const waitlistCount = wl.filter(w => !w.claimed).length;
+
     let statusBadge = full ? '<span class="badge badge-full">Full</span>'
       : rsvpClosed ? '<span class="badge badge-closed">RSVP closed</span>'
       : '<span class="badge badge-open">Open</span>';
 
     const formOpen = STATE.openReserveFormFor === ev.id;
+    const waitlistOpen = STATE.openReserveFormFor === ev.id + '-waitlist';
     let formHtml = '';
+
     if (formOpen && !full && !rsvpClosed) {
       let options = '';
       for (let i = 1; i <= Math.min(spotsLeft, 8); i++)
@@ -389,7 +502,30 @@ async function renderReserve() {
           <button class="btn btn-outline" type="button" data-action="cancel-reserve-form" style="margin-left:8px;">Cancel</button>
         </form>
       </div>`;
+    } else if (waitlistOpen && full && !rsvpClosed) {
+      formHtml = `
+      <div class="form-panel">
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:10px;">Join the waitlist</div>
+        <p style="margin:0 0 12px;font-size:.92rem;">This session is full. Add your name to the waitlist — if a seat opens up and there's more than 48 hours until the session, we'll email you first.</p>
+        <form data-form="waitlist" data-event-id="${ev.id}" novalidate>
+          <div class="field"><label>Name</label><input type="text" name="name"/></div>
+          <div class="field"><label>Email</label><input type="email" name="email"/></div>
+          <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. flexibility on party size"></textarea></div>
+          <button class="btn" type="submit">Join waitlist</button>
+          <button class="btn btn-outline" type="button" data-action="cancel-reserve-form" style="margin-left:8px;">Cancel</button>
+        </form>
+      </div>`;
     }
+
+    let actionBtn = '';
+    if (!rsvpClosed) {
+      if (!full && !formOpen && !waitlistOpen) {
+        actionBtn = `<button class="btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>`;
+      } else if (full && !waitlistOpen && !formOpen) {
+        actionBtn = `<button class="btn btn-outline" data-action="open-reserve-form" data-event-id="${ev.id + '-waitlist'}">Waitlist${waitlistCount > 0 ? ' ('+waitlistCount+')' : ''}</button>`;
+      }
+    }
+
     cardsHtml += `
     <div class="event-card">
       <div class="event-num mono">${String(num).padStart(2,'0')}</div>
@@ -401,7 +537,7 @@ async function renderReserve() {
         ${ev.notes ? `<div class="field-hint" style="margin-top:8px;">${escapeHtml(ev.notes)}</div>` : ''}
         ${formHtml}
       </div>
-      <div>${(!full && !rsvpClosed && !formOpen) ? `<button class="btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>` : ''}</div>
+      <div>${actionBtn}</div>
     </div>`;
     num++;
   }
@@ -409,6 +545,106 @@ async function renderReserve() {
     <h2 class="section-title">Reserve a seat</h2>
     <p class="section-sub">We're a very small room, so we seat people in small clusters. Reserve ahead — once a session fills up, it's full.</p>
     ${noticeHtml}${cardsHtml}`;
+}
+
+/* ===================== cancel / claim views ===================== */
+async function renderCancel() {
+  const token = STATE.cancelToken;
+  if (!token) return '<div class="empty-state">No cancellation token found.</div>';
+
+  let rows;
+  try {
+    rows = await supaFetch('reservations?cancel_token=eq.' + token + '&select=*');
+  } catch(e) {
+    return '<div class="notice notice-error">Could not look up your reservation. Please try again.</div>';
+  }
+
+  if (!rows || !rows.length) {
+    return `
+      <h2 class="section-title">Cancel reservation</h2>
+      <div class="card">This reservation has already been cancelled or the link is invalid.</div>`;
+  }
+
+  const r = rows[0];
+  const ev = STATE.events.find(e => e.id === r.event_id);
+  const eventDate = ev ? ev.date : '';
+  const eventLabel = ev ? ev.label : '';
+  const past = eventDate && !isFuture(eventDate);
+
+  if (past) {
+    return `
+      <h2 class="section-title">Cancel reservation</h2>
+      <div class="card">This session has already taken place — nothing to cancel.</div>`;
+  }
+
+  let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
+  return `
+    <h2 class="section-title">Cancel reservation</h2>
+    ${noticeHtml}
+    <div class="card">
+      <p style="margin-top:0;">You're about to cancel the following reservation:</p>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+        <div style="font-weight:700;">${escapeHtml(r.name)}</div>
+        <div class="field-hint">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''} · ${r.party_size} seat${r.party_size===1?'':'s'}</div>
+      </div>
+      <p style="font-size:.9rem;opacity:.75;">Once cancelled, your seat will be released and the next person on the waitlist (if any) will be notified.</p>
+      <form data-form="do-cancel" data-reservation-id="${r.id}" data-event-id="${r.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+        <button class="btn btn-danger" type="submit" style="background:var(--brick);color:#fff;border:none;">Confirm cancellation</button>
+        <button class="btn btn-outline" type="button" data-nav="home" style="margin-left:8px;">Keep my seat</button>
+      </form>
+    </div>`;
+}
+
+async function renderClaim() {
+  const token = STATE.claimToken;
+  if (!token) return '<div class="empty-state">No claim token found.</div>';
+
+  let rows;
+  try {
+    rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
+  } catch(e) {
+    return '<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>';
+  }
+
+  if (!rows || !rows.length) {
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">This link is invalid or has already been used.</div>`;
+  }
+
+  const w = rows[0];
+  const ev = STATE.events.find(e => e.id === w.event_id);
+  const eventDate = ev ? ev.date : '';
+  const eventLabel = ev ? ev.label : '';
+
+  if (w.claimed) {
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">You've already claimed your seat for ${fmtDate(eventDate)}. See you there!</div>`;
+  }
+
+  if (hoursUntil(eventDate) < 48) {
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — the claim window for this session has closed (less than 48 hours to go).</div>`;
+  }
+
+  // Check there's still a seat
+  const res = await loadReservations(w.event_id);
+  const rc = reservedCount(res);
+  const cap = ev ? parseInt(ev.capacity)||0 : 0;
+  if (rc >= cap) {
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — the seat was just taken by someone else. We'll be in touch if another opens up.</div>`;
+  }
+
+  let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
+  return `
+    <h2 class="section-title">Claim your seat</h2>
+    ${noticeHtml}
+    <div class="card">
+      <p style="margin-top:0;">A seat is available for:</p>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+        <div style="font-weight:700;">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''}</div>
+        <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
+      </div>
+      <form data-form="do-claim" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+        <button class="btn" type="submit">Confirm — claim my seat</button>
+      </form>
+    </div>`;
 }
 
 /* ===================== talk — calendar picker ===================== */
@@ -664,6 +900,12 @@ async function renderAdminSessions() {
       </div>
       ${editForm}
       ${res.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
+      ${await (async () => {
+        const wl = await loadWaitlist(ev.id);
+        if (!wl.length) return '';
+        const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.notified?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td><button class="btn-danger btn btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
+        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed).length} active)</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
+      })()}
     </div>`;
   }
   if (!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
@@ -743,6 +985,11 @@ document.addEventListener('click', async (e) => {
       await deleteReservation(actionEl.dataset.id);
       STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
+  } else if (action === 'delete-waitlist') {
+    if (confirm('Remove this person from the waitlist?')) {
+      await deleteWaitlistEntry(actionEl.dataset.id);
+      STATE.notice = { type:'success', text:'Waitlist entry removed.' }; await render();
+    }
   } else if (action === 'delete-talk') {
     if (confirm('Delete this talk proposal?')) {
       await deleteTalk(actionEl.dataset.id);
@@ -814,10 +1061,82 @@ document.addEventListener('submit', async (e) => {
     if (rc + partySize > (parseInt(ev.capacity) || 0)) {
       STATE.notice = { type:'error', text:'Sorry — that session just filled up. Try a smaller party or another date.' };
     } else {
-      await addReservation(eventId, { name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'' });
-      STATE.notice = { type:'success', text:"You're booked! See you at the cafe." };
+      const reservation = await addReservation(eventId, { name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'' });
+      if (reservation) {
+        const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
+        await sendEmail(
+          fd.get('email'),
+          'Your reservation — Café Gestalt ' + fmtDate(ev.date),
+          emailConfirmation(fd.get('name'), fmtDate(ev.date), ev.label||'', cancelUrl)
+        );
+      }
+      STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation and cancellation link." };
     }
     STATE.openReserveFormFor = null; await render();
+
+  } else if (type === 'waitlist') {
+    const valid = validateForm(form, {
+      name:  { required: 'Please enter your name.' },
+      email: { required: 'Please enter your email.', email: 'Please enter a valid email address.' }
+    });
+    if (!valid) return;
+    const eventId = form.dataset.eventId;
+    const ev = STATE.events.find(x => x.id === eventId);
+    await addToWaitlist(eventId, { name:fd.get('name'), email:fd.get('email'), partySize:1, notes:fd.get('notes')||'' });
+    STATE.notice = { type:'success', text:"You're on the waitlist. We'll email you if a seat opens up." };
+    STATE.openReserveFormFor = null; await render();
+
+  } else if (type === 'do-cancel') {
+    const reservationId = form.dataset.reservationId;
+    const eventId       = form.dataset.eventId;
+    const eventDate     = form.dataset.eventDate;
+    const eventLabel    = form.dataset.eventLabel;
+    await deleteReservation(reservationId);
+    await promoteWaitlist(eventId, eventDate, eventLabel);
+    STATE.notice = { type:'success', text:'Your reservation has been cancelled.' };
+    await render();
+
+  } else if (type === 'do-claim') {
+    const waitlistId = form.dataset.waitlistId;
+    const eventId    = form.dataset.eventId;
+    const eventDate  = form.dataset.eventDate;
+    const eventLabel = form.dataset.eventLabel;
+    const ev = STATE.events.find(x => x.id === eventId);
+
+    // Re-check capacity
+    const res = await loadReservations(eventId);
+    const rc = reservedCount(res);
+    const cap = ev ? parseInt(ev.capacity)||0 : 0;
+    if (rc >= cap) {
+      STATE.notice = { type:'error', text:'Sorry — the seat was just taken. We'll be in touch if another opens up.' };
+      await render(); return;
+    }
+
+    // Get waitlist entry for name/email
+    const wRows = await supaFetch('waitlist?id=eq.' + waitlistId + '&select=*');
+    const w = wRows && wRows[0];
+    if (!w) { STATE.notice = { type:'error', text:'Could not find your waitlist entry.' }; await render(); return; }
+
+    // Create reservation
+    const reservation = await addReservation(eventId, { name:w.name, email:w.email, partySize:w.party_size, notes:w.notes||'' });
+
+    // Mark waitlist entry as claimed
+    w.claimed = true;
+    await updateWaitlistEntry(w);
+
+    // Send confirmation
+    if (reservation) {
+      const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
+      await sendEmail(
+        w.email,
+        'Your seat is confirmed — Café Gestalt ' + fmtDate(eventDate),
+        emailWaitlistConfirm(w.name, fmtDate(eventDate), eventLabel, cancelUrl)
+      );
+    }
+    STATE.notice = { type:'success', text:"You're booked! Check your email for confirmation." };
+    STATE.claimToken = null;
+    STATE.view = 'home';
+    await render();
 
   } else if (type === 'talk') {
     const valid = validateForm(form, {
@@ -865,13 +1184,34 @@ document.addEventListener('submit', async (e) => {
 
 /* ===================== init ===================== */
 window.addEventListener('hashchange', async () => {
-  STATE.view = window.location.hash.replace('#','') || 'home';
+  const hash = window.location.hash.replace('#','');
+  if (hash.startsWith('cancel?token=')) {
+    STATE.cancelToken = hash.replace('cancel?token=', '');
+    STATE.view = 'cancel';
+  } else if (hash.startsWith('claim?token=')) {
+    STATE.claimToken = hash.replace('claim?token=', '');
+    STATE.view = 'claim';
+  } else {
+    STATE.view = hash || 'home';
+  }
   setActiveTab(); await render();
 });
 
 (async function init() {
   await refreshCore();
-  STATE.view = window.location.hash.replace('#','') || 'home';
+  const hash = window.location.hash.replace('#','');
+
+  // Handle cancel?token=xxx and claim?token=xxx
+  if (hash.startsWith('cancel?token=')) {
+    STATE.cancelToken = hash.replace('cancel?token=', '');
+    STATE.view = 'cancel';
+  } else if (hash.startsWith('claim?token=')) {
+    STATE.claimToken = hash.replace('claim?token=', '');
+    STATE.view = 'claim';
+  } else {
+    STATE.view = hash || 'home';
+  }
+
   setActiveTab(); await render();
 })();
 </script>
