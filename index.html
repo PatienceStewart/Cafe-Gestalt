@@ -64,9 +64,9 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .cup-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
 .cup-icon{width:22px;height:22px;overflow:visible;flex:none;}
 .cup-body{fill:rgba(228,217,192,.15);stroke:var(--paper-dark);stroke-width:2.2;stroke-linejoin:round;}
-.cup-icon.is-filled .cup-body{fill:var(--ochre);stroke:var(--ochre-dark);opacity:1;}
+.cup-icon.is-filled .cup-body{fill:var(--ochre);stroke:var(--paper-light);opacity:1;}
 .cup-handle,.cup-base{fill:none;stroke:var(--paper-dark);stroke-width:2.2;stroke-linecap:round;}
-.cup-icon.is-filled .cup-handle,.cup-icon.is-filled .cup-base{stroke:var(--ochre-dark);opacity:1;}
+.cup-icon.is-filled .cup-handle,.cup-icon.is-filled .cup-base{stroke:var(--paper-light);opacity:1;}
 .fill-bar{height:10px;border:1px solid var(--espresso);border-radius:2px;overflow:hidden;width:180px;background:var(--paper);}
 .fill-bar-inner{height:100%;background:var(--ochre);}
 
@@ -713,7 +713,7 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
   let html = label
     ? `<div class="field"><label>${label}</label>`
     : `<div class="field">`;
-  html += '<div class="field-hint" style="margin-bottom:10px;">Open a month, then tap days that work for you. You can open multiple months.</div>';
+  if (label) html += '<div class="field-hint" style="margin-bottom:10px;">Open a month, then tap days that work for you. You can open multiple months.</div>';
 
   months.forEach(({ key, label }) => {
     const isOpen = TALK_PICKER.openMonths.has(key);
