@@ -426,6 +426,7 @@ async function renderHome() {
     sessionBlock =
       '<div class="hero-session-date">' + fmtDate(next.date) + '</div>' +
       (next.label ? '<div style="opacity:.85;margin-bottom:10px;">' + escapeHtml(next.label) + '</div>' : '') +
+      (next.notes ? '<div style="margin-top:-4px;margin-bottom:10px;font-size:.9rem;opacity:.8;">' + escapeHtml(next.notes) + '</div>' : '') +
       capacityWidget(cap, rc) +
       '<div style="margin-top:8px;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem;opacity:.85;">' +
       spotsLeft + ' of ' + cap + ' seats left · RSVP by ' + fmtDate(next.rsvp_by) + '</div>' +
