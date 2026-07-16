@@ -789,6 +789,14 @@ async function renderTalk() {
         <button class="btn" type="submit">Submit idea</button>
       </form>`;
 
+  return `
+    <h2 class="section-title">Get involved</h2>
+    ${noticeHtml}
+    ${tabs}
+      ${TALK_MODE === 'talk' ? talkForm : themeForm}
+    </div>`;
+}
+
 /* ===================== admin ===================== */
 let ADMIN_TAB = 'overview';
 
