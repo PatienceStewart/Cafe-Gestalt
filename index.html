@@ -1108,7 +1108,7 @@ document.addEventListener('submit', async (e) => {
     const rc = reservedCount(res);
     const cap = ev ? parseInt(ev.capacity)||0 : 0;
     if (rc >= cap) {
-      STATE.notice = { type:'error', text:'Sorry — the seat was just taken. We'll be in touch if another opens up.' };
+      STATE.notice = { type:'error', text:'Sorry — the seat was just taken. We\'ll be in touch if another opens up.' };
       await render(); return;
     }
 
