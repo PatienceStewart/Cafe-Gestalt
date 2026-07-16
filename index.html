@@ -1093,7 +1093,10 @@ document.addEventListener('submit', async (e) => {
     const eventLabel    = form.dataset.eventLabel;
     await deleteReservation(reservationId);
     await promoteWaitlist(eventId, eventDate, eventLabel);
+    STATE.cancelToken = null;
+    STATE.view = 'home';
     STATE.notice = { type:'success', text:'Your reservation has been cancelled.' };
+    await refreshCore();
     await render();
 
   } else if (type === 'do-claim') {
