@@ -95,6 +95,8 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;background:var(--paper-light);color:var(--espresso);}
 .field textarea{min-height:80px;resize:vertical;}
 .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
+.field-error{font-size:.8rem;color:var(--brick);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
+.field input.invalid,.field select.invalid,.field textarea.invalid{border-color:var(--brick);}
 .checkbox-list{display:flex;flex-direction:column;gap:6px;}
 .checkbox-list label{display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;}
 .checkbox-list input{width:auto;}
@@ -377,9 +379,9 @@ async function renderReserve() {
         options += `<option value="${i}">${i} ${i===1?'seat':'seats'}</option>`;
       formHtml = `
       <div class="form-panel">
-        <form data-form="reserve" data-event-id="${ev.id}">
-          <div class="field"><label>Name</label><input type="text" name="name" required/></div>
-          <div class="field"><label>Email</label><input type="email" name="email" required/></div>
+        <form data-form="reserve" data-event-id="${ev.id}" novalidate>
+          <div class="field"><label>Name</label><input type="text" name="name"/></div>
+          <div class="field"><label>Email</label><input type="email" name="email"/></div>
           <div class="field"><label>Party size</label><select name="partySize">${options}</select>
             <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left.</div></div>
           <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. seating with another guest, accessibility needs"></textarea></div>
@@ -515,11 +517,11 @@ async function renderTalk() {
     <p class="section-sub">Have an idea worth sharing over coffee? Tell us about it. We'll follow up to confirm a date.</p>
     ${noticeHtml}
     <div class="card">
-      <form data-form="talk">
-        <div class="field"><label>Name</label><input type="text" name="name" required/></div>
-        <div class="field"><label>Email</label><input type="email" name="email" required/></div>
-        <div class="field"><label>Talk topic / title</label><input type="text" name="topic" required/></div>
-        <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?" required></textarea></div>
+      <form data-form="talk" novalidate>
+        <div class="field"><label>Name</label><input type="text" name="name"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email"/></div>
+        <div class="field"><label>Talk topic / title</label><input type="text" name="topic"/></div>
+        <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?"></textarea></div>
         ${renderCalendarPicker()}
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Format needs, length, anything else we should know"></textarea></div>
         <button class="btn" type="submit">Submit proposal</button>
@@ -757,6 +759,40 @@ document.addEventListener('click', async (e) => {
   }
 });
 
+/* ===================== inline validation ===================== */
+function validateForm(form, rules) {
+  // Clear previous errors
+  form.querySelectorAll('.field-error').forEach(el => el.remove());
+  form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+
+  let valid = true;
+  for (const [name, checks] of Object.entries(rules)) {
+    const input = form.querySelector(`[name="${name}"]`);
+    if (!input) continue;
+    let error = null;
+    const val = input.value.trim();
+    if (checks.required && !val) {
+      error = checks.required;
+    } else if (checks.email && val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+      error = checks.email;
+    }
+    if (error) {
+      valid = false;
+      input.classList.add('invalid');
+      const msg = document.createElement('div');
+      msg.className = 'field-error';
+      msg.textContent = error;
+      input.closest('.field').appendChild(msg);
+    }
+  }
+  // Scroll to first error
+  if (!valid) {
+    const first = form.querySelector('.invalid');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  return valid;
+}
+
 document.addEventListener('submit', async (e) => {
   const form = e.target.closest('form[data-form]');
   if (!form) return;
@@ -765,6 +801,11 @@ document.addEventListener('submit', async (e) => {
   const fd = new FormData(form);
 
   if (type === 'reserve') {
+    const valid = validateForm(form, {
+      name:  { required: 'Please enter your name.' },
+      email: { required: 'Please enter your email.', email: 'Please enter a valid email address.' }
+    });
+    if (!valid) return;
     const eventId = form.dataset.eventId;
     const ev = STATE.events.find(x => x.id === eventId);
     const partySize = parseInt(fd.get('partySize')) || 1;
@@ -779,6 +820,13 @@ document.addEventListener('submit', async (e) => {
     STATE.openReserveFormFor = null; await render();
 
   } else if (type === 'talk') {
+    const valid = validateForm(form, {
+      name:        { required: 'Please enter your name.' },
+      email:       { required: 'Please enter your email.', email: 'Please enter a valid email address.' },
+      topic:       { required: 'Please enter a topic or title for your talk.' },
+      description: { required: 'Please add a short description of your talk.' }
+    });
+    if (!valid) return;
     const availableDates = [...TALK_PICKER.selectedDays].sort();
     await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'' });
     TALK_PICKER.openMonths.clear();
