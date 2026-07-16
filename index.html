@@ -41,10 +41,10 @@ nav.tabs button{background:none;border:1px solid transparent;color:var(--paper-l
 nav.tabs button:hover{opacity:1;border-color:rgba(232,225,206,.3);}
 nav.tabs button.active{opacity:1;background:var(--ochre);color:var(--ink);font-weight:600;}
 
-.hero{background:var(--ink);color:var(--paper-light);margin:0 -20px 36px;padding:44px 20px 36px;position:relative;background-image:radial-gradient(circle at 15% 20%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 85% 70%,rgba(255,255,255,.03),transparent 45%);}
+.hero{background:var(--ink);color:var(--paper-light);margin:0 -20px 0;padding:44px 20px 36px;position:relative;background-image:radial-gradient(circle at 15% 20%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 85% 70%,rgba(255,255,255,.03),transparent 45%);border-radius:12%;overflow:hidden;}
 .hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);margin-bottom:10px;}
 .hero h1{font-family:'Kavivanar',cursive;font-weight:700;font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:0 0 12px;text-shadow:0 0 1px rgba(255,255,255,.25);}
-.hero p.tagline{max-width:520px;color:var(--paper-dark);font-size:1.05rem;margin:0 0 22px;}
+.hero p.tagline{max-width:520px;color:var(--paper-light);font-size:1.05rem;margin:0 0 22px;}
 .hero-session-card{background:rgba(232,225,206,.06);border:1px solid rgba(232,225,206,.22);border-radius:6px;padding:16px 18px;max-width:460px;}
 .hero-session-card .label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ochre);margin-bottom:6px;}
 .hero-session-date{font-size:1.25rem;font-weight:600;margin-bottom:8px;}
@@ -104,9 +104,11 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
   background:var(--ink);
   background-image:radial-gradient(circle at 85% 30%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 15% 80%,rgba(255,255,255,.03),transparent 45%);
   color:var(--paper-light);
-  margin:0 -20px;
+  margin:24px -20px 0;
   display:grid;
   grid-template-columns:1fr 1fr;
+  border-radius:12%;
+  overflow:hidden;
 }
 .how-it-works-img{
   min-height:380px;
