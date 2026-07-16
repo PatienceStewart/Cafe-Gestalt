@@ -704,11 +704,13 @@ function renderMonthGrid(yearMonth) {
   return grid;
 }
 
-function renderCalendarPicker() {
+function renderCalendarPicker(label = 'Which dates could you present?') {
   const months = pickerMonthOptions();
   const totalSelected = TALK_PICKER.selectedDays.size;
 
-  let html = '<div class="field"><label>Which dates could you present?</label>';
+  let html = label
+    ? `<div class="field"><label>${label}</label>`
+    : `<div class="field">`;
   html += '<div class="field-hint" style="margin-bottom:10px;">Open a month, then tap days that work for you. You can open multiple months.</div>';
 
   months.forEach(({ key, label }) => {
@@ -780,19 +782,11 @@ async function renderTalk() {
         <div class="field">
           <label>Preferred dates (optional)</label>
           <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. Otherwise leave this blank and we'll be in touch.</div>
-          ${renderCalendarPicker()}
+          ${renderCalendarPicker(null)}
         </div>
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Anything else we should know"></textarea></div>
         <button class="btn" type="submit">Submit idea</button>
       </form>`;
-
-  return `
-    <h2 class="section-title">Get involved</h2>
-    ${noticeHtml}
-    ${tabs}
-      ${TALK_MODE === 'talk' ? talkForm : themeForm}
-    </div>`;
-}
 
 /* ===================== admin ===================== */
 let ADMIN_TAB = 'overview';
