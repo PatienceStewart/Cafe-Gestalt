@@ -235,7 +235,6 @@ async function supaFetch(path, opts = {}) {
   const url = SUPA_URL + '/rest/v1/' + path;
   const headers = {
     'apikey': SUPA_KEY,
-    'Authorization': 'Bearer ' + SUPA_KEY,
     'Content-Type': 'application/json',
     'Prefer': opts.prefer || 'return=representation',
     ...opts.headers
