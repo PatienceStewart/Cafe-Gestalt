@@ -159,18 +159,32 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .home-hamburger.is-open .ham-icon-open{display:none;}
 .home-hamburger.is-open .ham-icon-close{display:block;}
 @media(max-width:640px){
-  .home-hero{background-position:0% 32%;}
   .home-hamburger{display:block;}
   .home-nav-links{display:none;position:absolute;top:100%;right:0;margin-top:8px;flex-direction:column;flex-wrap:nowrap;background:#1b1b13;border:1px solid rgba(240,234,216,.25);border-radius:8px;padding:6px;min-width:200px;z-index:20;gap:2px;}
   .home-nav-links.is-open{display:flex;}
   .home-nav-links button{width:100%;text-align:left;}
 }
 .home-hero-tagline{position:absolute;left:11%;top:47%;font-family:'Source Serif 4',serif;font-size:clamp(1.1rem,2.2vw,2rem);line-height:1.25;color:#1b1b13;white-space:nowrap;}
+.home-hero-tagline .tagline-line{display:block;}
 @media(max-width:900px){
   .home-hero-tagline{font-size:clamp(.8rem,3.2vw,1.4rem);}
 }
 @media(max-width:640px){
-  .home-hero-tagline{left:clamp(20px,5vw,80px);top:60px;font-size:clamp(.65rem,4vw,1rem);}
+  .home-hero-tagline{
+    left:0;
+    right:0;
+    width:100%;
+    box-sizing:border-box;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:clamp(.75rem,3.8vw,1.05rem);
+    color:#f0ead8;
+    background:rgba(27,27,19,.25);
+    backdrop-filter:blur(6px);
+    -webkit-backdrop-filter:blur(6px);
+    padding:10px clamp(20px,5vw,80px);
+  }
+  .home-hero-tagline .tagline-line{display:inline;}
 }
 .home-sub{font-family:'Source Sans 3',sans-serif;font-size:1.25rem;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
 .home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
@@ -562,7 +576,7 @@ async function renderHome() {
           <button data-nav="admin">Admin</button>
         </div>
       </div>
-      <div class="home-hero-tagline">A secret café and lecture club<br/>in Tampere</div>
+      <div class="home-hero-tagline"><span class="tagline-line">A secret café and lecture club</span> <span class="tagline-line">in Tampere</span></div>
     </div>
 
     <p class="home-sub">Café Gestalt is a small monthly community dedicated to getting offline and out of the algorithm.</p>
