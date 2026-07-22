@@ -148,11 +148,22 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 /* ===================== Home screen ===================== */
 .home-view{background:#1b1b13;color:#f0ead8;width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:0 0 56px;}
 .home-hero{position:relative;width:100%;background:url('hero-cups.jpg') 0% 32%/137.5% auto no-repeat;padding:20px clamp(20px,5vw,80px) 56px;aspect-ratio:1440/900;min-height:320px;max-height:max(900px,65vh);display:flex;flex-direction:column;box-sizing:border-box;}
-.home-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.home-nav{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .home-brand{font-family:'Train One',sans-serif;font-size:clamp(1.1rem,2.2vw,2rem);letter-spacing:.04em;text-transform:uppercase;color:#0f2e20;}
 .home-nav-links{display:flex;gap:2px;flex-wrap:wrap;}
 .home-nav-links button{background:none;border:none;color:#f0ead8;font-family:'Source Serif 4',serif;font-size:clamp(.85rem,1.65vw,1.5rem);padding:8px 12px;border-radius:6px;opacity:.92;text-shadow:0 1px 3px rgba(0,0,0,.35);}
 .home-nav-links button:hover{background:rgba(240,234,216,.18);opacity:1;}
+.home-hamburger{display:none;background:none;border:none;padding:8px;cursor:pointer;color:#f0ead8;filter:drop-shadow(0 1px 3px rgba(0,0,0,.35));}
+.home-hamburger svg{width:26px;height:26px;display:block;}
+.home-hamburger .ham-icon-close{display:none;}
+.home-hamburger.is-open .ham-icon-open{display:none;}
+.home-hamburger.is-open .ham-icon-close{display:block;}
+@media(max-width:640px){
+  .home-hamburger{display:block;}
+  .home-nav-links{display:none;position:absolute;top:100%;right:0;margin-top:8px;flex-direction:column;flex-wrap:nowrap;background:#1b1b13;border:1px solid rgba(240,234,216,.25);border-radius:8px;padding:6px;min-width:200px;z-index:20;gap:2px;}
+  .home-nav-links.is-open{display:flex;}
+  .home-nav-links button{width:100%;text-align:left;}
+}
 .home-hero-tagline{position:absolute;left:11%;top:47%;font-family:'Source Serif 4',serif;font-size:clamp(1.1rem,2.2vw,2rem);line-height:1.25;color:#1b1b13;white-space:nowrap;}
 .home-sub{font-family:'Source Sans 3',sans-serif;font-size:1.25rem;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
 .home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
@@ -530,7 +541,11 @@ async function renderHome() {
     <div class="home-hero">
       <div class="home-nav">
         <div class="home-brand">${escapeHtml(info.name || 'Café Gestalt')}</div>
-        <div class="home-nav-links">
+        <button class="home-hamburger" id="homeHamburger" data-action="toggle-mobile-nav" aria-label="Menu" aria-expanded="false">
+          <svg class="ham-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+          <svg class="ham-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+        <div class="home-nav-links" id="homeNavLinks">
           <button data-nav="reserve">Upcoming sessions</button>
           <button data-nav="talk">Give a talk</button>
           <button data-nav="admin">Admin</button>
@@ -1109,10 +1124,24 @@ document.addEventListener('click', async (e) => {
   const navBtn = e.target.closest('[data-nav]');
   if (navBtn) { await navigate(navBtn.dataset.nav); return; }
   const actionEl = e.target.closest('[data-action]');
-  if (!actionEl) return;
+  if (!actionEl) {
+    const openLinks = document.getElementById('homeNavLinks');
+    const hamburger = document.getElementById('homeHamburger');
+    if (openLinks && openLinks.classList.contains('is-open') && !e.target.closest('.home-nav')) {
+      openLinks.classList.remove('is-open');
+      hamburger.classList.remove('is-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+    return;
+  }
   const action = actionEl.dataset.action;
 
-  if (action === 'scroll-how') {
+  if (action === 'toggle-mobile-nav') {
+    const links = document.getElementById('homeNavLinks');
+    const isOpen = links.classList.toggle('is-open');
+    actionEl.classList.toggle('is-open', isOpen);
+    actionEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  } else if (action === 'scroll-how') {
     document.getElementById('home-how-it-works')?.scrollIntoView({ behavior:'smooth', block:'start' });
   } else if (action === 'toggle-diet-field') {
     const textarea = actionEl.closest('.field').querySelector('textarea[name="dietaryNeeds"]');
