@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Café Gestalt</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Train+One&family=Kavivanar&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Train+One&family=Kavivanar&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;600&family=Source+Code+Pro:wght@400;500;600&display=swap');
 
 
 :root{
@@ -31,6 +31,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;}
 .mono{font-family:'IBM Plex Mono',monospace;}
 
 #app{max-width:900px;margin:0 auto;padding:clamp(28px,4vw,48px) 20px 80px;}
+#app.home-active{padding:0;}
 
 .topbar{background:var(--ink);color:var(--paper-light);padding:14px 20px;}
 .topbar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
@@ -143,11 +144,46 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .admin-subnav button.active{background:var(--espresso);color:var(--paper-light);}
 .footer{text-align:center;padding:30px 20px 10px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;}
 .loading-line{font-family:'IBM Plex Mono',monospace;opacity:.6;padding:40px 0;text-align:center;}
+
+/* ===================== Home screen ===================== */
+.home-view{background:#1b1b13;color:#f0ead8;width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:0 0 56px;}
+.home-hero{position:relative;width:100%;background:url('hero-cups.jpg') 0% 32%/137.5% auto no-repeat;padding:20px clamp(20px,5vw,80px) 56px;aspect-ratio:1440/900;min-height:320px;max-height:max(900px,65vh);display:flex;flex-direction:column;box-sizing:border-box;}
+.home-nav{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.home-brand{font-family:'Train One',sans-serif;font-size:clamp(1.1rem,2.2vw,2rem);letter-spacing:.04em;text-transform:uppercase;color:#0f2e20;}
+.home-nav-links{display:flex;gap:2px;flex-wrap:wrap;}
+.home-nav-links button{background:none;border:none;color:#f0ead8;font-family:'Source Serif 4',serif;font-size:clamp(.85rem,1.65vw,1.5rem);padding:8px 12px;border-radius:6px;opacity:.92;text-shadow:0 1px 3px rgba(0,0,0,.35);}
+.home-nav-links button:hover{background:rgba(240,234,216,.18);opacity:1;}
+.home-hero-tagline{position:absolute;left:11%;top:47%;font-family:'Source Serif 4',serif;font-size:clamp(1.1rem,2.2vw,2rem);line-height:1.25;color:#1b1b13;white-space:nowrap;}
+.home-sub{font-family:'Source Sans 3',sans-serif;font-size:1.25rem;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
+.home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
+.home-col{flex:1 1 300px;min-width:260px;display:flex;flex-direction:column;justify-content:space-between;}
+.home-eyebrow{font-family:'Source Code Pro',monospace;font-size:.95rem;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;display:inline-block;margin-bottom:18px;}
+.home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;gap:18px;max-width:440px;}
+.home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;}
+.home-session-body{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0;}
+.home-session-title{font-family:'Source Serif 4',serif;font-size:1.1rem;}
+.home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;margin-top:2px;}
+.home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;opacity:.9;}
+.home-btn{display:inline-block;align-self:flex-end;background:#e4d9c0;color:#1b1b13;border:none;padding:8px 14px;border-radius:6px;font-family:'Source Serif 4',serif;font-size:.95rem;cursor:pointer;}
+.home-btn:hover{background:#f0ead8;}
+.home-btn-outline{display:inline-block;background:none;border:2px solid #f0ead8;color:#f0ead8;padding:6px 13px;border-radius:6px;font-family:'Source Serif 4',serif;font-size:.95rem;cursor:pointer;}
+.home-btn-outline:hover{background:rgba(240,234,216,.12);}
+.home-session-note{font-family:'IBM Plex Mono',monospace;font-size:.8rem;opacity:.75;}
+.home-propose-copy{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.5;margin:0;}
+.home-propose-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.home-how{display:flex;flex-wrap:wrap;width:calc(100% - 40px);max-width:950px;margin:112px auto 0;border-radius:24px;overflow:hidden;}
+.home-how-img{flex:1 1 300px;min-height:300px;background:url('coffee-overhead.png') center/cover no-repeat;}
+.home-how-copy{flex:1 1 300px;background:#2f2f25;padding:32px;display:flex;flex-direction:column;gap:18px;justify-content:center;}
+.home-how-copy p{font-family:'Source Serif 4',serif;font-size:1rem;line-height:1.6;margin:0 0 14px;}
+.home-how-copy p:last-child{margin:0;}
+.home-footer{text-align:center;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;font-family:'Source Code Pro',monospace;font-size:.85rem;}
+.home-footer .dotted{text-decoration:underline dotted;text-underline-offset:3px;}
+@media(max-width:640px){.home-hero{padding:16px 16px 40px;}}
 </style>
 </head>
 <body>
 
-<div class="topbar">
+<div class="topbar" id="topbar">
   <div class="topbar-inner">
     <div class="brand" id="brandTitle">Café Gestalt</div>
     <nav class="tabs" id="navTabs">
@@ -160,7 +196,7 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 </div>
 
 <div id="app"><div class="loading-line">Page is brewing…</div></div>
-<div class="footer">Come as you are. You may not leave as you were.</div>
+<div class="footer" id="siteFooter">Come as you are. You may not leave as you were.</div>
 
 <script>
 /* ===================== Supabase config ===================== */
@@ -437,13 +473,22 @@ async function render() {
   app.innerHTML = html;
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
+  // the home view has its own nav/footer built into its dark hero design
+  const isHome = STATE.view === 'home';
+  app.classList.toggle('home-active', isHome);
+  document.getElementById('topbar').style.display = isHome ? 'none' : '';
+  document.getElementById('siteFooter').style.display = isHome ? 'none' : '';
 }
 
 /* ===================== home ===================== */
 async function renderHome() {
   const info = STATE.cafeInfo;
   const next = upcomingEvents()[0];
-  let sessionBlock = '<div class="hero-session-empty">No session scheduled yet — check back soon.</div>';
+
+  let sessionCardHtml = `
+    <div class="home-session-card">
+      <div class="home-session-body"><div class="home-session-title">No session scheduled yet — check back soon.</div></div>
+    </div>`;
   if (next) {
     const res = await loadReservations(next.id);
     const rc = reservedCount(res);
@@ -451,37 +496,76 @@ async function renderHome() {
     const spotsLeft = Math.max(0, cap - rc);
     const rsvpClosed = !isFuture(next.rsvp_by);
     const full = spotsLeft <= 0;
-    let ctaBtn = '';
+    const d = new Date(next.date + 'T00:00:00');
+    const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
+    const year = isNaN(d) ? '' : d.getFullYear();
+
+    let actionHtml;
     if (full) {
-      ctaBtn = '<div style="margin-top:14px;font-family:\'IBM Plex Mono\',monospace;font-size:.8rem;opacity:.7;letter-spacing:.04em;">This session is full.</div>';
+      actionHtml = '<div class="home-session-note">This session is full.</div>';
     } else if (rsvpClosed) {
-      ctaBtn = '<div style="margin-top:14px;font-family:\'IBM Plex Mono\',monospace;font-size:.8rem;opacity:.7;letter-spacing:.04em;">RSVP is now closed.</div>';
+      actionHtml = '<div class="home-session-note">RSVP is now closed.</div>';
     } else {
-      ctaBtn = '<button data-nav="reserve" style="margin-top:14px;display:inline-block;background:var(--ochre);color:var(--ink);border:none;padding:9px 16px;border-radius:4px;font-family:\'IBM Plex Mono\',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;cursor:pointer;">Reserve a seat →</button>';
+      actionHtml = '<button class="home-btn" data-nav="reserve">Reserve a seat</button>';
     }
-    sessionBlock =
-      '<div class="hero-session-date">' + fmtDate(next.date) + '</div>' +
-      (next.label ? '<div style="opacity:.85;margin-bottom:10px;">' + escapeHtml(next.label) + '</div>' : '') +
-      (next.notes ? '<div style="margin-top:-4px;margin-bottom:10px;font-size:.9rem;opacity:.8;">' + escapeHtml(next.notes) + '</div>' : '') +
-      capacityWidget(cap, rc) +
-      '<div style="margin-top:8px;font-family:\'IBM Plex Mono\',monospace;font-size:.82rem;opacity:.85;">' +
-      spotsLeft + ' of ' + cap + ' seats left · RSVP by ' + fmtDate(next.rsvp_by) + '</div>' +
-      ctaBtn;
+
+    sessionCardHtml = `
+    <div class="home-session-card">
+      <div class="home-session-date">${dayMonth}<br/>${year}</div>
+      <div class="home-session-body">
+        <div>
+          <div class="home-session-title">${next.label ? escapeHtml(next.label) : 'Café Gestalt session'}</div>
+          ${next.notes ? `<div class="home-session-notes">${escapeHtml(next.notes)}</div>` : ''}
+        </div>
+        <div class="home-session-meta"><span>${spotsLeft} of ${cap} seats available</span><span>·</span><span>RSVP by ${fmtDate(next.rsvp_by)}</span></div>
+        ${actionHtml}
+      </div>
+    </div>`;
   }
+
+  const howParas = (info.how_it_works || '').split(/\n\n+/).map(p => p.trim()).filter(Boolean);
+
   return `
-  <div class="hero" style="margin-top:0;">
-    <h1>${escapeHtml(info.tagline)}</h1>
-    <p class="tagline">${escapeHtml(info.about.slice(0,160))}${info.about.length>160?'…':''}</p>
-    <div class="hero-session-card">
-    <div class="hero-eyebrow">Next Session</div>
-      ${sessionBlock}
+  <div class="home-view">
+    <div class="home-hero">
+      <div class="home-nav">
+        <div class="home-brand">${escapeHtml(info.name || 'Café Gestalt')}</div>
+        <div class="home-nav-links">
+          <button data-nav="reserve">Upcoming sessions</button>
+          <button data-nav="talk">Give a talk</button>
+          <button data-nav="admin">Admin</button>
+        </div>
+      </div>
+      <div class="home-hero-tagline">A secret café and lecture club<br/>in Tampere</div>
     </div>
-  </div>
-  <div class="how-it-works">
-    <div class="how-it-works-img" role="img" aria-label="A coffee in a white cup shot from above"></div>
-    <div class="how-it-works-copy">
-      <h2>How it works</h2>
-      ${(info.how_it_works||'').split(/\n\n+/).map(p => `<p>${escapeHtml(p.trim())}</p>`).join('')}
+
+    <p class="home-sub">Café Gestalt is a small monthly community dedicated to getting offline and out of the algorithm.</p>
+
+    <div class="home-grid">
+      <div class="home-col">
+        <div class="home-eyebrow">NEXT SESSION</div>
+        ${sessionCardHtml}
+      </div>
+      <div class="home-col">
+        <div class="home-eyebrow">PROPOSE A TALK OR THEME</div>
+        <p class="home-propose-copy">Have an idea worth sharing over coffee? Want to suggest an activity for an upcoming session? Tell us what you have in mind and we'll follow up.</p>
+        <div class="home-propose-actions">
+          <button class="home-btn-outline" data-action="scroll-how">Learn more</button>
+          <button class="home-btn" data-nav="talk">Share with us</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-how" id="home-how-it-works">
+      <div class="home-how-img" role="img" aria-label="Coffee cup shot from above"></div>
+      <div class="home-how-copy">
+        <div class="home-eyebrow" style="margin-bottom:0;">HOW IT WORKS</div>
+        ${howParas.length ? howParas.map(p => `<p>${escapeHtml(p)}</p>`).join('') : '<p>Once a month, we open the doors of a small room, brew something good, and someone shares an idea worth talking about.</p>'}
+      </div>
+    </div>
+
+    <div class="home-footer">
+      <span class="dotted">Come as you are. You may not leave as you were.</span>&nbsp;&nbsp;·&nbsp;&nbsp;<span class="dotted">Contact: hello@cafegestalt.com</span>
     </div>
   </div>
   `;
@@ -1028,7 +1112,9 @@ document.addEventListener('click', async (e) => {
   if (!actionEl) return;
   const action = actionEl.dataset.action;
 
-  if (action === 'toggle-diet-field') {
+  if (action === 'scroll-how') {
+    document.getElementById('home-how-it-works')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  } else if (action === 'toggle-diet-field') {
     const textarea = actionEl.closest('.field').querySelector('textarea[name="dietaryNeeds"]');
     if (textarea) {
       textarea.style.display = actionEl.checked ? 'none' : '';
