@@ -230,6 +230,10 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .sess-next-img{flex:1 1 40%;min-height:300px;background:url('session-photo.jpg') center/cover no-repeat;}
 .sess-next-copy{flex:1 1 60%;background:#2f2f25;padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .sess-next-inner{display:flex;flex-direction:column;gap:24px;width:100%;max-width:440px;}
+@media(max-width:640px){
+  .sess-next-img{display:none;}
+  .sess-next-copy{flex:1 1 100%;}
+}
 .sess-list{width:calc(100% - 40px);max-width:950px;margin:40px auto 0;display:flex;flex-direction:column;gap:16px;}
 .sess-row{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:20px clamp(16px,3vw,40px);}
 .sess-row-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
