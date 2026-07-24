@@ -325,7 +325,11 @@ function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
     <h2 style="font-size:1.4rem;margin-bottom:4px;">You're booked for Café Gestalt</h2>
     <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
     <p>Hi ${name}, your seat is reserved. We look forward to seeing you.</p>
+<p></p>
+<p>Come find us at:</p>
     ${emailAddressBlock()}
+<p></p>
+<p>Ring the bell and come on up!</p>
     <p>If your plans change, please cancel so your seat can go to someone on the waitlist:</p>
     <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
     <p style="font-size:.85rem;opacity:.6;">This link will work until the day of the session.</p>
