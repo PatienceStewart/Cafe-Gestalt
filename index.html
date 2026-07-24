@@ -250,6 +250,9 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .sess-back-btn:hover{opacity:1;}
 .sess-back-btn svg{width:24px;height:24px;}
 
+.talk-panel{width:calc(100% - 40px);max-width:640px;margin:40px auto 0;}
+.talk-tabs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+.talk-panel .form-panel-dark{margin-top:0;}
 .form-panel-dark{background:#1b1b13;border:1px dashed rgba(240,234,216,.3);border-radius:6px;padding:18px;margin-top:16px;color:#f0ead8;}
 .form-panel-dark p{color:#f0ead8;}
 .form-panel-dark .field label{color:#f0ead8;opacity:.8;font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block;}
@@ -323,6 +326,35 @@ function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
   </div>`;
 }
 
+function emailReservationPending(name, eventDate, eventLabel) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">We've got your request — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, thanks for requesting a seat. We review requests by hand — we'll email you as soon as it's confirmed, or if we're not able to fit you in this time.</p>
+  </div>`;
+}
+
+function emailReservationApproved(name, eventDate, eventLabel, cancelUrl) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your seat is confirmed — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, good news — your reservation request has been confirmed. We look forward to seeing you.</p>
+    <p>If your plans change, please cancel so your seat can go to someone else:</p>
+    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
+  </div>`;
+}
+
+function emailReservationDeclined(name, eventDate, eventLabel) {
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">About your request — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+    <p>Hi ${name}, thanks for your interest — we're not able to offer you a seat for this session. We hope to see you at a future one.</p>
+  </div>`;
+}
+
 function emailWaitlistNotify(name, eventDate, eventLabel, claimUrl) {
   return `
   <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
@@ -371,11 +403,12 @@ async function loadCafeInfo() {
     name:'Café Gestalt', tagline:'Coffee, conversation, and one good idea a month.',
     about:'Café Gestalt is a tiny monthly gathering — part coffeehouse, part seminar room. Once a month we open our doors, pull in a small handful of chairs, and someone shares an idea worth talking about over coffee.',
     address:'Add your address in the Admin tab', hours:'Open one day a month — see the next session above',
-    how_it_works:'Once a month, we open the doors of a small room, brew something good, and someone shares an idea worth talking about. That\'s it.\n\nSessions are intentionally small — a handful of chairs, one speaker, and enough space for a real conversation afterwards. We keep it that way on purpose.\n\nAnyone can come. Anyone can propose a talk or suggest a theme. Reserve your seat ahead of time, because once the room fills up, it fills up.'
+    how_it_works:'Once a month, we open the doors of a small room, brew something good, and someone shares an idea worth talking about. That\'s it.\n\nSessions are intentionally small — a handful of chairs, one speaker, and enough space for a real conversation afterwards. We keep it that way on purpose.\n\nAnyone can come. Anyone can propose a talk or suggest a theme. Reserve your seat ahead of time, because once the room fills up, it fills up.',
+    require_confirmation:false
   };
 }
 async function saveCafeInfo(info) {
-  await supaFetch('cafe_info?id=eq.1', { method:'PATCH', body:{ name:info.name, tagline:info.tagline, about:info.about, address:info.address, hours:info.hours, how_it_works:info.how_it_works } });
+  await supaFetch('cafe_info?id=eq.1', { method:'PATCH', body:{ name:info.name, tagline:info.tagline, about:info.about, address:info.address, hours:info.hours, how_it_works:info.how_it_works, require_confirmation:!!info.require_confirmation } });
 }
 
 async function loadEvents() {
@@ -419,12 +452,17 @@ async function addReservation(eventId, data) {
   const rows = await supaFetch('reservations', { method:'POST', body:{
     event_id: eventId, name: data.name, email: data.email,
     party_size: data.partySize, notes: data.notes||'',
-    dietary_needs: data.dietaryNeeds||'', cancel_token: token
+    dietary_needs: data.dietaryNeeds||'', cancel_token: token,
+    status: data.status || 'confirmed'
   }});
   return rows && rows[0] ? rows[0] : null;
 }
 async function deleteReservation(id) {
   await supaFetch('reservations?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
+}
+async function updateReservationStatus(id, status) {
+  const rows = await supaFetch('reservations?id=eq.' + id, { method:'PATCH', body:{ status } });
+  return rows && rows[0] ? rows[0] : null;
 }
 
 async function loadWaitlist(eventId) {
@@ -495,7 +533,8 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function isFuture(iso) { return iso >= todayISO(); }
-function reservedCount(list) { return list.reduce((s, r) => s + (parseInt(r.party_size) || 0), 0); }
+// Only confirmed reservations hold a seat — pending requests and declined ones don't count.
+function reservedCount(list) { return list.filter(r => (r.status || 'confirmed') === 'confirmed').reduce((s, r) => s + (parseInt(r.party_size) || 0), 0); }
 function cupIcon(filled) {
   return '<svg class="cup-icon ' + (filled ? 'is-filled' : '') + '" viewBox="0 0 22 22" aria-hidden="true">'
     + '<path class="cup-body" d="M4 4h11v8a4.5 4.5 0 0 1-4.5 4.5h-2A4.5 4.5 0 0 1 4 12V4z"/>'
@@ -576,7 +615,7 @@ async function render() {
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
   // some views use their own dark nav/footer built into the new design, instead of the shared light chrome
-  const isDarkPage = STATE.view === 'home' || STATE.view === 'reserve' || STATE.view === 'reserveForm';
+  const isDarkPage = STATE.view === 'home' || STATE.view === 'reserve' || STATE.view === 'reserveForm' || STATE.view === 'talk';
   app.classList.toggle('home-active', isDarkPage);
   document.getElementById('topbar').style.display = isDarkPage ? 'none' : '';
   document.getElementById('siteFooter').style.display = isDarkPage ? 'none' : '';
@@ -713,7 +752,7 @@ async function renderReserve() {
 
   function buildAction(ev, spotsLeft, full, rsvpClosed, waitlistCount) {
     if (rsvpClosed) return '<div class="home-session-note">RSVP is now closed.</div>';
-    if (!full) return `<button class="home-btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>`;
+    if (!full) return `<button class="home-btn" data-action="open-reserve-form" data-event-id="${ev.id}">${STATE.cafeInfo && STATE.cafeInfo.require_confirmation ? 'Request a seat' : 'Reserve'}</button>`;
     return `<button class="home-btn-outline" data-action="open-reserve-form" data-event-id="${ev.id + '-waitlist'}">Waitlist${waitlistCount > 0 ? ' ('+waitlistCount+')' : ''}</button>`;
   }
 
@@ -777,6 +816,8 @@ async function renderReserveForm() {
   const isWaitlist = typeof targetId === 'string' && targetId.endsWith('-waitlist');
   const eventId = isWaitlist ? targetId.slice(0, -('-waitlist'.length)) : targetId;
   const ev = eventId ? STATE.events.find(e => e.id === eventId) : null;
+  const requiresConfirmation = !!(STATE.cafeInfo && STATE.cafeInfo.require_confirmation);
+  const reserveTitle = requiresConfirmation ? 'Request your seat' : 'Reserve your seat';
 
   const shell = (innerHtml) => `
   <div class="home-view">
@@ -818,7 +859,7 @@ async function renderReserveForm() {
 
   if (rsvpClosed || (isWaitlist ? !full : full)) {
     return shell(`
-      ${titleRow(isWaitlist ? 'Join the waitlist' : 'Reserve your seat')}
+      ${titleRow(isWaitlist ? 'Join the waitlist' : reserveTitle)}
       <div class="sess-form-wrap">
         ${cardHtml}
         <div class="sess-form-note">${rsvpClosed ? 'RSVP is now closed for this session.' : (isWaitlist ? 'A seat just opened up — refresh Upcoming sessions to reserve it.' : 'This session just filled up. Please check Upcoming sessions for waitlist options.')} <span data-nav="reserve" role="link" tabindex="0" style="text-decoration:underline;cursor:pointer;">Back to Upcoming sessions</span></div>
@@ -848,7 +889,7 @@ async function renderReserveForm() {
         <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="Thoughts, comments, jokes, or questions"></textarea></div>
         <div class="form-actions-right">
           <button class="home-btn-outline" type="button" data-action="cancel-reserve-form">Cancel</button>
-          <button class="home-btn" type="submit">Confirm reservation</button>
+          <button class="home-btn" type="submit">${requiresConfirmation ? 'Submit request' : 'Confirm reservation'}</button>
         </div>
       </form>
     </div>`;
@@ -869,7 +910,7 @@ async function renderReserveForm() {
   }
 
   return shell(`
-    ${titleRow(isWaitlist ? 'Join the waitlist' : 'Reserve your seat')}
+    ${titleRow(isWaitlist ? 'Join the waitlist' : reserveTitle)}
     <div class="sess-form-wrap">
       ${cardHtml}
       ${formHtml}
@@ -1016,15 +1057,15 @@ function renderMonthGrid(yearMonth) {
     const iso = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const isPast = iso < todayStr;
     const selected = TALK_PICKER.selectedDays.has(iso);
-    const bg = selected ? 'var(--ochre)' : 'var(--paper)';
-    const color = selected ? 'var(--ink)' : isPast ? 'var(--espresso)' : 'var(--espresso)';
+    const bg = selected ? '#e4d9c0' : 'rgba(240,234,216,.06)';
+    const color = selected ? '#1b1b13' : '#f0ead8';
     const opacity = isPast ? '.35' : '1';
     const cursor = isPast ? 'default' : 'pointer';
     grid += `<div
       data-action="pick-day" data-iso="${iso}" data-past="${isPast}"
       style="text-align:center;padding:5px 2px;border-radius:3px;font-size:.88rem;
              background:${bg};color:${color};opacity:${opacity};cursor:${cursor};
-             border:1px solid ${selected ? 'var(--ochre-dark)' : 'var(--line)'};
+             border:1px solid ${selected ? '#e4d9c0' : 'rgba(240,234,216,.25)'};
              font-weight:${selected?'700':'400'};"
     >${day}</div>`;
   }
@@ -1036,7 +1077,7 @@ function renderMonthGrid(yearMonth) {
     .map(d => new Date(d + 'T00:00:00').getDate())
     .sort((a,b) => a-b);
   if (monthSelections.length) {
-    grid += `<div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;margin-top:8px;color:var(--ochre-dark);">Selected: ${monthSelections.join(', ')}</div>`;
+    grid += `<div style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;margin-top:8px;color:#e4d9c0;">Selected: ${monthSelections.join(', ')}</div>`;
   }
   return grid;
 }
@@ -1053,12 +1094,12 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
   months.forEach(({ key, label }) => {
     const isOpen = TALK_PICKER.openMonths.has(key);
     const countInMonth = [...TALK_PICKER.selectedDays].filter(d => d.startsWith(key)).length;
-    const badge = countInMonth > 0 ? ` <span style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;background:var(--ochre);color:var(--ink);padding:1px 6px;border-radius:10px;margin-left:6px;">${countInMonth}</span>` : '';
+    const badge = countInMonth > 0 ? ` <span style="font-family:'IBM Plex Mono',monospace;font-size:.7rem;background:#e4d9c0;color:#1b1b13;padding:1px 6px;border-radius:10px;margin-left:6px;">${countInMonth}</span>` : '';
 
-    html += `<div style="border:1px solid var(--line);border-radius:4px;margin-bottom:6px;overflow:hidden;">
+    html += `<div style="border:1px solid rgba(240,234,216,.25);border-radius:4px;margin-bottom:6px;overflow:hidden;">
       <button type="button" data-action="toggle-month" data-month="${key}"
-        style="width:100%;text-align:left;background:${isOpen?'var(--paper)':'var(--paper-light)'};
-               border:none;padding:10px 12px;font-size:.95rem;cursor:pointer;
+        style="width:100%;text-align:left;background:${isOpen?'rgba(240,234,216,.12)':'rgba(240,234,216,.06)'};
+               color:#f0ead8;border:none;padding:10px 12px;font-size:.95rem;cursor:pointer;
                display:flex;justify-content:space-between;align-items:center;">
         <span>${label}${badge}</span>
         <span style="font-family:'IBM Plex Mono',monospace;font-size:.8rem;opacity:.6;">${isOpen ? '▲ close' : '▼ open'}</span>
@@ -1069,7 +1110,7 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
 
   if (totalSelected > 0) {
     const sorted = [...TALK_PICKER.selectedDays].sort();
-    html += `<div style="margin-top:8px;padding:10px 12px;background:rgba(189,139,46,.1);border:1px solid var(--ochre);border-radius:4px;font-size:.88rem;">
+    html += `<div style="margin-top:8px;padding:10px 12px;background:rgba(228,217,192,.12);border:1px solid #e4d9c0;border-radius:4px;font-size:.88rem;color:#f0ead8;">
       <span style="font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.7;">ALL SELECTED DATES</span><br/>
       ${sorted.map(d => fmtDate(d)).join(' · ')}
     </div>`;
@@ -1080,57 +1121,52 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
 }
 
 async function renderTalk() {
-  let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
+  const noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
 
-  const tabStyle = (mode) => `
-    display:inline-block;padding:9px 18px;border-radius:4px 4px 0 0;cursor:pointer;
-    font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;border:none;
-    background:${TALK_MODE===mode ? 'var(--paper-light)' : 'var(--paper-dark)'};
-    color:${TALK_MODE===mode ? 'var(--espresso)' : 'var(--espresso)'};
-    opacity:${TALK_MODE===mode ? '1' : '.6'};
-    border-bottom:${TALK_MODE===mode ? '2px solid var(--ochre)' : '2px solid transparent'};`;
-
-  const tabs = `
-    <div style="display:flex;gap:4px;margin-bottom:-1px;">
-      <button type="button" data-action="set-talk-mode" data-mode="talk" style="${tabStyle('talk')}">Give a talk</button>
-      <button type="button" data-action="set-talk-mode" data-mode="theme" style="${tabStyle('theme')}">Suggest a theme</button>
-    </div>
-    <div style="border:1px solid var(--line);border-radius:0 4px 4px 4px;background:var(--paper-light);padding:20px;">`;
+  const modeBtn = (mode, label) => `<button type="button" class="${TALK_MODE===mode ? 'home-btn' : 'home-btn-outline'}" data-action="set-talk-mode" data-mode="${mode}">${label}</button>`;
+  const tabs = `<div class="talk-tabs">${modeBtn('talk', 'Give a talk')}${modeBtn('theme', 'Suggest a theme')}</div>`;
 
   const talkForm = `
-      <p class="section-sub" style="margin-bottom:16px;">Have an idea worth sharing over coffee? Tell us about it — we'll follow up to confirm a date.</p>
+      <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
       <form data-form="talk" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name"/></div>
         <div class="field"><label>Email</label><input type="email" name="email"/></div>
-        <div class="field"><label>Talk topic / title</label><input type="text" name="topic"/></div>
+        <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic"/></div>
         <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?"></textarea></div>
         ${renderCalendarPicker()}
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Format needs, length, anything else we should know"></textarea></div>
-        <button class="btn" type="submit">Submit proposal</button>
+        <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
       </form>`;
 
   const themeForm = `
-      <p class="section-sub" style="margin-bottom:16px;">Have an idea for a session theme — a book club, a craft day, a screening? Tell us what you have in mind.</p>
+      <p style="margin:0 0 16px;">Have an idea for a session theme — a book club, a craft day, a screening? Tell us what you have in mind.</p>
       <form data-form="theme" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name"/></div>
         <div class="field"><label>Email</label><input type="email" name="email"/></div>
         <div class="field"><label>Theme idea</label><input type="text" name="topic" placeholder="e.g. Silent book club, Natural dyeing workshop"/></div>
-        <div class="field"><label>Description</label><textarea name="description" placeholder="What would this session look like? Any materials or prep needed?"></textarea></div>
+        <div class="field"><label>Description</label><textarea name="description" placeholder="What would this session look like?"></textarea></div>
         <div class="field">
           <label>Preferred dates (optional)</label>
-          <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. Otherwise leave this blank and we'll be in touch.</div>
+          <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. You can select dates across multiple months.</div>
           ${renderCalendarPicker(null)}
         </div>
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Anything else we should know"></textarea></div>
-        <button class="btn" type="submit">Submit idea</button>
+        <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
       </form>`;
 
   return `
-    <h2 class="section-title">Get involved</h2>
-    ${noticeHtml}
-    ${tabs}
-      ${TALK_MODE === 'talk' ? talkForm : themeForm}
-    </div>`;
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('talk', { onFlatBg: true })}</div>
+    <h1 class="sess-title">Get involved</h1>
+    <div class="talk-panel">
+      ${noticeHtml}
+      ${tabs}
+      <div class="form-panel-dark">
+        ${TALK_MODE === 'talk' ? talkForm : themeForm}
+      </div>
+    </div>
+    ${darkFooterHtml()}
+  </div>`;
 }
 
 /* ===================== admin ===================== */
@@ -1202,6 +1238,12 @@ function renderAdminCafeInfo() {
         <div class="field"><label>About</label><textarea name="about" required>${escapeHtml(info.about)}</textarea></div>
         <div class="field"><label>How it works</label><textarea name="how_it_works" style="min-height:120px;">${escapeHtml(info.how_it_works||'')}</textarea><div class="field-hint">Separate paragraphs with a blank line.</div></div>
         <div class="field"><label>Hours note</label><input type="text" name="hours" value="${escapeHtml(info.hours)}"/></div>
+        <div class="field">
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
+            <input type="checkbox" name="requireConfirmation" value="yes" style="width:auto;" ${info.require_confirmation ? 'checked' : ''}/> Require confirmation before reservations are booked
+          </label>
+          <div class="field-hint">When on, seats aren't booked instantly — requests land in Sessions for you to confirm or decline, and guests get an email either way.</div>
+        </div>
         <button class="btn" type="submit">Save</button>
       </form>
     </div>`;
@@ -1230,11 +1272,24 @@ async function renderAdminSessions() {
     const rc = reservedCount(res);
     const isEditing = STATE.openEditEventFor === ev.id;
 
-    const rows = res.map(r => `
+    const confirmedRes = res.filter(r => (r.status||'confirmed') === 'confirmed');
+    const pendingRes = res.filter(r => r.status === 'pending');
+
+    const rows = confirmedRes.map(r => `
       <tr>
         <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
         <td>${r.party_size}</td><td>${escapeHtml(r.dietary_needs||'')}</td><td>${escapeHtml(r.notes||'')}</td>
         <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
+      </tr>`).join('');
+
+    const pendingRows = pendingRes.map(r => `
+      <tr>
+        <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
+        <td>${r.party_size}</td><td>${escapeHtml(r.dietary_needs||'')}</td><td>${escapeHtml(r.notes||'')}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-outline btn-small" data-action="decline-reservation" data-id="${r.id}" data-event-id="${ev.id}">Decline</button>
+          <button class="btn btn-small" data-action="confirm-reservation" data-id="${r.id}" data-event-id="${ev.id}">Confirm</button>
+        </td>
       </tr>`).join('');
 
     const editForm = isEditing ? `
@@ -1268,7 +1323,8 @@ async function renderAdminSessions() {
         </div>
       </div>
       ${editForm}
-      ${res.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No reservations yet.</div>'}
+      ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${pendingRows}</tbody></table></div>` : ''}
+      ${confirmedRes.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
       ${await (async () => {
         const wl = await loadWaitlist(ev.id);
         if (!wl.length) return '';
@@ -1392,6 +1448,33 @@ document.addEventListener('click', async (e) => {
       invalidateReserveStats();
       STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
+  } else if (action === 'confirm-reservation') {
+    const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
+    const reservation = await updateReservationStatus(actionEl.dataset.id, 'confirmed');
+    invalidateReserveStats();
+    if (reservation && ev) {
+      const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
+      await sendEmail(
+        reservation.email,
+        'Your reservation — Café Gestalt ' + fmtDate(ev.date),
+        emailReservationApproved(reservation.name, fmtDate(ev.date), ev.label||'', cancelUrl)
+      );
+    }
+    STATE.notice = { type:'success', text:'Reservation confirmed and guest notified.' }; await render();
+  } else if (action === 'decline-reservation') {
+    if (confirm('Decline this request? The guest will be emailed.')) {
+      const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
+      const reservation = await updateReservationStatus(actionEl.dataset.id, 'declined');
+      invalidateReserveStats();
+      if (reservation && ev) {
+        await sendEmail(
+          reservation.email,
+          'Your request — Café Gestalt ' + fmtDate(ev.date),
+          emailReservationDeclined(reservation.name, fmtDate(ev.date), ev.label||'')
+        );
+      }
+      STATE.notice = { type:'success', text:'Request declined and guest notified.' }; await render();
+    }
   } else if (action === 'delete-waitlist') {
     if (confirm('Remove this person from the waitlist?')) {
       await deleteWaitlistEntry(actionEl.dataset.id);
@@ -1485,16 +1568,28 @@ document.addEventListener('submit', async (e) => {
     if (rc + partySize > (parseInt(ev.capacity) || 0)) {
       STATE.notice = { type:'error', text:'Sorry — that session just filled up. Try a smaller party or another date.' };
     } else {
-      const reservation = await addReservation(eventId, { name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'', dietaryNeeds: noSpecialDiet ? 'No special dietary needs' : dietaryNeeds });
-      if (reservation) {
+      const requiresConfirmation = !!(STATE.cafeInfo && STATE.cafeInfo.require_confirmation);
+      const reservation = await addReservation(eventId, {
+        name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'',
+        dietaryNeeds: noSpecialDiet ? 'No special dietary needs' : dietaryNeeds,
+        status: requiresConfirmation ? 'pending' : 'confirmed'
+      });
+      if (reservation && requiresConfirmation) {
+        await sendEmail(
+          fd.get('email'),
+          'Your request — Café Gestalt ' + fmtDate(ev.date),
+          emailReservationPending(fd.get('name'), fmtDate(ev.date), ev.label||'')
+        );
+        STATE.notice = { type:'success', text:"Request sent! We'll email you once it's confirmed." };
+      } else if (reservation) {
         const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
         await sendEmail(
           fd.get('email'),
           'Your reservation — Café Gestalt ' + fmtDate(ev.date),
           emailConfirmation(fd.get('name'), fmtDate(ev.date), ev.label||'', cancelUrl)
         );
+        STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation and cancellation link." };
       }
-      STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation and cancellation link." };
     }
     invalidateReserveStats();
     STATE.openReserveFormFor = null;
@@ -1617,7 +1712,7 @@ document.addEventListener('submit', async (e) => {
     await render();
 
   } else if (type === 'cafe-info') {
-    STATE.cafeInfo = { name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), address:fd.get('address'), hours:fd.get('hours'), how_it_works:fd.get('how_it_works')||'' };
+    STATE.cafeInfo = { name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), address:fd.get('address'), hours:fd.get('hours'), how_it_works:fd.get('how_it_works')||'', require_confirmation: form.querySelector('[name="requireConfirmation"]').checked };
     await saveCafeInfo(STATE.cafeInfo);
     STATE.notice = { type:'success', text:'Cafe info saved.' }; await render();
 
