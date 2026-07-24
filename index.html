@@ -370,15 +370,17 @@ function emailReservationDeclined(name, eventDate, eventLabel) {
   </div>`;
 }
 
-function emailWaitlistNotify(name, eventDate, eventLabel, claimUrl) {
+function emailWaitlistNotify(name, eventDate, eventLabel, claimUrl, declineUrl) {
   return `
   <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
     <h2 style="font-size:1.4rem;margin-bottom:4px;">A seat has opened up at Café Gestalt</h2>
     <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
     <p>Hi ${name}, you're next on the waitlist and a seat has just become available.</p>
-    <p>Claim your seat before it's gone — this link is valid for 48 hours before the event:</p>
+    <p>You have ${WAITLIST_RESPONSE_WINDOW_HOURS} hours to claim it before it's offered to the next person on the waitlist:</p>
     <p><a href="${claimUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Claim my seat</a></p>
-    <p style="font-size:.85rem;opacity:.6;">If you no longer need a seat, no action is needed.</p>
+    <p>Know you can't make it? Let us know so we can offer it sooner:</p>
+    <p><a href="${declineUrl}" style="background:none;border:1px solid #1A553D;color:#1A553D;padding:9px 17px;border-radius:4px;text-decoration:none;font-family:monospace;">No thanks, skip me</a></p>
+    <p style="font-size:.85rem;opacity:.6;">If you take no action within ${WAITLIST_RESPONSE_WINDOW_HOURS} hours, we'll automatically offer the seat to the next person.</p>
   </div>`;
 }
 
@@ -451,13 +453,14 @@ function invalidateReserveStats() { RESERVE_STATS_CACHE.clear(); }
 async function getEventStats(ev) {
   if (RESERVE_STATS_CACHE.has(ev.id)) return RESERVE_STATS_CACHE.get(ev.id);
   const res = await loadReservations(ev.id);
-  const wl = await loadWaitlist(ev.id);
+  let wl = await loadWaitlist(ev.id);
+  wl = await expireStaleWaitlistOffers(ev, wl);
   const rc = reservedCount(res);
   const cap = parseInt(ev.capacity) || 0;
   const spotsLeft = Math.max(0, cap - rc);
   const rsvpClosed = !isFuture(ev.rsvp_by);
   const full = spotsLeft <= 0;
-  const waitlistCount = wl.filter(w => !w.claimed).length;
+  const waitlistCount = wl.filter(w => !w.claimed && !w.declined).length;
   const stats = { res, wl, rc, cap, spotsLeft, rsvpClosed, full, waitlistCount };
   RESERVE_STATS_CACHE.set(ev.id, stats);
   return stats;
@@ -492,12 +495,14 @@ async function addToWaitlist(eventId, data) {
 }
 async function updateWaitlistEntry(entry) {
   await supaFetch('waitlist?id=eq.' + entry.id, { method:'PATCH', body:{
-    claimed: entry.claimed, notified: entry.notified
+    claimed: entry.claimed, notified: entry.notified, notified_at: entry.notified_at||null, declined: !!entry.declined
   }});
 }
 async function deleteWaitlistEntry(id) {
   await supaFetch('waitlist?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' }});
 }
+
+const WAITLIST_RESPONSE_WINDOW_HOURS = 6;
 
 // After a cancellation: notify the next unclaimed, un-notified waitlist person if >48h to event
 async function promoteWaitlist(eventId, eventDate, eventLabel) {
@@ -506,13 +511,30 @@ async function promoteWaitlist(eventId, eventDate, eventLabel) {
   const next = list.find(w => !w.claimed && !w.notified);
   if (!next) return;
   const claimUrl = SITE_URL + '/#claim?token=' + next.claim_token;
+  const declineUrl = SITE_URL + '/#decline?token=' + next.claim_token;
   await sendEmail(
     next.email,
     'A seat has opened at Café Gestalt — ' + fmtDate(eventDate),
-    emailWaitlistNotify(next.name, fmtDate(eventDate), eventLabel, claimUrl)
+    emailWaitlistNotify(next.name, fmtDate(eventDate), eventLabel, claimUrl, declineUrl)
   );
   next.notified = true;
+  next.notified_at = new Date().toISOString();
   await updateWaitlistEntry(next);
+}
+
+// Waitlist offers that sat unanswered past the response window are treated as declined,
+// which lets promoteWaitlist's "next un-notified person" search move on to whoever's next.
+async function expireStaleWaitlistOffers(ev, wl) {
+  const cutoff = WAITLIST_RESPONSE_WINDOW_HOURS * 3600 * 1000;
+  const stale = wl.filter(w => w.notified && !w.claimed && !w.declined && w.notified_at
+    && (Date.now() - new Date(w.notified_at).getTime()) > cutoff);
+  if (!stale.length) return wl;
+  for (const w of stale) {
+    w.declined = true;
+    await updateWaitlistEntry(w);
+    await promoteWaitlist(ev.id, ev.date, ev.label);
+  }
+  return await loadWaitlist(ev.id);
 }
 
 async function loadAllTalks() {
@@ -583,6 +605,7 @@ let STATE = {
   openEditEventFor: null,
   cancelToken: null,   // set from URL hash for cancel flow
   claimToken: null,    // set from URL hash for waitlist claim flow
+  declineToken: null,  // set from URL hash for waitlist decline flow
 };
 
 async function refreshCore() {
@@ -622,6 +645,7 @@ async function render() {
     else if (STATE.view === 'admin')   html = await renderAdmin();
     else if (STATE.view === 'cancel')  html = await renderCancel();
     else if (STATE.view === 'claim')   html = await renderClaim();
+    else if (STATE.view === 'declineWaitlist') html = await renderDeclineWaitlist();
     else html = await renderHome();
   } catch(e) {
     html = '<div class="notice notice-error">Could not load data. Check your Supabase connection.<br><small>' + escapeHtml(e.message) + '</small></div>';
@@ -1005,6 +1029,17 @@ async function renderClaim() {
     return `<h2 class="section-title">Claim your seat</h2><div class="card">You've already claimed your seat for ${fmtDate(eventDate)}. See you there!</div>`;
   }
 
+  if (w.declined) {
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">This offer has already been declined or expired, and the seat was offered to the next person on the waitlist.</div>`;
+  }
+
+  if (w.notified && w.notified_at && (Date.now() - new Date(w.notified_at).getTime()) > WAITLIST_RESPONSE_WINDOW_HOURS * 3600 * 1000) {
+    w.declined = true;
+    await updateWaitlistEntry(w);
+    if (ev) { await promoteWaitlist(ev.id, ev.date, ev.label); invalidateReserveStats(); }
+    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — this offer expired after ${WAITLIST_RESPONSE_WINDOW_HOURS} hours with no response, so we've offered the seat to the next person on the waitlist.</div>`;
+  }
+
   if (hoursUntil(eventDate) < 48) {
     return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — the claim window for this session has closed (less than 48 hours to go).</div>`;
   }
@@ -1029,6 +1064,51 @@ async function renderClaim() {
       </div>
       <form data-form="do-claim" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
         <button class="btn" type="submit">Confirm — claim my seat</button>
+      </form>
+    </div>`;
+}
+
+async function renderDeclineWaitlist() {
+  const token = STATE.declineToken;
+  if (!token) return '<div class="empty-state">No token found.</div>';
+
+  let rows;
+  try {
+    rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
+  } catch(e) {
+    return '<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>';
+  }
+
+  if (!rows || !rows.length) {
+    return `<h2 class="section-title">Decline seat</h2><div class="card">This link is invalid or has already been used.</div>`;
+  }
+
+  const w = rows[0];
+  const ev = STATE.events.find(e => e.id === w.event_id);
+  const eventDate = ev ? ev.date : '';
+  const eventLabel = ev ? ev.label : '';
+
+  if (w.claimed) {
+    return `<h2 class="section-title">Decline seat</h2><div class="card">You've already claimed this seat for ${fmtDate(eventDate)} — see you there!</div>`;
+  }
+
+  if (w.declined) {
+    return `<h2 class="section-title">Decline seat</h2><div class="card">You've already declined this offer, or it expired. Thanks for letting us know.</div>`;
+  }
+
+  let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
+  return `
+    <h2 class="section-title">Decline seat</h2>
+    ${noticeHtml}
+    <div class="card">
+      <p style="margin-top:0;">A seat was offered to you for:</p>
+      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+        <div style="font-weight:700;">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''}</div>
+        <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
+      </div>
+      <p style="font-size:.9rem;opacity:.75;">If you decline, we'll offer the seat to the next person on the waitlist right away.</p>
+      <form data-form="do-decline-waitlist" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+        <button class="btn btn-outline" type="submit">No thanks, skip me</button>
       </form>
     </div>`;
 }
@@ -1341,10 +1421,11 @@ async function renderAdminSessions() {
       ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${pendingRows}</tbody></table></div>` : ''}
       ${confirmedRes.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
       ${await (async () => {
-        const wl = await loadWaitlist(ev.id);
+        let wl = await loadWaitlist(ev.id);
+        wl = await expireStaleWaitlistOffers(ev, wl);
         if (!wl.length) return '';
-        const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.notified?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td><button class="btn-danger btn btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
-        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed).length} active)</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
+        const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td><button class="btn-danger btn btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
+        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
       })()}
     </div>`;
   }
@@ -1689,6 +1770,24 @@ document.addEventListener('submit', async (e) => {
     STATE.view = 'home';
     await render();
 
+  } else if (type === 'do-decline-waitlist') {
+    const waitlistId = form.dataset.waitlistId;
+    const eventId     = form.dataset.eventId;
+    const eventDate    = form.dataset.eventDate;
+    const eventLabel   = form.dataset.eventLabel;
+    const wRows = await supaFetch('waitlist?id=eq.' + waitlistId + '&select=*');
+    const w = wRows && wRows[0];
+    if (w) {
+      w.declined = true;
+      await updateWaitlistEntry(w);
+      await promoteWaitlist(eventId, eventDate, eventLabel);
+    }
+    invalidateReserveStats();
+    STATE.declineToken = null;
+    STATE.view = 'home';
+    STATE.notice = { type:'success', text:"Thanks for letting us know — we've offered the seat to the next person on the waitlist." };
+    await render();
+
   } else if (type === 'talk') {
     const valid = validateForm(form, {
       name:        { required: 'Please enter your name.' },
@@ -1761,6 +1860,9 @@ window.addEventListener('hashchange', async () => {
   } else if (hash.startsWith('claim?token=')) {
     STATE.claimToken = hash.replace('claim?token=', '');
     STATE.view = 'claim';
+  } else if (hash.startsWith('decline?token=')) {
+    STATE.declineToken = hash.replace('decline?token=', '');
+    STATE.view = 'declineWaitlist';
   } else {
     STATE.view = hash || 'home';
   }
@@ -1780,6 +1882,9 @@ window.addEventListener('hashchange', async () => {
   } else if (hash.startsWith('claim?token=')) {
     STATE.claimToken = hash.replace('claim?token=', '');
     STATE.view = 'claim';
+  } else if (hash.startsWith('decline?token=')) {
+    STATE.declineToken = hash.replace('decline?token=', '');
+    STATE.view = 'declineWaitlist';
   } else {
     STATE.view = hash || 'home';
   }
