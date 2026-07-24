@@ -1605,7 +1605,7 @@ document.addEventListener('submit', async (e) => {
           'Your reservation — Café Gestalt ' + fmtDate(ev.date),
           emailConfirmation(fd.get('name'), fmtDate(ev.date), ev.label||'', cancelUrl)
         );
-        STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation and cancellation link." };
+        STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation." };
       }
     }
     invalidateReserveStats();
