@@ -1459,8 +1459,11 @@ document.addEventListener('click', async (e) => {
         'Your reservation — Café Gestalt ' + fmtDate(ev.date),
         emailReservationApproved(reservation.name, fmtDate(ev.date), ev.label||'', cancelUrl)
       );
+      STATE.notice = { type:'success', text:'Reservation confirmed and guest notified.' };
+    } else {
+      STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
     }
-    STATE.notice = { type:'success', text:'Reservation confirmed and guest notified.' }; await render();
+    await render();
   } else if (action === 'decline-reservation') {
     if (confirm('Decline this request? The guest will be emailed.')) {
       const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
@@ -1472,8 +1475,11 @@ document.addEventListener('click', async (e) => {
           'Your request — Café Gestalt ' + fmtDate(ev.date),
           emailReservationDeclined(reservation.name, fmtDate(ev.date), ev.label||'')
         );
+        STATE.notice = { type:'success', text:'Request declined and guest notified.' };
+      } else {
+        STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
       }
-      STATE.notice = { type:'success', text:'Request declined and guest notified.' }; await render();
+      await render();
     }
   } else if (action === 'delete-waitlist') {
     if (confirm('Remove this person from the waitlist?')) {
