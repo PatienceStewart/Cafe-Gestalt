@@ -208,7 +208,8 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .home-btn-outline:hover{background:rgba(240,234,216,.12);}
 .home-session-note{font-family:'IBM Plex Mono',monospace;font-size:.8rem;opacity:.75;}
 .home-propose-copy{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.5;margin:0;}
-.home-propose-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.home-propose-actions{display:flex;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.form-actions-right{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .home-how{display:flex;flex-wrap:wrap;width:calc(100% - 40px);max-width:950px;margin:112px auto 0;border-radius:24px;overflow:hidden;}
 .home-how-img{flex:1 1 300px;min-height:300px;background:url('coffee-overhead.png') center/cover no-repeat;}
 .home-how-copy{flex:1 1 300px;background:#2f2f25;padding:32px;display:flex;flex-direction:column;gap:18px;justify-content:center;}
@@ -241,6 +242,13 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .sess-row-date,.sess-row-name{font-family:'Source Serif 4',serif;font-size:1.2rem;color:#f0ead8;}
 .sess-row-seats{font-family:'Source Sans 3',sans-serif;font-size:.95rem;color:#f0ead8;opacity:.9;}
 .sess-empty{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;width:calc(100% - 40px);max-width:950px;margin:40px auto 0;}
+.sess-form-wrap{width:calc(100% - 40px);max-width:440px;margin:32px auto 0;display:flex;flex-direction:column;gap:24px;}
+.sess-form-note{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;}
+.sess-form-header{display:flex;align-items:center;gap:12px;width:calc(100% - 40px);max-width:440px;margin:40px auto 0;}
+.sess-form-header .sess-title{margin:0;text-align:left;width:auto;max-width:none;flex:1;}
+.sess-back-btn{background:none;border:none;color:#f0ead8;cursor:pointer;padding:4px;margin:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.85;}
+.sess-back-btn:hover{opacity:1;}
+.sess-back-btn svg{width:24px;height:24px;}
 
 .form-panel-dark{background:#1b1b13;border:1px dashed rgba(240,234,216,.3);border-radius:6px;padding:18px;margin-top:16px;color:#f0ead8;}
 .form-panel-dark p{color:#f0ead8;}
@@ -386,6 +394,26 @@ async function updateEvent(ev) {
 async function loadReservations(eventId) {
   return await supaFetch('reservations?event_id=eq.' + eventId + '&select=*&order=created_at.asc') || [];
 }
+
+// Cache of per-event reservation/waitlist stats used by the Upcoming Sessions page, so
+// purely-local UI toggles (opening/cancelling a reserve form) don't refetch over the network
+// and don't produce a "reload" flash. Cleared whenever the underlying data may have changed.
+const RESERVE_STATS_CACHE = new Map();
+function invalidateReserveStats() { RESERVE_STATS_CACHE.clear(); }
+async function getEventStats(ev) {
+  if (RESERVE_STATS_CACHE.has(ev.id)) return RESERVE_STATS_CACHE.get(ev.id);
+  const res = await loadReservations(ev.id);
+  const wl = await loadWaitlist(ev.id);
+  const rc = reservedCount(res);
+  const cap = parseInt(ev.capacity) || 0;
+  const spotsLeft = Math.max(0, cap - rc);
+  const rsvpClosed = !isFuture(ev.rsvp_by);
+  const full = spotsLeft <= 0;
+  const waitlistCount = wl.filter(w => !w.claimed).length;
+  const stats = { res, wl, rc, cap, spotsLeft, rsvpClosed, full, waitlistCount };
+  RESERVE_STATS_CACHE.set(ev.id, stats);
+  return stats;
+}
 async function addReservation(eventId, data) {
   const token = genToken();
   const rows = await supaFetch('reservations', { method:'POST', body:{
@@ -520,6 +548,8 @@ function setActiveTab() {
 }
 async function navigate(view) {
   STATE.view = view; STATE.notice = null;
+  if (view !== 'reserve' && view !== 'reserveForm') STATE.openReserveFormFor = null;
+  if (view === 'reserve') invalidateReserveStats();
   window.location.hash = view;
   setActiveTab();
   await render();
@@ -533,6 +563,7 @@ async function render() {
   try {
     if (STATE.view === 'home')         html = await renderHome();
     else if (STATE.view === 'reserve') html = await renderReserve();
+    else if (STATE.view === 'reserveForm') html = await renderReserveForm();
     else if (STATE.view === 'talk')    html = await renderTalk();
     else if (STATE.view === 'admin')   html = await renderAdmin();
     else if (STATE.view === 'cancel')  html = await renderCancel();
@@ -545,7 +576,7 @@ async function render() {
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
   // some views use their own dark nav/footer built into the new design, instead of the shared light chrome
-  const isDarkPage = STATE.view === 'home' || STATE.view === 'reserve';
+  const isDarkPage = STATE.view === 'home' || STATE.view === 'reserve' || STATE.view === 'reserveForm';
   app.classList.toggle('home-active', isDarkPage);
   document.getElementById('topbar').style.display = isDarkPage ? 'none' : '';
   document.getElementById('siteFooter').style.display = isDarkPage ? 'none' : '';
@@ -681,67 +712,15 @@ async function renderReserve() {
   }
 
   function buildAction(ev, spotsLeft, full, rsvpClosed, waitlistCount) {
-    const formOpen = STATE.openReserveFormFor === ev.id;
-    const waitlistOpen = STATE.openReserveFormFor === ev.id + '-waitlist';
     if (rsvpClosed) return '<div class="home-session-note">RSVP is now closed.</div>';
-    if (!full && !formOpen && !waitlistOpen) return `<button class="home-btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>`;
-    if (full && !waitlistOpen && !formOpen) return `<button class="home-btn-outline" data-action="open-reserve-form" data-event-id="${ev.id + '-waitlist'}">Waitlist${waitlistCount > 0 ? ' ('+waitlistCount+')' : ''}</button>`;
-    return '';
-  }
-
-  function buildForm(ev, spotsLeft, full, rsvpClosed) {
-    const formOpen = STATE.openReserveFormFor === ev.id;
-    const waitlistOpen = STATE.openReserveFormFor === ev.id + '-waitlist';
-    if (formOpen && !full && !rsvpClosed) {
-      let options = '';
-      for (let i = 1; i <= Math.min(spotsLeft, 8); i++)
-        options += `<option value="${i}">${i} ${i===1?'seat':'seats'}</option>`;
-      return `
-      <div class="form-panel-dark">
-        <form data-form="reserve" data-event-id="${ev.id}" novalidate>
-          <div class="field"><label>Name</label><input type="text" name="name"/></div>
-          <div class="field"><label>Email</label><input type="email" name="email"/></div>
-          <div class="field"><label>Party size</label><select name="partySize">${options}</select>
-            <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left.</div></div>
-          <div class="field">
-            <label>Dietary needs</label>
-            <label style="display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;margin-bottom:8px;">
-              <input type="checkbox" name="noSpecialDiet" value="yes" style="width:auto;" data-action="toggle-diet-field"/> No special dietary needs
-            </label>
-            <textarea name="dietaryNeeds" placeholder="Please describe any dietary needs, allergies, or intolerances for your party"></textarea>
-          </div>
-          <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. seating with another guest, accessibility needs"></textarea></div>
-          <button class="home-btn" type="submit">Confirm reservation</button>
-          <button class="home-btn-outline" type="button" data-action="cancel-reserve-form" style="margin-left:8px;">Cancel</button>
-        </form>
-      </div>`;
-    } else if (waitlistOpen && full && !rsvpClosed) {
-      return `
-      <div class="form-panel-dark">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:10px;">Join the waitlist</div>
-        <p style="margin:0 0 12px;font-size:.92rem;">This session is full. Add your name to the waitlist — if a seat opens up and there's more than 48 hours until the session, we'll email you first.</p>
-        <form data-form="waitlist" data-event-id="${ev.id}" novalidate>
-          <div class="field"><label>Name</label><input type="text" name="name"/></div>
-          <div class="field"><label>Email</label><input type="email" name="email"/></div>
-          <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. flexibility on party size"></textarea></div>
-          <button class="home-btn" type="submit">Join waitlist</button>
-          <button class="home-btn-outline" type="button" data-action="cancel-reserve-form" style="margin-left:8px;">Cancel</button>
-        </form>
-      </div>`;
-    }
-    return '';
+    if (!full) return `<button class="home-btn" data-action="open-reserve-form" data-event-id="${ev.id}">Reserve</button>`;
+    return `<button class="home-btn-outline" data-action="open-reserve-form" data-event-id="${ev.id + '-waitlist'}">Waitlist${waitlistCount > 0 ? ' ('+waitlistCount+')' : ''}</button>`;
   }
 
   const [first, ...rest] = events;
 
-  const fRes = await loadReservations(first.id);
-  const fWl = await loadWaitlist(first.id);
-  const fRc = reservedCount(fRes);
-  const fCap = parseInt(first.capacity) || 0;
-  const fSpotsLeft = Math.max(0, fCap - fRc);
-  const fRsvpClosed = !isFuture(first.rsvp_by);
-  const fFull = fSpotsLeft <= 0;
-  const fWaitlistCount = fWl.filter(w => !w.claimed).length;
+  const fStats = await getEventStats(first);
+  const { spotsLeft: fSpotsLeft, cap: fCap, rsvpClosed: fRsvpClosed, full: fFull, waitlistCount: fWaitlistCount } = fStats;
   const fd = new Date(first.date + 'T00:00:00');
   const fDayMonth = isNaN(fd) ? '' : fd.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
   const fYear = isNaN(fd) ? '' : fd.getFullYear();
@@ -761,7 +740,6 @@ async function renderReserve() {
           </div>
           <div class="home-session-meta"><span>${fSpotsLeft} of ${fCap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(first.rsvp_by)}</span></div>
           ${buildAction(first, fSpotsLeft, fFull, fRsvpClosed, fWaitlistCount)}
-          ${buildForm(first, fSpotsLeft, fFull, fRsvpClosed)}
         </div>
       </div>
      </div>
@@ -770,14 +748,7 @@ async function renderReserve() {
 
   let rowsHtml = '';
   for (const ev of rest) {
-    const res = await loadReservations(ev.id);
-    const wl = await loadWaitlist(ev.id);
-    const rc = reservedCount(res);
-    const cap = parseInt(ev.capacity) || 0;
-    const spotsLeft = Math.max(0, cap - rc);
-    const rsvpClosed = !isFuture(ev.rsvp_by);
-    const full = spotsLeft <= 0;
-    const waitlistCount = wl.filter(w => !w.claimed).length;
+    const { spotsLeft, cap, rsvpClosed, full, waitlistCount } = await getEventStats(ev);
 
     rowsHtml += `
     <div class="sess-row">
@@ -790,7 +761,6 @@ async function renderReserve() {
         ${buildAction(ev, spotsLeft, full, rsvpClosed, waitlistCount)}
       </div>
       ${ev.notes ? `<div class="home-session-notes" style="margin-top:10px;">${escapeHtml(ev.notes)}</div>` : ''}
-      ${buildForm(ev, spotsLeft, full, rsvpClosed)}
     </div>`;
   }
 
@@ -798,6 +768,112 @@ async function renderReserve() {
     ${noticeHtml ? `<div class="sess-list" style="margin-bottom:0;">${noticeHtml}</div>` : ''}
     ${nextSessionHtml}
     ${rest.length ? `<div class="sess-list">${rowsHtml}</div>` : ''}
+  `);
+}
+
+/* ===================== reserve form (dedicated page) ===================== */
+async function renderReserveForm() {
+  const targetId = STATE.openReserveFormFor;
+  const isWaitlist = typeof targetId === 'string' && targetId.endsWith('-waitlist');
+  const eventId = isWaitlist ? targetId.slice(0, -('-waitlist'.length)) : targetId;
+  const ev = eventId ? STATE.events.find(e => e.id === eventId) : null;
+
+  const shell = (innerHtml) => `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('reserve', { onFlatBg: true })}</div>
+    ${innerHtml}
+    ${darkFooterHtml()}
+  </div>`;
+
+  const backBtn = `<button class="sess-back-btn" data-nav="reserve" aria-label="Back to Upcoming sessions">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>`;
+  const titleRow = (text) => `<div class="sess-form-header">${backBtn}<h1 class="sess-title">${text}</h1></div>`;
+
+  if (!ev) {
+    return shell(`
+      ${titleRow('Session not found')}
+      <div class="sess-form-wrap">
+        <div class="sess-form-note">This session is no longer available. <span data-nav="reserve" role="link" tabindex="0" style="text-decoration:underline;cursor:pointer;">Back to Upcoming sessions</span></div>
+      </div>
+    `);
+  }
+
+  const { spotsLeft, cap, rsvpClosed, full } = await getEventStats(ev);
+  const d = new Date(ev.date + 'T00:00:00');
+  const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
+  const year = isNaN(d) ? '' : d.getFullYear();
+
+  const cardHtml = `
+  <div class="home-session-card">
+    <div class="home-session-date">${dayMonth}<br/>${year}</div>
+    <div class="home-session-body">
+      <div>
+        <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
+        ${ev.notes ? `<div class="home-session-notes">${escapeHtml(ev.notes)}</div>` : ''}
+      </div>
+      <div class="home-session-meta"><span>${spotsLeft} of ${cap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(ev.rsvp_by)}</span></div>
+    </div>
+  </div>`;
+
+  if (rsvpClosed || (isWaitlist ? !full : full)) {
+    return shell(`
+      ${titleRow(isWaitlist ? 'Join the waitlist' : 'Reserve your seat')}
+      <div class="sess-form-wrap">
+        ${cardHtml}
+        <div class="sess-form-note">${rsvpClosed ? 'RSVP is now closed for this session.' : (isWaitlist ? 'A seat just opened up — refresh Upcoming sessions to reserve it.' : 'This session just filled up. Please check Upcoming sessions for waitlist options.')} <span data-nav="reserve" role="link" tabindex="0" style="text-decoration:underline;cursor:pointer;">Back to Upcoming sessions</span></div>
+      </div>
+    `);
+  }
+
+  let formHtml;
+  if (!isWaitlist) {
+    let options = '';
+    for (let i = 1; i <= Math.min(spotsLeft, 8); i++)
+      options += `<option value="${i}">${i} ${i===1?'seat':'seats'}</option>`;
+    formHtml = `
+    <div class="form-panel-dark">
+      <form data-form="reserve" data-event-id="${ev.id}" novalidate>
+        <div class="field"><label>Name</label><input type="text" name="name"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email"/></div>
+        <div class="field"><label>Party size</label><select name="partySize">${options}</select>
+          <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left.</div></div>
+        <div class="field">
+          <label>Dietary needs</label>
+          <label style="display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;margin-bottom:8px;">
+            <input type="checkbox" name="noSpecialDiet" value="yes" style="width:auto;" data-action="toggle-diet-field"/> No special dietary needs
+          </label>
+          <textarea name="dietaryNeeds" placeholder="Please describe any dietary needs, allergies, or intolerances for your party"></textarea>
+        </div>
+        <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="Thoughts, comments, jokes, or questions"></textarea></div>
+        <div class="form-actions-right">
+          <button class="home-btn-outline" type="button" data-action="cancel-reserve-form">Cancel</button>
+          <button class="home-btn" type="submit">Confirm reservation</button>
+        </div>
+      </form>
+    </div>`;
+  } else {
+    formHtml = `
+    <div class="form-panel-dark">
+      <p style="margin:0 0 12px;font-size:.92rem;">This session is full. Add your name to the waitlist — if a seat opens up and there's more than 48 hours until the session, we'll email you first.</p>
+      <form data-form="waitlist" data-event-id="${ev.id}" novalidate>
+        <div class="field"><label>Name</label><input type="text" name="name"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email"/></div>
+        <div class="field"><label>Notes (optional)</label><textarea name="notes" placeholder="e.g. flexibility on party size"></textarea></div>
+        <div class="form-actions-right">
+          <button class="home-btn-outline" type="button" data-action="cancel-reserve-form">Cancel</button>
+          <button class="home-btn" type="submit">Join waitlist</button>
+        </div>
+      </form>
+    </div>`;
+  }
+
+  return shell(`
+    ${titleRow(isWaitlist ? 'Join the waitlist' : 'Reserve your seat')}
+    <div class="sess-form-wrap">
+      ${cardHtml}
+      ${formHtml}
+    </div>
   `);
 }
 
@@ -1173,8 +1249,8 @@ async function renderAdminSessions() {
           </div>
           <div class="field"><label>Notes shown to guests</label><textarea name="notes">${escapeHtml(ev.notes||'')}</textarea></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn" type="submit">Save changes</button>
             <button class="btn btn-outline" type="button" data-action="cancel-edit-event">Cancel</button>
+            <button class="btn" type="submit">Save changes</button>
           </div>
         </form>
       </div>` : '';
@@ -1290,9 +1366,11 @@ document.addEventListener('click', async (e) => {
     else TALK_PICKER.selectedDays.add(iso);
     await render();
   } else if (action === 'open-reserve-form') {
-    STATE.openReserveFormFor = actionEl.dataset.eventId; await render();
+    STATE.openReserveFormFor = actionEl.dataset.eventId;
+    await navigate('reserveForm');
   } else if (action === 'cancel-reserve-form') {
-    STATE.openReserveFormFor = null; await render();
+    STATE.openReserveFormFor = null;
+    await navigate('reserve');
   } else if (action === 'admin-tab') {
     ADMIN_TAB = actionEl.dataset.tab; await render();
   } else if (action === 'lock-admin') {
@@ -1305,16 +1383,19 @@ document.addEventListener('click', async (e) => {
     if (confirm('Delete this session? All reservations for it will also be deleted.')) {
       await deleteEvent(actionEl.dataset.eventId);
       STATE.events = await loadEvents();
+      invalidateReserveStats();
       STATE.notice = { type:'success', text:'Session deleted.' }; await render();
     }
   } else if (action === 'delete-reservation') {
     if (confirm('Remove this reservation?')) {
       await deleteReservation(actionEl.dataset.id);
+      invalidateReserveStats();
       STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
   } else if (action === 'delete-waitlist') {
     if (confirm('Remove this person from the waitlist?')) {
       await deleteWaitlistEntry(actionEl.dataset.id);
+      invalidateReserveStats();
       STATE.notice = { type:'success', text:'Waitlist entry removed.' }; await render();
     }
   } else if (action === 'delete-talk') {
@@ -1415,7 +1496,10 @@ document.addEventListener('submit', async (e) => {
       }
       STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation and cancellation link." };
     }
-    STATE.openReserveFormFor = null; await render();
+    invalidateReserveStats();
+    STATE.openReserveFormFor = null;
+    STATE.view = 'reserve'; window.location.hash = 'reserve'; setActiveTab();
+    await render();
 
   } else if (type === 'waitlist') {
     const valid = validateForm(form, {
@@ -1426,8 +1510,11 @@ document.addEventListener('submit', async (e) => {
     const eventId = form.dataset.eventId;
     const ev = STATE.events.find(x => x.id === eventId);
     await addToWaitlist(eventId, { name:fd.get('name'), email:fd.get('email'), partySize:1, notes:fd.get('notes')||'' });
+    invalidateReserveStats();
     STATE.notice = { type:'success', text:"You're on the waitlist. We'll email you if a seat opens up." };
-    STATE.openReserveFormFor = null; await render();
+    STATE.openReserveFormFor = null;
+    STATE.view = 'reserve'; window.location.hash = 'reserve'; setActiveTab();
+    await render();
 
   } else if (type === 'do-cancel') {
     const reservationId = form.dataset.reservationId;
@@ -1436,6 +1523,7 @@ document.addEventListener('submit', async (e) => {
     const eventLabel    = form.dataset.eventLabel;
     await deleteReservation(reservationId);
     await promoteWaitlist(eventId, eventDate, eventLabel);
+    invalidateReserveStats();
     STATE.cancelToken = null;
     STATE.view = 'home';
     STATE.notice = { type:'success', text:'Your reservation has been cancelled.' };
@@ -1469,6 +1557,7 @@ document.addEventListener('submit', async (e) => {
     // Mark waitlist entry as claimed
     w.claimed = true;
     await updateWaitlistEntry(w);
+    invalidateReserveStats();
 
     // Send confirmation
     if (reservation) {
@@ -1535,11 +1624,13 @@ document.addEventListener('submit', async (e) => {
   } else if (type === 'create-event') {
     await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
     STATE.events = await loadEvents();
+    invalidateReserveStats();
     STATE.notice = { type:'success', text:'Session created.' }; await render();
 
   } else if (type === 'edit-event') {
     await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
     STATE.events = await loadEvents();
+    invalidateReserveStats();
     STATE.openEditEventFor = null;
     STATE.notice = { type:'success', text:'Session updated.' }; await render();
   }
@@ -1557,6 +1648,8 @@ window.addEventListener('hashchange', async () => {
   } else {
     STATE.view = hash || 'home';
   }
+  if (STATE.view !== 'reserve' && STATE.view !== 'reserveForm') STATE.openReserveFormFor = null;
+  if (STATE.view === 'reserve') invalidateReserveStats();
   setActiveTab(); await render();
 });
 
