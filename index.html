@@ -92,7 +92,9 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 
 .field{margin-bottom:14px;}
 .field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;color:var(--espresso);opacity:.8;margin-bottom:5px;}
-.field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;background:var(--paper-light);color:var(--espresso);}
+.field input,.field select,.field textarea{width:100%;min-width:0;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;background:var(--paper-light);color:var(--espresso);}
+.form-grid-2col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;}
+@media(max-width:480px){.form-grid-2col{grid-template-columns:minmax(0,1fr);}}
 .field textarea{min-height:80px;resize:vertical;}
 .field input::placeholder,.field textarea::placeholder{color:var(--ochre-dark);opacity:1;}
 input[type="date"]::-webkit-calendar-picker-indicator{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F0EAD8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cline x1='16' y1='3' x2='16' y2='7'/%3E%3Cline x1='8' y1='3' x2='8' y2='7'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:contain;cursor:pointer;}
@@ -105,8 +107,8 @@ input[type="password"]::-ms-reveal{filter:invert(93%) sepia(9%) saturate(340%) h
 .checkbox-list input{width:auto;}
 .form-panel{background:var(--paper);border:1px dashed var(--line-strong);border-radius:6px;padding:18px;margin-top:12px;}
 .notice{padding:12px 14px;border-radius:4px;margin-bottom:16px;font-size:.92rem;}
-.notice-success{background:rgba(95,111,78,.15);border:1px solid var(--sage);color:var(--sage);}
-.notice-error{background:rgba(156,74,52,.12);border:1px solid var(--brick);color:var(--brick);}
+.notice-success{background:rgba(95,111,78,.15);border:1px solid var(--sage);color:#6FAE82;}
+.notice-error{background:rgba(156,74,52,.12);border:1px solid var(--brick);color:#e0a898;}
 .how-it-works{
   background:var(--ink);
   background-image:radial-gradient(circle at 85% 30%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 15% 80%,rgba(255,255,255,.03),transparent 45%);
@@ -266,7 +268,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .form-panel-dark{background:#1b1b13;border:1px dashed rgba(240,234,216,.3);border-radius:6px;padding:18px;margin-top:16px;color:#f0ead8;}
 .form-panel-dark p{color:#f0ead8;}
 .form-panel-dark .field label{color:#f0ead8;opacity:.8;font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block;}
-.form-panel-dark .field input,.form-panel-dark .field select,.form-panel-dark .field textarea{background:#2f2f25;color:#f0ead8;border:1px solid rgba(240,234,216,.35);border-radius:4px;padding:9px 11px;width:100%;box-sizing:border-box;font-family:'Source Sans 3',sans-serif;}
+.form-panel-dark .field input,.form-panel-dark .field select,.form-panel-dark .field textarea{background:#2f2f25;color:#f0ead8;border:1px solid rgba(240,234,216,.35);border-radius:4px;padding:9px 11px;width:100%;min-width:0;box-sizing:border-box;font-family:'Source Sans 3',sans-serif;}
 .form-panel-dark .field textarea{min-height:80px;resize:vertical;}
 .form-panel-dark .field input::placeholder,.form-panel-dark .field textarea::placeholder{color:var(--paper-dark);opacity:1;}
 .form-panel-dark .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
@@ -1310,7 +1312,7 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
 }
 
 async function renderTalk() {
-  const submitNoticeHtml = STATE.notice ? `<div style="margin-top:16px;text-align:right;color:var(--sage);font-size:.92rem;">${escapeHtml(STATE.notice.text)}</div>` : '';
+  const submitNoticeHtml = STATE.notice ? `<div style="margin-top:16px;text-align:right;color:#6FAE82;font-size:.92rem;">${escapeHtml(STATE.notice.text)}</div>` : '';
 
   const modeBtn = (mode, label) => `<button type="button" class="${TALK_MODE===mode ? 'home-btn' : 'home-btn-outline'}" data-action="set-talk-mode" data-mode="${mode}">${label}</button>`;
   const tabs = `<div class="talk-tabs">${modeBtn('talk', 'Give a talk')}${modeBtn('theme', 'Suggest a theme')}</div>`;
@@ -1468,7 +1470,7 @@ async function renderAdminSessions() {
       <div style="font-weight:600;margin-bottom:10px;">Create a new session</div>
       ${prefill.fromTalkId ? `<div class="field-hint" style="margin-bottom:10px;">Pre-filled from a talk/theme suggestion — review before creating.</div>` : ''}
       <form data-form="create-event"${prefill.fromTalkId ? ` data-from-talk-id="${prefill.fromTalkId}"` : ''}>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div class="form-grid-2col">
           <div class="field"><label>Date</label><input type="date" name="date" value="${prefill.date||''}" required/></div>
           <div class="field"><label>Time</label><input type="time" name="time" required/></div>
           <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" required/></div>
@@ -1516,7 +1518,7 @@ async function renderAdminSessions() {
       <div class="form-panel-dark" style="margin-top:14px;">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:12px;">Edit session</div>
         <form data-form="edit-event" data-event-id="${ev.id}">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-grid-2col">
             <div class="field"><label>Date</label><input type="date" name="date" value="${ev.date}" required/></div>
             <div class="field"><label>Time</label><input type="time" name="time" value="${ev.time ? ev.time.slice(0,5) : ''}" required/></div>
             <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" value="${ev.rsvp_by}" required/></div>
