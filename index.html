@@ -491,13 +491,13 @@ async function loadEvents() {
   return await supaFetch('events?select=*&order=date.asc') || [];
 }
 async function createEvent(ev) {
-  return await supaFetch('events', { method:'POST', body:{ date:ev.date, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
+  return await supaFetch('events', { method:'POST', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
 }
 async function deleteEvent(id) {
   await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
 }
 async function updateEvent(ev) {
-  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
+  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes } });
 }
 
 async function loadReservations(eventId) {
@@ -623,6 +623,10 @@ function fmtDate(iso) {
   const d = new Date(iso + 'T00:00:00');
   if (isNaN(d)) return iso;
   return d.toLocaleDateString(undefined, { weekday:'short', year:'numeric', month:'short', day:'numeric' });
+}
+function fmtTime(t) {
+  if (!t) return '';
+  return t.slice(0, 5); // "HH:MM:SS" or "HH:MM" -> "HH:MM", 24-hour, no seconds
 }
 function todayISO() {
   const d = new Date();
@@ -780,7 +784,7 @@ async function renderHome() {
 
     sessionCardHtml = `
     <div class="home-session-card">
-      <div class="home-session-date">${dayMonth}<br/>${year}</div>
+      <div class="home-session-date">${dayMonth}<br/>${year}${next.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(next.time)}</span>` : ''}</div>
       <div class="home-session-body">
         <div>
           <div class="home-session-title">${next.label ? escapeHtml(next.label) : 'Café Gestalt session'}</div>
@@ -872,7 +876,7 @@ async function renderReserve() {
      <div class="sess-next-inner">
       <div class="home-eyebrow" style="margin-bottom:0;">NEXT SESSION</div>
       <div class="home-session-card">
-        <div class="home-session-date">${fDayMonth}<br/>${fYear}</div>
+        <div class="home-session-date">${fDayMonth}<br/>${fYear}${first.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(first.time)}</span>` : ''}</div>
         <div class="home-session-body">
           <div>
             <div class="home-session-title">${first.label ? escapeHtml(first.label) : 'Café Gestalt session'}</div>
@@ -894,7 +898,7 @@ async function renderReserve() {
     <div class="sess-row">
       <div class="sess-row-top">
         <div class="sess-row-info">
-          <div class="sess-row-date">${fmtDate(ev.date)}</div>
+          <div class="sess-row-date">${fmtDate(ev.date)}${ev.time ? ' · '+fmtTime(ev.time) : ''}</div>
           <div class="sess-row-name">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
           <div class="sess-row-seats">${spotsLeft} of ${cap} seats available</div>
         </div>
@@ -948,7 +952,7 @@ async function renderReserveForm() {
 
   const cardHtml = `
   <div class="home-session-card">
-    <div class="home-session-date">${dayMonth}<br/>${year}</div>
+    <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(ev.time)}</span>` : ''}</div>
     <div class="home-session-body">
       <div>
         <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
@@ -1465,6 +1469,7 @@ async function renderAdminSessions() {
       <form data-form="create-event"${prefill.fromTalkId ? ` data-from-talk-id="${prefill.fromTalkId}"` : ''}>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div class="field"><label>Date</label><input type="date" name="date" value="${prefill.date||''}" required/></div>
+          <div class="field"><label>Time</label><input type="time" name="time" required/></div>
           <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" required/></div>
           <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="10" required/></div>
           <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" value="${escapeHtml(prefill.label||'')}" placeholder="e.g. Talk: The physics of coffee"/></div>
@@ -1512,6 +1517,7 @@ async function renderAdminSessions() {
         <form data-form="edit-event" data-event-id="${ev.id}">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
             <div class="field"><label>Date</label><input type="date" name="date" value="${ev.date}" required/></div>
+            <div class="field"><label>Time</label><input type="time" name="time" value="${ev.time ? ev.time.slice(0,5) : ''}" required/></div>
             <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" value="${ev.rsvp_by}" required/></div>
             <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="${ev.capacity}" required/></div>
             <div class="field"><label>Theme / label</label><input type="text" name="label" value="${escapeHtml(ev.label||'')}"/></div>
@@ -1528,7 +1534,7 @@ async function renderAdminSessions() {
     <div class="sess-row" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;">
         <div>
-          <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
+          <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.time ? ' · '+fmtTime(ev.time) : ''}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
           <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvp_by)} · ${rc}/${ev.capacity} seats reserved${isFuture(ev.date)?'':' · past'}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -2027,7 +2033,7 @@ document.addEventListener('submit', async (e) => {
     await render();
 
   } else if (type === 'create-event') {
-    const created = await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
     const fromTalkId = form.dataset.fromTalkId;
     if (fromTalkId && created && created[0]) {
       const t = STATE.talks.find(x => x.id === fromTalkId);
@@ -2039,7 +2045,7 @@ document.addEventListener('submit', async (e) => {
     STATE.notice = { type:'success', text:'Session created.' }; await render();
 
   } else if (type === 'edit-event') {
-    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
     STATE.events = await loadEvents();
     invalidateReserveStats();
     STATE.openEditEventFor = null;
