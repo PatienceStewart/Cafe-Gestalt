@@ -77,6 +77,7 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .badge-full{background:rgba(156,74,52,.15);color:var(--brick);}
 .badge-pending{background:#c9974f;color:#1b1b13;}
 .badge-approved{background:#6fae82;color:#1b1b13;}
+.badge-declined{background:#c98f82;color:#1b1b13;}
 
 .btn{display:inline-block;background:var(--espresso);color:var(--paper-light);border:none;padding:10px 16px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;}
 .btn:hover{background:var(--ink);}
@@ -416,6 +417,36 @@ function emailNewSubmissionNotify(data) {
     <p><strong>Available dates:</strong> ${dates}</p>
     ${data.notes ? `<p><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : ''}
     <p style="font-size:.85rem;opacity:.6;">Review it in the admin panel under Talks.</p>
+  </div>`;
+}
+
+function emailTalkReceived(name, topic, type) {
+  const kindLabel = type === 'theme' ? 'idea' : 'talk proposal';
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">We've got your ${kindLabel} — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
+    <p>Hi ${escapeHtml(name)}, thanks for your suggestion! We review submissions by hand — we'll email you once we've made a decision.</p>
+  </div>`;
+}
+
+function emailTalkApproved(name, topic, type) {
+  const kindLabel = type === 'theme' ? 'idea' : 'talk';
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your ${kindLabel} was approved — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
+    <p>Hi ${escapeHtml(name)}, good news — we'd love to have you. We'll follow up separately to lock in a date and other details.</p>
+  </div>`;
+}
+
+function emailTalkDeclined(name, topic, type) {
+  const kindLabel = type === 'theme' ? 'idea' : 'talk';
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">About your ${kindLabel} — Café Gestalt</h2>
+    <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
+    <p>Hi ${escapeHtml(name)}, thanks for sending this in — we're not able to take it forward this time. </p>
   </div>`;
 }
 
@@ -1508,7 +1539,7 @@ function renderAdminTalks() {
     const dateOptions = upcomingEvents().map(ev =>
       `<option value="${ev.id}" ${t.assigned_event_id===ev.id?'selected':''}>${fmtDate(ev.date)}${ev.label?' — '+escapeHtml(ev.label):''}</option>`).join('');
     const availableLabels = (t.available_dates||[]).map(d => fmtDate(d)).filter(Boolean).join(', ') || '—';
-    const statusClass = t.status === 'approved' ? 'badge-approved' : 'badge-pending';
+    const statusClass = t.status === 'approved' ? 'badge-approved' : t.status === 'declined' ? 'badge-declined' : 'badge-pending';
     return `
     <div class="sess-row" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -1526,6 +1557,7 @@ function renderAdminTalks() {
         </select>
         <button class="home-btn btn-small" data-action="assign-talk" data-id="${t.id}" style="align-self:center;">Save</button>
         ${t.status!=='approved' ? `<button class="home-btn-outline btn-small" data-action="approve-talk" data-id="${t.id}">Mark approved</button>` : ''}
+        ${t.status!=='declined' ? `<button class="home-btn-danger btn-small" data-action="decline-talk" data-id="${t.id}">Decline</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -1663,7 +1695,22 @@ document.addEventListener('click', async (e) => {
     }
   } else if (action === 'approve-talk') {
     const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
-    if (t) { t.status = 'approved'; await updateTalk(t); STATE.notice = { type:'success', text:'Marked approved.' }; await render(); }
+    if (t) {
+      t.status = 'approved';
+      await updateTalk(t);
+      await sendEmail(t.email, 'Your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' was approved — Café Gestalt', emailTalkApproved(t.name, t.topic, t.submission_type));
+      STATE.notice = { type:'success', text:'Marked approved and submitter notified.' }; await render();
+    }
+  } else if (action === 'decline-talk') {
+    if (confirm('Decline this proposal? The submitter will be emailed.')) {
+      const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
+      if (t) {
+        t.status = 'declined';
+        await updateTalk(t);
+        await sendEmail(t.email, 'About your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' — Café Gestalt', emailTalkDeclined(t.name, t.topic, t.submission_type));
+        STATE.notice = { type:'success', text:'Declined and submitter notified.' }; await render();
+      }
+    }
   } else if (action === 'assign-talk') {
     const sel = document.querySelector('select[data-role="assign-select"][data-id="'+actionEl.dataset.id+'"]');
     const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
@@ -1872,6 +1919,7 @@ document.addEventListener('submit', async (e) => {
     const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'talk' };
     await addTalk(submission);
     await sendEmail(ADMIN_NOTIFY_EMAIL, 'New talk proposal — ' + submission.topic, emailNewSubmissionNotify(submission));
+    await sendEmail(submission.email, "We've got your talk proposal — Café Gestalt", emailTalkReceived(submission.name, submission.topic, submission.type));
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
     TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
@@ -1891,6 +1939,7 @@ document.addEventListener('submit', async (e) => {
     const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'theme' };
     await addTalk(submission);
     await sendEmail(ADMIN_NOTIFY_EMAIL, 'New theme idea — ' + submission.topic, emailNewSubmissionNotify(submission));
+    await sendEmail(submission.email, "We've got your idea — Café Gestalt", emailTalkReceived(submission.name, submission.topic, submission.type));
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
     TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
