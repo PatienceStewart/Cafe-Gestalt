@@ -144,7 +144,9 @@ input[type="password"]::-ms-reveal{filter:invert(93%) sepia(9%) saturate(340%) h
   .how-it-works-img{min-height:240px;}
   .how-it-works-copy{padding:32px 20px;}
 }
+.table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table.admin-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.9rem;}
+.table-scroll table.admin-table{min-width:600px;margin-top:0;}
 table.admin-table th,table.admin-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle;}
 table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
 table.admin-table.admin-table-dark{color:#f0ead8;}
@@ -222,6 +224,11 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .home-propose-copy{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.5;margin:0;}
 .home-propose-actions{display:flex;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
 .form-actions-right{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:8px;}
+.button-row{display:flex;gap:10px;flex-wrap:wrap;}
+@media(max-width:480px){
+  .button-row{flex-direction:column;}
+  .button-row .home-btn,.button-row .home-btn-outline,.button-row .home-btn-danger{width:100%;text-align:center;box-sizing:border-box;}
+}
 .home-how{display:flex;flex-wrap:wrap;width:calc(100% - 40px);max-width:950px;margin:112px auto 0;border-radius:24px;overflow:hidden;}
 .home-how-img{flex:1 1 300px;min-height:300px;background:url('coffee-overhead.png') center/cover no-repeat;}
 .home-how-copy{flex:1 1 300px;background:#2f2f25;padding:32px;display:flex;flex-direction:column;gap:18px;justify-content:center;}
@@ -1546,14 +1553,14 @@ async function renderAdminSessions() {
         </div>
       </div>
       ${editForm}
-      ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${pendingRows}</tbody></table></div>` : ''}
-      ${confirmedRes.length ? `<table class="admin-table admin-table-dark" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
+      ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>` : ''}
+      ${confirmedRes.length ? `<div class="table-scroll" style="margin-top:14px;"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
       ${await (async () => {
         let wl = await loadWaitlist(ev.id);
         wl = await expireStaleWaitlistOffers(ev, wl);
         if (!wl.length) return '';
         const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td style="width:1%;text-align:right;white-space:nowrap;"><button class="home-btn-danger btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
-        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th style="width:1%;"></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
+        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th style="width:1%;"></th></tr></thead><tbody>${wrows}</tbody></table></div></div>`;
       })()}
     </div>`;
   }
