@@ -1333,18 +1333,26 @@ function renderAdminCafeInfo() {
         <div class="field"><label>About</label><textarea name="about" required>${escapeHtml(info.about)}</textarea></div>
         <div class="field"><label>How it works</label><textarea name="how_it_works" style="min-height:120px;">${escapeHtml(info.how_it_works||'')}</textarea><div class="field-hint">Separate paragraphs with a blank line.</div></div>
         <div class="field"><label>Hours note</label><input type="text" name="hours" value="${escapeHtml(info.hours)}"/></div>
-        <div class="field">
-          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
-            <input type="checkbox" name="requireConfirmation" value="yes" style="width:auto;" ${info.require_confirmation ? 'checked' : ''}/> Require confirmation before reservations are booked
-          </label>
-          <div class="field-hint">When on, seats aren't booked instantly — requests land in Sessions for you to confirm or decline, and guests get an email either way.</div>
-        </div>
         <button class="btn" type="submit">Save</button>
       </form>
     </div>`;
 }
 
 async function renderAdminSessions() {
+  const info = STATE.cafeInfo;
+  let settingsCard = `
+    <div class="card">
+      <form data-form="reservation-settings">
+        <div class="field" style="margin-bottom:0;">
+          <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
+            <input type="checkbox" name="requireConfirmation" value="yes" style="width:auto;" ${info.require_confirmation ? 'checked' : ''}/> Require confirmation before reservations are booked
+          </label>
+          <div class="field-hint">When on, seats aren't booked instantly — requests land below for you to confirm or decline, and guests get an email either way.</div>
+        </div>
+        <button class="btn btn-small" type="submit" style="margin-top:12px;">Save</button>
+      </form>
+    </div>`;
+
   let createForm = `
     <div class="card">
       <div style="font-weight:600;margin-bottom:10px;">Create a new session</div>
@@ -1430,7 +1438,7 @@ async function renderAdminSessions() {
     </div>`;
   }
   if (!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
-  return createForm + sessionsHtml;
+  return settingsCard + createForm + sessionsHtml;
 }
 
 function renderAdminTalks() {
@@ -1540,7 +1548,9 @@ document.addEventListener('click', async (e) => {
     }
   } else if (action === 'delete-reservation') {
     if (confirm('Remove this reservation?')) {
+      const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
       await deleteReservation(actionEl.dataset.id);
+      if (ev) await promoteWaitlist(ev.id, ev.date, ev.label);
       invalidateReserveStats();
       STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
@@ -1832,9 +1842,14 @@ document.addEventListener('submit', async (e) => {
     await render();
 
   } else if (type === 'cafe-info') {
-    STATE.cafeInfo = { name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), hours:fd.get('hours'), how_it_works:fd.get('how_it_works')||'', require_confirmation: form.querySelector('[name="requireConfirmation"]').checked };
+    STATE.cafeInfo = { ...STATE.cafeInfo, name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), hours:fd.get('hours'), how_it_works:fd.get('how_it_works')||'' };
     await saveCafeInfo(STATE.cafeInfo);
     STATE.notice = { type:'success', text:'Cafe info saved.' }; await render();
+
+  } else if (type === 'reservation-settings') {
+    STATE.cafeInfo.require_confirmation = form.querySelector('[name="requireConfirmation"]').checked;
+    await saveCafeInfo(STATE.cafeInfo);
+    STATE.notice = { type:'success', text:'Reservation setting saved.' }; await render();
 
   } else if (type === 'create-event') {
     await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
