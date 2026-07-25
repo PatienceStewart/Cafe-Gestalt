@@ -296,6 +296,7 @@ const SUPA_KEY = 'sb_publishable_LjqgeRMTPkd3z07rOPMVoQ_O-O4juOj';
 // Replace this with your Vercel deployment URL once deployed
 const PROXY_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/send-email';
 const SITE_URL  = 'https://cafegestalt.com';
+const ADMIN_NOTIFY_EMAIL = 'patiencem.stewart@gmail.com';
 
 async function sendEmail(to, subject, htmlBody) {
   try {
@@ -399,6 +400,21 @@ function emailWaitlistConfirm(name, eventDate, eventLabel, cancelUrl) {
     <p>Hi ${name}, great news — your waitlisted seat is now confirmed. See you there.</p>
     <p>Need to cancel?</p>
     <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
+  </div>`;
+}
+
+function emailNewSubmissionNotify(data) {
+  const kindLabel = data.type === 'theme' ? 'Theme idea' : 'Talk proposal';
+  const dates = (data.availableDates||[]).length ? data.availableDates.map(d => fmtDate(d)).join(', ') : '—';
+  return `
+  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">New ${kindLabel.toLowerCase()} submitted</h2>
+    <p style="opacity:.7;margin-top:0;">${escapeHtml(data.topic)}</p>
+    <p><strong>From:</strong> ${escapeHtml(data.name)} (${escapeHtml(data.email)})</p>
+    <p>${escapeHtml(data.description)}</p>
+    <p><strong>Available dates:</strong> ${dates}</p>
+    ${data.notes ? `<p><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : ''}
+    <p style="font-size:.85rem;opacity:.6;">Review it in the admin panel under Talks.</p>
   </div>`;
 }
 
@@ -1852,7 +1868,9 @@ document.addEventListener('submit', async (e) => {
     });
     if (!valid) return;
     const availableDates = [...TALK_PICKER.selectedDays].sort();
-    await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'talk' });
+    const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'talk' };
+    await addTalk(submission);
+    await sendEmail(ADMIN_NOTIFY_EMAIL, 'New talk proposal — ' + submission.topic, emailNewSubmissionNotify(submission));
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
     TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
@@ -1869,7 +1887,9 @@ document.addEventListener('submit', async (e) => {
     });
     if (!valid) return;
     const availableDates = [...TALK_PICKER.selectedDays].sort();
-    await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'theme' });
+    const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'theme' };
+    await addTalk(submission);
+    await sendEmail(ADMIN_NOTIFY_EMAIL, 'New theme idea — ' + submission.topic, emailNewSubmissionNotify(submission));
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
     TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
