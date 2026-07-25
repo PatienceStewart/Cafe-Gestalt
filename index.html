@@ -1348,11 +1348,11 @@ async function renderTalk() {
     <div class="sess-header">${darkNavHtml('talk', { onFlatBg: true })}</div>
     <h1 class="sess-title">Get involved</h1>
     <div class="talk-panel">
-      ${noticeHtml}
       ${tabs}
       <div class="form-panel-dark">
         ${TALK_MODE === 'talk' ? talkForm : themeForm}
       </div>
+      ${noticeHtml}
     </div>
     ${darkFooterHtml()}
   </div>`;
