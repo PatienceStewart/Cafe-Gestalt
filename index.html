@@ -784,7 +784,7 @@ async function renderHome() {
 
     sessionCardHtml = `
     <div class="home-session-card">
-      <div class="home-session-date">${dayMonth}<br/>${year}${next.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(next.time)}</span>` : ''}</div>
+      <div class="home-session-date">${dayMonth}<br/>${year}${next.time ? `<br/><span class="home-session-title">${fmtTime(next.time)}</span>` : ''}</div>
       <div class="home-session-body">
         <div>
           <div class="home-session-title">${next.label ? escapeHtml(next.label) : 'Café Gestalt session'}</div>
@@ -876,7 +876,7 @@ async function renderReserve() {
      <div class="sess-next-inner">
       <div class="home-eyebrow" style="margin-bottom:0;">NEXT SESSION</div>
       <div class="home-session-card">
-        <div class="home-session-date">${fDayMonth}<br/>${fYear}${first.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(first.time)}</span>` : ''}</div>
+        <div class="home-session-date">${fDayMonth}<br/>${fYear}${first.time ? `<br/><span class="home-session-title">${fmtTime(first.time)}</span>` : ''}</div>
         <div class="home-session-body">
           <div>
             <div class="home-session-title">${first.label ? escapeHtml(first.label) : 'Café Gestalt session'}</div>
@@ -952,7 +952,7 @@ async function renderReserveForm() {
 
   const cardHtml = `
   <div class="home-session-card">
-    <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span style="font-size:.85rem;opacity:.75;">${fmtTime(ev.time)}</span>` : ''}</div>
+    <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span class="home-session-title">${fmtTime(ev.time)}</span>` : ''}</div>
     <div class="home-session-body">
       <div>
         <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
