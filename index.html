@@ -23,7 +23,7 @@
 }
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{background-color:var(--paper);background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj4KICA8ZmlsdGVyIGlkPSJwYXBlciIgeD0iMCUiIHk9IjAlIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIj4KICAgIDxmZVR1cmJ1bGVuY2UgdHlwZT0iZnJhY3RhbE5vaXNlIiBiYXNlRnJlcXVlbmN5PSIwLjY1IiBudW1PY3RhdmVzPSI0IiBzdGl0Y2hUaWxlcz0ic3RpdGNoIiByZXN1bHQ9Im5vaXNlIi8+CiAgICA8ZmVDb2xvck1hdHJpeCB0eXBlPSJzYXR1cmF0ZSIgdmFsdWVzPSIwIiBpbj0ibm9pc2UiIHJlc3VsdD0iZ3JleSIvPgogICAgPGZlQmxlbmQgaW49IlNvdXJjZUdyYXBoaWMiIGluMj0iZ3JleSIgbW9kZT0ibXVsdGlwbHkiIHJlc3VsdD0iYmxlbmQiLz4KICAgIDxmZUNvbXBvc2l0ZSBpbj0iYmxlbmQiIGluMj0iU291cmNlR3JhcGhpYyIgb3BlcmF0b3I9ImluIi8+CiAgPC9maWx0ZXI+CiAgPHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiNFNEQ5QzAiLz4KICA8cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsdGVyPSJ1cmwoI3BhcGVyKSIgZmlsbD0iI0M4QkE5QSIgb3BhY2l0eT0iMC4xOCIvPgo8L3N2Zz4=');background-repeat:repeat;background-size:300px 300px;color:var(--espresso);font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
+body{background-color:#1b1b13;color:#f0ead8;font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
 img,svg{display:block;}
 a{color:inherit;}
 button{font-family:inherit;cursor:pointer;}
@@ -33,7 +33,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;}
 #app{max-width:900px;margin:0 auto;padding:clamp(28px,4vw,48px) 20px 80px;}
 #app.home-active{padding:0;}
 
-.topbar{background:var(--ink);color:var(--paper-light);padding:14px 20px;}
+.topbar{display:none;background:var(--ink);color:var(--paper-light);padding:14px 20px;}
 .topbar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
 .brand{font-family:'Train One',sans-serif;font-size:1.5rem;letter-spacing:.06em;text-transform:uppercase;}
 .brand span{color:inherit;}
@@ -146,7 +146,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .admin-subnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
 .admin-subnav button{background:var(--paper-light);border:1px solid var(--line-strong);padding:8px 14px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;}
 .admin-subnav button.active{background:var(--espresso);color:var(--paper-light);}
-.footer{text-align:center;padding:30px 20px 10px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;}
+.footer{display:none;text-align:center;padding:30px 20px 10px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;}
 .loading-line{font-family:'IBM Plex Mono',monospace;opacity:.6;padding:40px 0;text-align:center;}
 
 /* ===================== Home screen ===================== */
@@ -284,7 +284,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
   </div>
 </div>
 
-<div id="app"><div class="loading-line">Page is brewing…</div></div>
+<div id="app" class="home-active"><div class="loading-line">Page is brewing…</div></div>
 <div class="footer" id="siteFooter">Come as you are. You may not leave as you were.</div>
 
 <script>
@@ -660,10 +660,7 @@ async function render() {
   app.innerHTML = html;
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
-  // every view now uses its own dark nav/footer built into the new design; the shared light chrome is unused
   app.classList.add('home-active');
-  document.getElementById('topbar').style.display = 'none';
-  document.getElementById('siteFooter').style.display = 'none';
 }
 
 /* ===================== dark page chrome (shared) ===================== */
@@ -1144,6 +1141,17 @@ const TALK_PICKER = {
 };
 let TALK_MODE = 'talk'; // 'talk' or 'theme'
 
+// Picking a day/toggling a month re-renders the whole page, which would otherwise wipe
+// whatever the user already typed into the form (plain inputs aren't bound to state).
+// Capture the live field values first so renderTalk() can restore them.
+let TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
+function captureTalkDraft() {
+  const form = document.querySelector('form[data-form="talk"], form[data-form="theme"]');
+  if (!form) return;
+  const fd = new FormData(form);
+  TALK_DRAFT = { name:fd.get('name')||'', email:fd.get('email')||'', topic:fd.get('topic')||'', description:fd.get('description')||'', notes:fd.get('notes')||'' };
+}
+
 function pickerMonthOptions() {
   // Build 12 months starting from current month
   const options = [];
@@ -1247,28 +1255,28 @@ async function renderTalk() {
   const talkForm = `
       <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
       <form data-form="talk" novalidate>
-        <div class="field"><label>Name</label><input type="text" name="name"/></div>
-        <div class="field"><label>Email</label><input type="email" name="email"/></div>
-        <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic"/></div>
-        <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?"></textarea></div>
+        <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
+        <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
+        <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?">${escapeHtml(TALK_DRAFT.description)}</textarea></div>
         ${renderCalendarPicker()}
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Format needs, length, anything else we should know"></textarea></div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
       </form>`;
 
   const themeForm = `
       <p style="margin:0 0 16px;">Have an idea for a session theme — a book club, a craft day, a screening? Tell us what you have in mind.</p>
       <form data-form="theme" novalidate>
-        <div class="field"><label>Name</label><input type="text" name="name"/></div>
-        <div class="field"><label>Email</label><input type="email" name="email"/></div>
-        <div class="field"><label>Theme idea</label><input type="text" name="topic" placeholder="e.g. Silent book club, Natural dyeing workshop"/></div>
-        <div class="field"><label>Description</label><textarea name="description" placeholder="What would this session look like?"></textarea></div>
+        <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
+        <div class="field"><label>Theme idea</label><input type="text" name="topic" placeholder="e.g. Silent book club, Natural dyeing workshop" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
+        <div class="field"><label>Description</label><textarea name="description" placeholder="What would this session look like?">${escapeHtml(TALK_DRAFT.description)}</textarea></div>
         <div class="field">
           <label>Preferred dates (optional)</label>
           <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. You can select dates across multiple months.</div>
           ${renderCalendarPicker(null)}
         </div>
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Anything else we should know"></textarea></div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
       </form>`;
 
@@ -1547,14 +1555,17 @@ document.addEventListener('click', async (e) => {
     TALK_MODE = actionEl.dataset.mode;
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
+    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
     await render();
   } else if (action === 'toggle-month') {
+    captureTalkDraft();
     const m = actionEl.dataset.month;
     if (TALK_PICKER.openMonths.has(m)) TALK_PICKER.openMonths.delete(m);
     else TALK_PICKER.openMonths.add(m);
     await render();
   } else if (action === 'pick-day') {
     if (actionEl.dataset.past === 'true') return;
+    captureTalkDraft();
     const iso = actionEl.dataset.iso;
     if (TALK_PICKER.selectedDays.has(iso)) TALK_PICKER.selectedDays.delete(iso);
     else TALK_PICKER.selectedDays.add(iso);
@@ -1844,6 +1855,7 @@ document.addEventListener('submit', async (e) => {
     await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'talk' });
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
+    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
     TALK_MODE = 'talk';
     STATE.notice = { type:'success', text:"Thanks! We'll follow up to confirm a date." };
     form.reset(); await render();
@@ -1860,6 +1872,7 @@ document.addEventListener('submit', async (e) => {
     await addTalk({ name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'theme' });
     TALK_PICKER.openMonths.clear();
     TALK_PICKER.selectedDays.clear();
+    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
     TALK_MODE = 'talk';
     STATE.notice = { type:'success', text:"Thanks for the idea! We'll be in touch." };
     form.reset(); await render();
