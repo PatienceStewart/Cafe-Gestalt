@@ -14,7 +14,7 @@
   --paper-dark:#D5C9A8;
   --paper-light:#F0EAD8;
   --espresso:#1A553D;
-  --ochre:#AA6C65;
+  --ochre:#F0EAD8;
   --ochre-dark:#7A4F4A;
   --sage:#3D7A5A;
   --brick:#7A4F4A;
@@ -75,8 +75,8 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .badge-open{background:rgba(95,111,78,.15);color:var(--sage);}
 .badge-closed{background:rgba(156,74,52,.15);color:var(--brick);}
 .badge-full{background:rgba(156,74,52,.15);color:var(--brick);}
-.badge-pending{background:rgba(189,139,46,.18);color:var(--ochre-dark);}
-.badge-approved{background:rgba(95,111,78,.15);color:var(--sage);}
+.badge-pending{background:#c9974f;color:#1b1b13;}
+.badge-approved{background:#6fae82;color:#1b1b13;}
 
 .btn{display:inline-block;background:var(--espresso);color:var(--paper-light);border:none;padding:10px 16px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;}
 .btn:hover{background:var(--ink);}
@@ -91,6 +91,8 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .field label{display:block;font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.05em;text-transform:uppercase;color:var(--espresso);opacity:.8;margin-bottom:5px;}
 .field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line-strong);border-radius:4px;background:var(--paper-light);color:var(--espresso);}
 .field textarea{min-height:80px;resize:vertical;}
+.field input::placeholder,.field textarea::placeholder{color:var(--ochre-dark);opacity:1;}
+input[type="date"]::-webkit-calendar-picker-indicator{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23AA6C65' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cline x1='16' y1='3' x2='16' y2='7'/%3E%3Cline x1='8' y1='3' x2='8' y2='7'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");background-repeat:no-repeat;background-size:contain;cursor:pointer;}
 .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
 .field-error{font-size:.8rem;color:var(--brick);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 .field input.invalid,.field select.invalid,.field textarea.invalid{border-color:var(--brick);}
@@ -139,6 +141,8 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 table.admin-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.9rem;}
 table.admin-table th,table.admin-table td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
 table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
+table.admin-table.admin-table-dark{color:#f0ead8;}
+table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{border-bottom-color:rgba(240,234,216,.25);}
 .admin-subnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
 .admin-subnav button{background:var(--paper-light);border:1px solid var(--line-strong);padding:8px 14px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;}
 .admin-subnav button.active{background:var(--espresso);color:var(--paper-light);}
@@ -206,6 +210,8 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .home-btn:hover{background:#f0ead8;}
 .home-btn-outline{display:inline-block;background:none;border:2px solid #f0ead8;color:#f0ead8;padding:6px 13px;border-radius:6px;font-family:'Source Serif 4',serif;font-size:.95rem;cursor:pointer;}
 .home-btn-outline:hover{background:rgba(240,234,216,.12);}
+.home-btn-danger{display:inline-block;background:none;border:1px solid #e0a898;color:#e0a898;padding:8px 14px;border-radius:6px;font-family:'Source Serif 4',serif;font-size:.95rem;cursor:pointer;}
+.home-btn-danger:hover{background:rgba(224,168,152,.12);}
 .home-session-note{font-family:'IBM Plex Mono',monospace;font-size:.8rem;opacity:.75;}
 .home-propose-copy{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.5;margin:0;}
 .home-propose-actions{display:flex;justify-content:flex-end;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
@@ -236,7 +242,7 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
   .sess-next-copy{flex:1 1 100%;}
 }
 .sess-list{width:calc(100% - 40px);max-width:950px;margin:40px auto 0;display:flex;flex-direction:column;gap:16px;}
-.sess-row{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:20px clamp(16px,3vw,40px);}
+.sess-row{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:20px clamp(16px,3vw,40px);color:#f0ead8;}
 .sess-row-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .sess-row-info{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
 .sess-row-date,.sess-row-name{font-family:'Source Serif 4',serif;font-size:1.2rem;color:#f0ead8;}
@@ -258,6 +264,7 @@ table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text
 .form-panel-dark .field label{color:#f0ead8;opacity:.8;font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block;}
 .form-panel-dark .field input,.form-panel-dark .field select,.form-panel-dark .field textarea{background:#2f2f25;color:#f0ead8;border:1px solid rgba(240,234,216,.35);border-radius:4px;padding:9px 11px;width:100%;box-sizing:border-box;font-family:'Source Sans 3',sans-serif;}
 .form-panel-dark .field textarea{min-height:80px;resize:vertical;}
+.form-panel-dark .field input::placeholder,.form-panel-dark .field textarea::placeholder{color:var(--paper-dark);opacity:1;}
 .form-panel-dark .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
 .form-panel-dark .field-error{font-size:.8rem;color:#e0a898;margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 .form-panel-dark .field input.invalid,.form-panel-dark .field select.invalid,.form-panel-dark .field textarea.invalid{border-color:#e0a898;}
@@ -653,11 +660,10 @@ async function render() {
   app.innerHTML = html;
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
-  // some views use their own dark nav/footer built into the new design, instead of the shared light chrome
-  const isDarkPage = STATE.view === 'home' || STATE.view === 'reserve' || STATE.view === 'reserveForm' || STATE.view === 'talk';
-  app.classList.toggle('home-active', isDarkPage);
-  document.getElementById('topbar').style.display = isDarkPage ? 'none' : '';
-  document.getElementById('siteFooter').style.display = isDarkPage ? 'none' : '';
+  // every view now uses its own dark nav/footer built into the new design; the shared light chrome is unused
+  app.classList.add('home-active');
+  document.getElementById('topbar').style.display = 'none';
+  document.getElementById('siteFooter').style.display = 'none';
 }
 
 /* ===================== dark page chrome (shared) ===================== */
@@ -959,20 +965,26 @@ async function renderReserveForm() {
 
 /* ===================== cancel / claim views ===================== */
 async function renderCancel() {
+  const shell = (innerHtml) => `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('cancel', { onFlatBg: true })}</div>
+    <h1 class="sess-title">Cancel reservation</h1>
+    <div class="sess-form-wrap">${innerHtml}</div>
+    ${darkFooterHtml()}
+  </div>`;
+
   const token = STATE.cancelToken;
-  if (!token) return '<div class="empty-state">No cancellation token found.</div>';
+  if (!token) return shell('<div class="field-hint">No cancellation token found.</div>');
 
   let rows;
   try {
     rows = await supaFetch('reservations?cancel_token=eq.' + token + '&select=*');
   } catch(e) {
-    return '<div class="notice notice-error">Could not look up your reservation. Please try again.</div>';
+    return shell('<div class="notice notice-error">Could not look up your reservation. Please try again.</div>');
   }
 
   if (!rows || !rows.length) {
-    return `
-      <h2 class="section-title">Cancel reservation</h2>
-      <div class="card">This reservation has already been cancelled or the link is invalid.</div>`;
+    return shell('<div class="sess-row">This reservation has already been cancelled or the link is invalid.</div>');
   }
 
   const r = rows[0];
@@ -982,42 +994,47 @@ async function renderCancel() {
   const past = eventDate && !isFuture(eventDate);
 
   if (past) {
-    return `
-      <h2 class="section-title">Cancel reservation</h2>
-      <div class="card">This session has already taken place — nothing to cancel.</div>`;
+    return shell('<div class="sess-row">This session has already taken place — nothing to cancel.</div>');
   }
 
   let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
-  return `
-    <h2 class="section-title">Cancel reservation</h2>
+  return shell(`
     ${noticeHtml}
-    <div class="card">
+    <div class="sess-row">
       <p style="margin-top:0;">You're about to cancel the following reservation:</p>
-      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+      <div style="background:rgba(240,234,216,.08);border:1px solid rgba(240,234,216,.25);border-radius:4px;padding:14px;margin-bottom:16px;">
         <div style="font-weight:700;">${escapeHtml(r.name)}</div>
         <div class="field-hint">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''} · ${r.party_size} seat${r.party_size===1?'':'s'}</div>
       </div>
       <p style="font-size:.9rem;opacity:.75;">Once cancelled, your seat will be released and the next person on the waitlist (if any) will be notified.</p>
       <form data-form="do-cancel" data-reservation-id="${r.id}" data-event-id="${r.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
-        <button class="btn btn-danger" type="submit" style="background:var(--brick);color:#fff;border:none;">Confirm cancellation</button>
-        <button class="btn btn-outline" type="button" data-nav="home" style="margin-left:8px;">Keep my seat</button>
+        <button class="home-btn" type="submit" style="background:#a85c48;color:#f0ead8;">Confirm cancellation</button>
+        <button class="home-btn-outline" type="button" data-nav="home" style="margin-left:8px;">Keep my seat</button>
       </form>
-    </div>`;
+    </div>`);
 }
 
 async function renderClaim() {
+  const shell = (innerHtml) => `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('claim', { onFlatBg: true })}</div>
+    <h1 class="sess-title">Claim your seat</h1>
+    <div class="sess-form-wrap">${innerHtml}</div>
+    ${darkFooterHtml()}
+  </div>`;
+
   const token = STATE.claimToken;
-  if (!token) return '<div class="empty-state">No claim token found.</div>';
+  if (!token) return shell('<div class="field-hint">No claim token found.</div>');
 
   let rows;
   try {
     rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
   } catch(e) {
-    return '<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>';
+    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
   }
 
   if (!rows || !rows.length) {
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">This link is invalid or has already been used.</div>`;
+    return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
   }
 
   const w = rows[0];
@@ -1026,22 +1043,22 @@ async function renderClaim() {
   const eventLabel = ev ? ev.label : '';
 
   if (w.claimed) {
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">You've already claimed your seat for ${fmtDate(eventDate)}. See you there!</div>`;
+    return shell(`<div class="sess-row">You've already claimed your seat for ${fmtDate(eventDate)}. See you there!</div>`);
   }
 
   if (w.declined) {
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">This offer has already been declined or expired, and the seat was offered to the next person on the waitlist.</div>`;
+    return shell('<div class="sess-row">This offer has already been declined or expired, and the seat was offered to the next person on the waitlist.</div>');
   }
 
   if (w.notified && w.notified_at && (Date.now() - new Date(w.notified_at).getTime()) > WAITLIST_RESPONSE_WINDOW_HOURS * 3600 * 1000) {
     w.declined = true;
     await updateWaitlistEntry(w);
     if (ev) { await promoteWaitlist(ev.id, ev.date, ev.label); invalidateReserveStats(); }
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — this offer expired after ${WAITLIST_RESPONSE_WINDOW_HOURS} hours with no response, so we've offered the seat to the next person on the waitlist.</div>`;
+    return shell(`<div class="sess-row">Sorry — this offer expired after ${WAITLIST_RESPONSE_WINDOW_HOURS} hours with no response, so we've offered the seat to the next person on the waitlist.</div>`);
   }
 
   if (hoursUntil(eventDate) < 48) {
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — the claim window for this session has closed (less than 48 hours to go).</div>`;
+    return shell('<div class="sess-row">Sorry — the claim window for this session has closed (less than 48 hours to go).</div>');
   }
 
   // Check there's still a seat
@@ -1049,38 +1066,45 @@ async function renderClaim() {
   const rc = reservedCount(res);
   const cap = ev ? parseInt(ev.capacity)||0 : 0;
   if (rc >= cap) {
-    return `<h2 class="section-title">Claim your seat</h2><div class="card">Sorry — the seat was just taken by someone else. We'll be in touch if another opens up.</div>`;
+    return shell('<div class="sess-row">Sorry — the seat was just taken by someone else. We\'ll be in touch if another opens up.</div>');
   }
 
   let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
-  return `
-    <h2 class="section-title">Claim your seat</h2>
+  return shell(`
     ${noticeHtml}
-    <div class="card">
+    <div class="sess-row">
       <p style="margin-top:0;">A seat is available for:</p>
-      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+      <div style="background:rgba(240,234,216,.08);border:1px solid rgba(240,234,216,.25);border-radius:4px;padding:14px;margin-bottom:16px;">
         <div style="font-weight:700;">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''}</div>
         <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
       </div>
       <form data-form="do-claim" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
-        <button class="btn" type="submit">Confirm — claim my seat</button>
+        <button class="home-btn" type="submit">Confirm — claim my seat</button>
       </form>
-    </div>`;
+    </div>`);
 }
 
 async function renderDeclineWaitlist() {
+  const shell = (innerHtml) => `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('decline', { onFlatBg: true })}</div>
+    <h1 class="sess-title">Decline seat</h1>
+    <div class="sess-form-wrap">${innerHtml}</div>
+    ${darkFooterHtml()}
+  </div>`;
+
   const token = STATE.declineToken;
-  if (!token) return '<div class="empty-state">No token found.</div>';
+  if (!token) return shell('<div class="field-hint">No token found.</div>');
 
   let rows;
   try {
     rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
   } catch(e) {
-    return '<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>';
+    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
   }
 
   if (!rows || !rows.length) {
-    return `<h2 class="section-title">Decline seat</h2><div class="card">This link is invalid or has already been used.</div>`;
+    return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
   }
 
   const w = rows[0];
@@ -1089,28 +1113,27 @@ async function renderDeclineWaitlist() {
   const eventLabel = ev ? ev.label : '';
 
   if (w.claimed) {
-    return `<h2 class="section-title">Decline seat</h2><div class="card">You've already claimed this seat for ${fmtDate(eventDate)} — see you there!</div>`;
+    return shell(`<div class="sess-row">You've already claimed this seat for ${fmtDate(eventDate)} — see you there!</div>`);
   }
 
   if (w.declined) {
-    return `<h2 class="section-title">Decline seat</h2><div class="card">You've already declined this offer, or it expired. Thanks for letting us know.</div>`;
+    return shell('<div class="sess-row">You\'ve already declined this offer, or it expired. Thanks for letting us know.</div>');
   }
 
   let noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
-  return `
-    <h2 class="section-title">Decline seat</h2>
+  return shell(`
     ${noticeHtml}
-    <div class="card">
+    <div class="sess-row">
       <p style="margin-top:0;">A seat was offered to you for:</p>
-      <div style="background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:16px;">
+      <div style="background:rgba(240,234,216,.08);border:1px solid rgba(240,234,216,.25);border-radius:4px;padding:14px;margin-bottom:16px;">
         <div style="font-weight:700;">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''}</div>
         <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
       </div>
       <p style="font-size:.9rem;opacity:.75;">If you decline, we'll offer the seat to the next person on the waitlist right away.</p>
       <form data-form="do-decline-waitlist" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
-        <button class="btn btn-outline" type="submit">No thanks, skip me</button>
+        <button class="home-btn-outline" type="submit">No thanks, skip me</button>
       </form>
-    </div>`;
+    </div>`);
 }
 
 /* ===================== talk — calendar picker ===================== */
@@ -1269,33 +1292,43 @@ let ADMIN_TAB = 'overview';
 
 async function renderAdmin() {
   const code = await loadPasscode();
+  const shell = (innerHtml) => `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('admin', { onFlatBg: true })}</div>
+    <h1 class="sess-title">Admin</h1>
+    ${innerHtml}
+    ${darkFooterHtml()}
+  </div>`;
+
   if (!STATE.adminUnlocked) {
-    if (!code) return `
-      <h2 class="section-title">Set up admin access</h2>
-      <p class="section-sub">No admin passcode set yet. Choose one now.</p>
-      <div class="card" style="max-width:360px;">
-        <form data-form="set-passcode">
-          <div class="field"><label>Choose a passcode</label><input type="text" name="passcode" required minlength="4"/></div>
-          <button class="btn" type="submit">Set passcode</button>
-        </form>
-      </div>`;
-    return `
-      <h2 class="section-title">Admin</h2>
-      <p class="section-sub">Enter the admin passcode to manage sessions, reservations, and talk proposals.</p>
-      ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
-      <div class="card" style="max-width:360px;">
-        <form data-form="unlock-admin">
-          <div class="field"><label>Passcode</label><input type="password" name="passcode" required/></div>
-          <button class="btn" type="submit">Unlock</button>
-        </form>
-      </div>`;
+    if (!code) return shell(`
+      <div class="sess-form-wrap">
+        <p class="sess-form-note">No admin passcode set yet. Choose one now.</p>
+        <div class="form-panel-dark">
+          <form data-form="set-passcode">
+            <div class="field"><label>Choose a passcode</label><input type="text" name="passcode" required minlength="4"/></div>
+            <button class="home-btn" type="submit">Set passcode</button>
+          </form>
+        </div>
+      </div>`);
+    return shell(`
+      <div class="sess-form-wrap">
+        <p class="sess-form-note">Enter the admin passcode to manage sessions, reservations, and talk proposals.</p>
+        ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
+        <div class="form-panel-dark">
+          <form data-form="unlock-admin">
+            <div class="field"><label>Passcode</label><input type="password" name="passcode" required/></div>
+            <button class="home-btn" type="submit">Unlock</button>
+          </form>
+        </div>
+      </div>`);
   }
 
   STATE.talks = await loadAllTalks();
   const upEvents = upcomingEvents();
   const pending = STATE.talks.filter(t => t.status === 'pending').length;
   let subnav = ['overview','cafe info','sessions','talks'].map(tab =>
-    `<button class="${ADMIN_TAB===tab?'active':''}" data-action="admin-tab" data-tab="${tab}">${tab}</button>`).join('');
+    `<button type="button" class="${ADMIN_TAB===tab?'home-btn':'home-btn-outline'}" data-action="admin-tab" data-tab="${tab}">${tab}</button>`).join('');
 
   let body = '';
   if (ADMIN_TAB === 'overview') body = renderAdminOverview(upEvents, pending);
@@ -1303,22 +1336,23 @@ async function renderAdmin() {
   else if (ADMIN_TAB === 'sessions') body = await renderAdminSessions();
   else if (ADMIN_TAB === 'talks') body = renderAdminTalks();
 
-  return `
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <h2 class="section-title">Admin</h2>
-      <button class="btn btn-outline btn-small" data-action="lock-admin">Lock</button>
-    </div>
-    ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
-    <div class="admin-subnav">${subnav}</div>
-    ${body}`;
+  return shell(`
+    <div style="width:calc(100% - 40px);max-width:900px;margin:40px auto 0;">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
+        <button class="home-btn-outline btn-small" data-action="lock-admin">Lock</button>
+      </div>
+      ${STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : ''}
+      <div class="talk-tabs">${subnav}</div>
+      ${body}
+    </div>`);
 }
 
 function renderAdminOverview(upEvents, pending) {
   return `
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;">
-      <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">UPCOMING SESSIONS</div><div style="font-size:1.8rem;font-weight:700;">${upEvents.length}</div></div>
-      <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">PENDING TALK PROPOSALS</div><div style="font-size:1.8rem;font-weight:700;">${pending}</div></div>
-      <div class="card"><div class="mono" style="opacity:.6;font-size:.78rem;">TOTAL SESSIONS EVER</div><div style="font-size:1.8rem;font-weight:700;">${STATE.events.length}</div></div>
+      <div class="sess-row"><div class="mono" style="opacity:.6;font-size:.78rem;">UPCOMING SESSIONS</div><div style="font-size:1.8rem;font-weight:700;">${upEvents.length}</div></div>
+      <div class="sess-row"><div class="mono" style="opacity:.6;font-size:.78rem;">PENDING TALK PROPOSALS</div><div style="font-size:1.8rem;font-weight:700;">${pending}</div></div>
+      <div class="sess-row"><div class="mono" style="opacity:.6;font-size:.78rem;">TOTAL SESSIONS EVER</div><div style="font-size:1.8rem;font-weight:700;">${STATE.events.length}</div></div>
     </div>
     <p class="field-hint" style="margin-top:16px;">Use "cafe info" to edit your About text, "sessions" to create sessions and manage reservations, and "talks" to review proposals.</p>`;
 }
@@ -1326,14 +1360,14 @@ function renderAdminOverview(upEvents, pending) {
 function renderAdminCafeInfo() {
   const info = STATE.cafeInfo;
   return `
-    <div class="card">
+    <div class="form-panel-dark">
       <form data-form="cafe-info">
         <div class="field"><label>Cafe name</label><input type="text" name="name" value="${escapeHtml(info.name)}" required/></div>
         <div class="field"><label>Tagline</label><input type="text" name="tagline" value="${escapeHtml(info.tagline)}" required/></div>
         <div class="field"><label>About</label><textarea name="about" required>${escapeHtml(info.about)}</textarea></div>
         <div class="field"><label>How it works</label><textarea name="how_it_works" style="min-height:120px;">${escapeHtml(info.how_it_works||'')}</textarea><div class="field-hint">Separate paragraphs with a blank line.</div></div>
         <div class="field"><label>Hours note</label><input type="text" name="hours" value="${escapeHtml(info.hours)}"/></div>
-        <button class="btn" type="submit">Save</button>
+        <button class="home-btn" type="submit">Save</button>
       </form>
     </div>`;
 }
@@ -1341,7 +1375,7 @@ function renderAdminCafeInfo() {
 async function renderAdminSessions() {
   const info = STATE.cafeInfo;
   let settingsCard = `
-    <div class="card">
+    <div class="form-panel-dark" style="margin-top:0;margin-bottom:16px;">
       <form data-form="reservation-settings">
         <div class="field" style="margin-bottom:0;">
           <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
@@ -1349,12 +1383,12 @@ async function renderAdminSessions() {
           </label>
           <div class="field-hint">When on, seats aren't booked instantly — requests land below for you to confirm or decline, and guests get an email either way.</div>
         </div>
-        <button class="btn btn-small" type="submit" style="margin-top:12px;">Save</button>
+        <button class="home-btn btn-small" type="submit" style="margin-top:12px;">Save</button>
       </form>
     </div>`;
 
   let createForm = `
-    <div class="card">
+    <div class="form-panel-dark" style="margin-top:0;margin-bottom:16px;">
       <div style="font-weight:600;margin-bottom:10px;">Create a new session</div>
       <form data-form="create-event">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -1364,7 +1398,7 @@ async function renderAdminSessions() {
           <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" placeholder="e.g. Talk: The physics of coffee"/></div>
         </div>
         <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" placeholder="e.g. we'll be seated in two small clusters of 5"></textarea></div>
-        <button class="btn" type="submit">Create session</button>
+        <button class="home-btn" type="submit">Create session</button>
       </form>
     </div>`;
 
@@ -1382,21 +1416,21 @@ async function renderAdminSessions() {
       <tr>
         <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
         <td>${r.party_size}</td><td>${escapeHtml(r.dietary_needs||'')}</td><td>${escapeHtml(r.notes||'')}</td>
-        <td><button class="btn-danger btn btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
+        <td style="width:1%;text-align:right;white-space:nowrap;"><button class="home-btn-danger btn-small" data-action="delete-reservation" data-id="${r.id}" data-event-id="${ev.id}">Remove</button></td>
       </tr>`).join('');
 
     const pendingRows = pendingRes.map(r => `
       <tr>
         <td>${escapeHtml(r.name)}</td><td>${escapeHtml(r.email)}</td>
         <td>${r.party_size}</td><td>${escapeHtml(r.dietary_needs||'')}</td><td>${escapeHtml(r.notes||'')}</td>
-        <td style="white-space:nowrap;">
-          <button class="btn btn-outline btn-small" data-action="decline-reservation" data-id="${r.id}" data-event-id="${ev.id}">Decline</button>
-          <button class="btn btn-small" data-action="confirm-reservation" data-id="${r.id}" data-event-id="${ev.id}">Confirm</button>
+        <td style="width:1%;text-align:right;white-space:nowrap;">
+          <button class="home-btn-outline btn-small" data-action="decline-reservation" data-id="${r.id}" data-event-id="${ev.id}">Decline</button>
+          <button class="home-btn btn-small" data-action="confirm-reservation" data-id="${r.id}" data-event-id="${ev.id}">Confirm</button>
         </td>
       </tr>`).join('');
 
     const editForm = isEditing ? `
-      <div class="form-panel" style="margin-top:14px;">
+      <div class="form-panel-dark" style="margin-top:14px;">
         <div style="font-family:'IBM Plex Mono',monospace;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;opacity:.7;margin-bottom:12px;">Edit session</div>
         <form data-form="edit-event" data-event-id="${ev.id}">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -1407,42 +1441,42 @@ async function renderAdminSessions() {
           </div>
           <div class="field"><label>Notes shown to guests</label><textarea name="notes">${escapeHtml(ev.notes||'')}</textarea></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-outline" type="button" data-action="cancel-edit-event">Cancel</button>
-            <button class="btn" type="submit">Save changes</button>
+            <button class="home-btn-outline" type="button" data-action="cancel-edit-event">Cancel</button>
+            <button class="home-btn" type="submit">Save changes</button>
           </div>
         </form>
       </div>` : '';
 
     sessionsHtml += `
-    <div class="card">
+    <div class="sess-row" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:center;">
         <div>
           <div style="font-weight:700;font-size:1.05rem;">${fmtDate(ev.date)}${ev.label ? ' — '+escapeHtml(ev.label):''}</div>
           <div class="mono" style="font-size:.8rem;opacity:.7;">RSVP by ${fmtDate(ev.rsvp_by)} · ${rc}/${ev.capacity} seats reserved${isFuture(ev.date)?'':' · past'}</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          ${!isEditing ? `<button class="btn btn-outline btn-small" data-action="open-edit-event" data-event-id="${ev.id}">Edit</button>` : ''}
-          <button class="btn-danger btn btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete</button>
+          ${!isEditing ? `<button class="home-btn-outline btn-small" data-action="open-edit-event" data-event-id="${ev.id}">Edit</button>` : ''}
+          <button class="home-btn-danger btn-small" data-action="delete-event" data-event-id="${ev.id}">Delete</button>
         </div>
       </div>
       ${editForm}
-      ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${pendingRows}</tbody></table></div>` : ''}
-      ${confirmedRes.length ? `<table class="admin-table" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
+      ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${pendingRows}</tbody></table></div>` : ''}
+      ${confirmedRes.length ? `<table class="admin-table admin-table-dark" style="margin-top:14px;"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
       ${await (async () => {
         let wl = await loadWaitlist(ev.id);
         wl = await expireStaleWaitlistOffers(ev, wl);
         if (!wl.length) return '';
-        const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td><button class="btn-danger btn btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
-        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><table class="admin-table"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
+        const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td style="width:1%;text-align:right;white-space:nowrap;"><button class="home-btn-danger btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
+        return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th style="width:1%;"></th></tr></thead><tbody>${wrows}</tbody></table></div>`;
       })()}
     </div>`;
   }
-  if (!sessionsHtml) sessionsHtml = '<div class="empty-state">No sessions created yet.</div>';
+  if (!sessionsHtml) sessionsHtml = '<div class="field-hint">No sessions created yet.</div>';
   return settingsCard + createForm + sessionsHtml;
 }
 
 function renderAdminTalks() {
-  if (!STATE.talks.length) return '<div class="empty-state">No talk proposals yet.</div>';
+  if (!STATE.talks.length) return '<div class="field-hint">No talk proposals yet.</div>';
   const evLookup = {};
   STATE.events.forEach(e => evLookup[e.id] = e);
   return STATE.talks.map(t => {
@@ -1451,22 +1485,22 @@ function renderAdminTalks() {
     const availableLabels = (t.available_dates||[]).map(d => fmtDate(d)).filter(Boolean).join(', ') || '—';
     const statusClass = t.status === 'approved' ? 'badge-approved' : 'badge-pending';
     return `
-    <div class="card">
+    <div class="sess-row" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div>
-          <div style="font-weight:700;">${escapeHtml(t.topic)} <span class="badge ${statusClass}">${t.status}</span> <span class="badge" style="background:var(--paper-dark);color:var(--espresso);">${t.submission_type === 'theme' ? 'Theme idea' : 'Talk'}</span></div>
+          <div style="font-weight:700;">${escapeHtml(t.topic)} <span class="badge ${statusClass}">${t.status}</span> <span class="badge" style="background:#e4d9c0;color:#1b1b13;">${t.submission_type === 'theme' ? 'Theme idea' : 'Talk'}</span></div>
           <div class="field-hint">${escapeHtml(t.name)} · ${escapeHtml(t.email)}</div>
         </div>
-        <button class="btn-danger btn btn-small" data-action="delete-talk" data-id="${t.id}">Delete</button>
+        <button class="home-btn-danger btn-small" data-action="delete-talk" data-id="${t.id}">Delete</button>
       </div>
       <p style="margin:10px 0;">${escapeHtml(t.description)}</p>
       <div class="field-hint" style="margin-bottom:10px;">Available: ${availableLabels}${t.notes ? ' · Notes: '+escapeHtml(t.notes) : ''}</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <select data-role="assign-select" data-id="${t.id}" style="padding:6px 8px;border:1px solid var(--line-strong);border-radius:4px;">
+        <select data-role="assign-select" data-id="${t.id}" style="padding:9px 11px;border:1px solid rgba(240,234,216,.35);border-radius:4px;background:#2f2f25;color:#f0ead8;font-family:'Source Sans 3',sans-serif;">
           <option value="">Assign to a session…</option>${dateOptions}
         </select>
-        <button class="btn btn-small" data-action="assign-talk" data-id="${t.id}">Save</button>
-        ${t.status!=='approved' ? `<button class="btn btn-outline btn-small" data-action="approve-talk" data-id="${t.id}">Mark approved</button>` : ''}
+        <button class="home-btn btn-small" data-action="assign-talk" data-id="${t.id}">Save</button>
+        ${t.status!=='approved' ? `<button class="home-btn-outline btn-small" data-action="approve-talk" data-id="${t.id}">Mark approved</button>` : ''}
       </div>
     </div>`;
   }).join('');
