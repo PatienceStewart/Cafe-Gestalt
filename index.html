@@ -1077,8 +1077,10 @@ async function renderCancel() {
       </div>
       <p style="font-size:.9rem;opacity:.75;">Once cancelled, your seat will be released and the next person on the waitlist (if any) will be notified.</p>
       <form data-form="do-cancel" data-reservation-id="${r.id}" data-event-id="${r.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
-        <button class="home-btn" type="submit" style="background:#a85c48;color:#f0ead8;">Confirm cancellation</button>
-        <button class="home-btn-outline" type="button" data-nav="home" style="margin-left:8px;">Keep my seat</button>
+        <div class="button-row">
+          <button class="home-btn" type="submit" style="background:#a85c48;color:#f0ead8;">Confirm cancellation</button>
+          <button class="home-btn-outline" type="button" data-nav="home">Keep my seat</button>
+        </div>
       </form>
     </div>`);
 }
