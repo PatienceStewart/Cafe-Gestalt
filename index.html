@@ -78,6 +78,8 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .badge-pending{background:#c9974f;color:#1b1b13;}
 .badge-approved{background:#6fae82;color:#1b1b13;}
 .badge-declined{background:#c98f82;color:#1b1b13;}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;}
+.modal-box{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:24px;max-width:440px;width:100%;}
 
 .btn{display:inline-block;background:var(--espresso);color:var(--paper-light);border:none;padding:10px 16px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:600;letter-spacing:.02em;}
 .btn:hover{background:var(--ink);}
@@ -201,7 +203,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;}
 .home-session-body{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0;container-type:inline-size;}
 .home-session-title{font-family:'Source Serif 4',serif;font-size:1.1rem;}
-.home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;margin-top:2px;}
+.home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;margin-top:2px;white-space:pre-line;}
 .home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:nowrap;opacity:.9;}
 .home-session-meta span{white-space:nowrap;}
 @container (max-width: 260px) {
@@ -440,13 +442,15 @@ function emailTalkApproved(name, topic, type) {
   </div>`;
 }
 
-function emailTalkDeclined(name, topic, type) {
+function emailTalkDeclined(name, topic, type, reason) {
   const kindLabel = type === 'theme' ? 'idea' : 'talk';
   return `
   <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
     <h2 style="font-size:1.4rem;margin-bottom:4px;">About your ${kindLabel} — Café Gestalt</h2>
     <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
-    <p>Hi ${escapeHtml(name)}, thanks for sending this in — we're not able to take it forward this time. </p>
+    <p>Hi ${escapeHtml(name)}, thanks for sending this in — we're not able to take it forward this time.</p>
+    ${reason ? `<p>${escapeHtml(reason).replace(/\n/g, '<br>')}</p>` : ''}
+    <p>We hope you'll pitch us again in the future.</p>
   </div>`;
 }
 
@@ -658,6 +662,7 @@ let STATE = {
   notice: null,
   openReserveFormFor: null,
   openEditEventFor: null,
+  declineTalkModalFor: null, // talk id currently showing the decline-reason modal
   cancelToken: null,   // set from URL hash for cancel flow
   claimToken: null,    // set from URL hash for waitlist claim flow
   declineToken: null,  // set from URL hash for waitlist decline flow
@@ -1345,6 +1350,9 @@ async function renderTalk() {
 
 /* ===================== admin ===================== */
 let ADMIN_TAB = 'overview';
+// Set when "Create session from this" is clicked on a talk/theme; pre-fills the
+// Sessions tab's create-event form, and gets linked back once that session is created.
+let CREATE_EVENT_PREFILL = null; // { label, notes, date, fromTalkId }
 
 async function renderAdmin() {
   const code = await loadPasscode();
@@ -1443,17 +1451,19 @@ async function renderAdminSessions() {
       </form>
     </div>`;
 
+  const prefill = CREATE_EVENT_PREFILL || {};
   let createForm = `
     <div class="form-panel-dark" style="margin-top:0;margin-bottom:16px;">
       <div style="font-weight:600;margin-bottom:10px;">Create a new session</div>
-      <form data-form="create-event">
+      ${prefill.fromTalkId ? `<div class="field-hint" style="margin-bottom:10px;">Pre-filled from a talk/theme suggestion — review before creating.</div>` : ''}
+      <form data-form="create-event"${prefill.fromTalkId ? ` data-from-talk-id="${prefill.fromTalkId}"` : ''}>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <div class="field"><label>Date</label><input type="date" name="date" required/></div>
+          <div class="field"><label>Date</label><input type="date" name="date" value="${prefill.date||''}" required/></div>
           <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" required/></div>
           <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="10" required/></div>
-          <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" placeholder="e.g. Talk: The physics of coffee"/></div>
+          <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" value="${escapeHtml(prefill.label||'')}" placeholder="e.g. Talk: The physics of coffee"/></div>
         </div>
-        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" placeholder="e.g. we'll be seated in two small clusters of 5"></textarea></div>
+        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea></div>
         <button class="home-btn" type="submit">Create session</button>
       </form>
     </div>`;
@@ -1531,15 +1541,34 @@ async function renderAdminSessions() {
   return settingsCard + createForm + sessionsHtml;
 }
 
+function renderDeclineTalkModal() {
+  const t = STATE.talks.find(x => x.id === STATE.declineTalkModalFor);
+  if (!t) return '';
+  return `
+  <div class="modal-backdrop" data-action="cancel-decline-talk">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <h3 style="font-family:'Kavivanar',cursive;font-size:1.3rem;margin:0 0 6px;">Decline "${escapeHtml(t.topic)}"?</h3>
+      <p style="opacity:.75;margin:0;font-size:.92rem;">Optionally add a reason — it'll be included in the decline email sent to ${escapeHtml(t.name)}.</p>
+      <div class="form-panel-dark" style="margin-top:12px;">
+        <form data-form="decline-talk-reason" data-id="${t.id}">
+          <div class="field" style="margin-bottom:0;"><label>Reason (optional)</label><textarea name="reason" placeholder="e.g. we're fully booked through the year, or this doesn't quite fit our format"></textarea></div>
+          <div class="form-actions-right">
+            <button class="home-btn-outline" type="button" data-action="cancel-decline-talk">Cancel</button>
+            <button class="home-btn-danger" type="submit">Decline &amp; send email</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderAdminTalks() {
-  if (!STATE.talks.length) return '<div class="field-hint">No talk proposals yet.</div>';
-  const evLookup = {};
-  STATE.events.forEach(e => evLookup[e.id] = e);
+  const modalHtml = renderDeclineTalkModal();
+  if (!STATE.talks.length) return '<div class="field-hint">No talk proposals yet.</div>' + modalHtml;
   return STATE.talks.map(t => {
-    const dateOptions = upcomingEvents().map(ev =>
-      `<option value="${ev.id}" ${t.assigned_event_id===ev.id?'selected':''}>${fmtDate(ev.date)}${ev.label?' — '+escapeHtml(ev.label):''}</option>`).join('');
     const availableLabels = (t.available_dates||[]).map(d => fmtDate(d)).filter(Boolean).join(', ') || '—';
     const statusClass = t.status === 'approved' ? 'badge-approved' : t.status === 'declined' ? 'badge-declined' : 'badge-pending';
+    const linkedEvent = t.assigned_event_id ? STATE.events.find(e => e.id === t.assigned_event_id) : null;
     return `
     <div class="sess-row" style="margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
@@ -1551,16 +1580,14 @@ function renderAdminTalks() {
       </div>
       <p style="margin:10px 0;">${escapeHtml(t.description)}</p>
       <div class="field-hint" style="margin-bottom:10px;">Available: ${availableLabels}${t.notes ? ' · Notes: '+escapeHtml(t.notes) : ''}</div>
+      ${linkedEvent ? `<div class="field-hint" style="margin-bottom:10px;">Linked to session: ${fmtDate(linkedEvent.date)}${linkedEvent.label ? ' — '+escapeHtml(linkedEvent.label) : ''}</div>` : ''}
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-        <select data-role="assign-select" data-id="${t.id}" style="padding:9px 11px;border:1px solid rgba(240,234,216,.35);border-radius:4px;background:#2f2f25;color:#f0ead8;font-family:'Source Sans 3',sans-serif;">
-          <option value="">Assign to a session…</option>${dateOptions}
-        </select>
-        <button class="home-btn btn-small" data-action="assign-talk" data-id="${t.id}" style="align-self:center;">Save</button>
+        <button class="home-btn btn-small" data-action="create-session-from-talk" data-id="${t.id}">Create session from this</button>
         ${t.status!=='approved' ? `<button class="home-btn-outline btn-small" data-action="approve-talk" data-id="${t.id}">Mark approved</button>` : ''}
-        ${t.status!=='declined' ? `<button class="home-btn-danger btn-small" data-action="decline-talk" data-id="${t.id}">Decline</button>` : ''}
+        ${t.status!=='declined' ? `<button class="home-btn-danger btn-small" data-action="open-decline-talk-modal" data-id="${t.id}">Decline</button>` : ''}
       </div>
     </div>`;
-  }).join('');
+  }).join('') + modalHtml;
 }
 
 /* ===================== event delegation ===================== */
@@ -1626,7 +1653,9 @@ document.addEventListener('click', async (e) => {
     STATE.openReserveFormFor = null;
     await navigate('reserve');
   } else if (action === 'admin-tab') {
-    ADMIN_TAB = actionEl.dataset.tab; await render();
+    ADMIN_TAB = actionEl.dataset.tab;
+    CREATE_EVENT_PREFILL = null;
+    await render();
   } else if (action === 'lock-admin') {
     STATE.adminUnlocked = false; await render();
   } else if (action === 'open-edit-event') {
@@ -1701,20 +1730,24 @@ document.addEventListener('click', async (e) => {
       await sendEmail(t.email, 'Your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' was approved — Café Gestalt', emailTalkApproved(t.name, t.topic, t.submission_type));
       STATE.notice = { type:'success', text:'Marked approved and submitter notified.' }; await render();
     }
-  } else if (action === 'decline-talk') {
-    if (confirm('Decline this proposal? The submitter will be emailed.')) {
-      const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
-      if (t) {
-        t.status = 'declined';
-        await updateTalk(t);
-        await sendEmail(t.email, 'About your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' — Café Gestalt', emailTalkDeclined(t.name, t.topic, t.submission_type));
-        STATE.notice = { type:'success', text:'Declined and submitter notified.' }; await render();
-      }
-    }
-  } else if (action === 'assign-talk') {
-    const sel = document.querySelector('select[data-role="assign-select"][data-id="'+actionEl.dataset.id+'"]');
+  } else if (action === 'open-decline-talk-modal') {
+    STATE.declineTalkModalFor = actionEl.dataset.id;
+    await render();
+  } else if (action === 'cancel-decline-talk') {
+    STATE.declineTalkModalFor = null;
+    await render();
+  } else if (action === 'create-session-from-talk') {
     const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
-    if (t && sel) { t.assigned_event_id = sel.value || null; await updateTalk(t); STATE.notice = { type:'success', text:'Assignment saved.' }; await render(); }
+    if (t) {
+      CREATE_EVENT_PREFILL = {
+        label: t.topic,
+        notes: t.description,
+        date: (t.available_dates && t.available_dates[0]) || '',
+        fromTalkId: t.id
+      };
+      ADMIN_TAB = 'sessions';
+      await render();
+    }
   }
 });
 
@@ -1968,8 +2001,26 @@ document.addEventListener('submit', async (e) => {
     await saveCafeInfo(STATE.cafeInfo);
     STATE.notice = { type:'success', text:'Reservation setting saved.' }; await render();
 
+  } else if (type === 'decline-talk-reason') {
+    const t = STATE.talks.find(x => x.id === form.dataset.id);
+    if (t) {
+      const reason = (fd.get('reason')||'').trim();
+      t.status = 'declined';
+      await updateTalk(t);
+      await sendEmail(t.email, 'About your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' — Café Gestalt', emailTalkDeclined(t.name, t.topic, t.submission_type, reason));
+      STATE.declineTalkModalFor = null;
+      STATE.notice = { type:'success', text:'Declined and submitter notified.' };
+    }
+    await render();
+
   } else if (type === 'create-event') {
-    await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    const created = await createEvent({ date:fd.get('date'), rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'' });
+    const fromTalkId = form.dataset.fromTalkId;
+    if (fromTalkId && created && created[0]) {
+      const t = STATE.talks.find(x => x.id === fromTalkId);
+      if (t) { t.assigned_event_id = created[0].id; await updateTalk(t); }
+    }
+    CREATE_EVENT_PREFILL = null;
     STATE.events = await loadEvents();
     invalidateReserveStats();
     STATE.notice = { type:'success', text:'Session created.' }; await render();
