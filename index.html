@@ -1475,8 +1475,13 @@ async function renderAdminSessions() {
     </div>`;
 
   let sessionsHtml = '';
+  let pastDividerShown = false;
   const allSorted = [...STATE.events].sort((a,b) => b.date.localeCompare(a.date));
   for (const ev of allSorted) {
+    if (!pastDividerShown && !isFuture(ev.date)) {
+      sessionsHtml += `<div style="margin:28px 0 16px;padding-top:16px;border-top:1px solid rgba(240,234,216,.25);"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;letter-spacing:.05em;">Past sessions</div></div>`;
+      pastDividerShown = true;
+    }
     const res = await loadReservations(ev.id);
     const rc = reservedCount(res);
     const isEditing = STATE.openEditEventFor === ev.id;
