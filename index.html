@@ -707,10 +707,14 @@ async function navigate(view) {
 }
 
 /* ===================== render shell ===================== */
+// The initial page load already shows the static "Page is brewing…" placeholder baked
+// into the HTML — skip render()'s own loading flash the first time so it doesn't stack
+// a second, differently-worded loading message on top of it before the real content lands.
+let firstRenderDone = false;
 async function render() {
   const app = document.getElementById('app');
   const scrollY = window.scrollY;
-  app.innerHTML = '<div class="loading-line">loading…</div>';
+  if (firstRenderDone) app.innerHTML = '<div class="loading-line">loading…</div>';
   let html = '';
   try {
     if (STATE.view === 'home')         html = await renderHome();
@@ -726,6 +730,7 @@ async function render() {
     html = '<div class="notice notice-error">Could not load data. Check your Supabase connection.<br><small>' + escapeHtml(e.message) + '</small></div>';
   }
   app.innerHTML = html;
+  firstRenderDone = true;
   // update brand
   document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
   app.classList.add('home-active');
