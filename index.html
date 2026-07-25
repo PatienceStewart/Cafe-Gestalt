@@ -808,7 +808,7 @@ async function renderHome() {
     <p class="home-sub">Café Gestalt is a small monthly community dedicated to getting offline and out of the algorithm.</p>
 
     <div class="home-grid">
-      <div class="home-col">
+      <div class="home-col"${!next ? ' style="justify-content:flex-start;"' : ''}>
         <div class="home-eyebrow">NEXT SESSION</div>
         ${sessionCardHtml}
       </div>
@@ -1323,7 +1323,7 @@ async function renderTalk() {
         <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
         <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?">${escapeHtml(TALK_DRAFT.description)}</textarea></div>
         ${renderCalendarPicker()}
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea></div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
       </form>`;
 
@@ -1339,7 +1339,7 @@ async function renderTalk() {
           <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. You can select dates across multiple months.</div>
           ${renderCalendarPicker(null)}
         </div>
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea></div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
       </form>`;
 
@@ -1474,7 +1474,7 @@ async function renderAdminSessions() {
           <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="10" required/></div>
           <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" value="${escapeHtml(prefill.label||'')}" placeholder="e.g. Talk: The physics of coffee"/></div>
         </div>
-        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea></div>
+        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" maxlength="250" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <button class="home-btn" type="submit">Create session</button>
       </form>
     </div>`;
@@ -1522,7 +1522,7 @@ async function renderAdminSessions() {
             <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="${ev.capacity}" required/></div>
             <div class="field"><label>Theme / label</label><input type="text" name="label" value="${escapeHtml(ev.label||'')}"/></div>
           </div>
-          <div class="field"><label>Notes shown to guests</label><textarea name="notes">${escapeHtml(ev.notes||'')}</textarea></div>
+          <div class="field"><label>Notes shown to guests</label><textarea name="notes" maxlength="250">${escapeHtml(ev.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="home-btn-outline" type="button" data-action="cancel-edit-event">Cancel</button>
             <button class="home-btn" type="submit">Save changes</button>
