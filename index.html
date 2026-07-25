@@ -1310,7 +1310,7 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
 }
 
 async function renderTalk() {
-  const noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
+  const submitNoticeHtml = STATE.notice ? `<div style="margin-top:16px;text-align:right;color:var(--sage);font-size:.92rem;">${escapeHtml(STATE.notice.text)}</div>` : '';
 
   const modeBtn = (mode, label) => `<button type="button" class="${TALK_MODE===mode ? 'home-btn' : 'home-btn-outline'}" data-action="set-talk-mode" data-mode="${mode}">${label}</button>`;
   const tabs = `<div class="talk-tabs">${modeBtn('talk', 'Give a talk')}${modeBtn('theme', 'Suggest a theme')}</div>`;
@@ -1325,6 +1325,7 @@ async function renderTalk() {
         ${renderCalendarPicker()}
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
+        ${TALK_MODE === 'talk' ? submitNoticeHtml : ''}
       </form>`;
 
   const themeForm = `
@@ -1341,6 +1342,7 @@ async function renderTalk() {
         </div>
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
+        ${TALK_MODE === 'theme' ? submitNoticeHtml : ''}
       </form>`;
 
   return `
@@ -1352,7 +1354,6 @@ async function renderTalk() {
       <div class="form-panel-dark">
         ${TALK_MODE === 'talk' ? talkForm : themeForm}
       </div>
-      ${noticeHtml}
     </div>
     ${darkFooterHtml()}
   </div>`;
