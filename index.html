@@ -1334,8 +1334,8 @@ async function renderTalk() {
   const tabs = `<div class="talk-tabs">${modeBtn('talk', 'Give a talk')}${modeBtn('theme', 'Suggest a theme')}</div>`;
 
   const talkForm = `
-      <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.
-As a guideline, talks and presentations can be anywhere from 20-40 minutes long. Workshops can be up to an hour. If you have other needs or ideas for your program, please add them to the notes section and let's discuss what's possible!</p>
+      <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
+      <p>As a guideline, talks and presentations can be anywhere from 20-40 minutes long. Workshops can be up to an hour. If you have other needs or ideas for your program, please add them to the notes section and let's discuss what's possible!</p>
       <form data-form="talk" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
         <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
