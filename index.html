@@ -258,6 +258,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .sess-row{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:20px clamp(16px,3vw,40px);color:#f0ead8;}
 .sess-row-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .sess-row-info{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.sess-row-action{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .sess-row-date,.sess-row-name{font-family:'Source Serif 4',serif;font-size:1.2rem;color:#f0ead8;}
 .sess-row-seats{font-family:'Source Sans 3',sans-serif;font-size:.95rem;color:#f0ead8;opacity:.9;}
 .sess-empty{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;width:calc(100% - 40px);max-width:950px;margin:40px auto 0;}
@@ -925,9 +926,11 @@ async function renderReserve() {
         <div class="sess-row-info">
           <div class="sess-row-date">${fmtDate(ev.date)}${ev.time ? ' · '+fmtTime(ev.time) : ''}</div>
           <div class="sess-row-name">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
-          <div class="sess-row-seats">${spotsLeft} of ${cap} seats available</div>
         </div>
-        ${buildAction(ev, spotsLeft, full, rsvpClosed, waitlistCount)}
+        <div class="sess-row-action">
+          <div class="sess-row-seats">${spotsLeft} of ${cap} seats available</div>
+          ${buildAction(ev, spotsLeft, full, rsvpClosed, waitlistCount)}
+        </div>
       </div>
       ${ev.notes ? `<div class="home-session-notes" style="margin-top:10px;">${escapeHtml(ev.notes)}</div>` : ''}
     </div>`;
