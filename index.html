@@ -33,35 +33,6 @@ input,select,textarea{font-family:inherit;font-size:1rem;}
 #app{max-width:900px;margin:0 auto;padding:clamp(28px,4vw,48px) 20px 80px;}
 #app.home-active{padding:0;}
 
-.topbar{display:none;background:var(--ink);color:var(--paper-light);padding:14px 20px;}
-.topbar-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-.brand{font-family:'Train One',sans-serif;font-size:1.5rem;letter-spacing:.06em;text-transform:uppercase;}
-.brand span{color:inherit;}
-nav.tabs{display:flex;gap:4px;flex-wrap:wrap;}
-nav.tabs button{background:none;border:1px solid transparent;color:var(--paper-light);padding:7px 12px;border-radius:3px;font-size:.92rem;font-family:'IBM Plex Mono',monospace;letter-spacing:.02em;opacity:.8;}
-nav.tabs button:hover{opacity:1;border-color:rgba(232,225,206,.3);}
-nav.tabs button.active{opacity:1;background:var(--ochre);color:var(--ink);font-weight:600;}
-
-.hero{background:var(--ink);color:var(--paper-light);margin:0 -20px 0;padding:44px 20px 36px;position:relative;background-image:radial-gradient(circle at 15% 20%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 85% 70%,rgba(255,255,255,.03),transparent 45%);border-radius:24px;overflow:hidden;}
-.hero-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ochre);margin-bottom:10px;}
-.hero h1{font-family:'Kavivanar',cursive;font-weight:700;font-size:clamp(2rem,5vw,3rem);line-height:1.1;margin:0 0 12px;text-shadow:0 0 1px rgba(255,255,255,.25);}
-.hero p.tagline{max-width:520px;color:var(--paper-light);font-size:1.05rem;margin:0 0 22px;}
-.hero-session-card{background:rgba(232,225,206,.06);border:1px solid rgba(232,225,206,.22);border-radius:6px;padding:16px 18px;max-width:460px;}
-.hero-session-card .label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ochre);margin-bottom:6px;}
-.hero-session-date{font-size:1.25rem;font-weight:600;margin-bottom:8px;}
-.hero-session-empty{color:var(--paper-dark);font-style:italic;}
-
-h2.section-title{font-family:'Kavivanar',cursive;font-size:1.6rem;font-weight:700;margin:0 0 6px;color:var(--espresso);}
-p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;}
-.hairline{border:none;border-top:1px solid var(--line);margin:28px 0;}
-.card{background:var(--paper-light);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:16px;}
-
-.event-card{display:grid;grid-template-columns:64px 1fr auto;gap:16px;align-items:start;background:var(--paper-light);border:1px solid var(--line);border-radius:6px;padding:18px 20px;margin-bottom:14px;}
-@media(max-width:640px){.event-card{grid-template-columns:1fr;}}
-.event-num{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:600;color:var(--ochre-dark);line-height:1;}
-.event-main .date{font-weight:700;font-size:1.15rem;}
-.event-main .label{color:var(--espresso);opacity:.8;margin:2px 0 8px;}
-.event-meta{font-family:'IBM Plex Mono',monospace;font-size:.82rem;color:var(--espresso);opacity:.75;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
 .cup-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;}
 .cup-icon{width:22px;height:22px;overflow:visible;flex:none;}
 .cup-body{fill:rgba(228,217,192,.15);stroke:var(--paper-dark);stroke-width:2.2;stroke-linejoin:round;}
@@ -72,9 +43,6 @@ p.section-sub{color:var(--espresso);opacity:.75;margin:0 0 22px;max-width:560px;
 .fill-bar-inner{height:100%;background:var(--ochre);}
 
 .badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:.72rem;padding:3px 8px;border-radius:3px;letter-spacing:.04em;text-transform:uppercase;}
-.badge-open{background:rgba(95,111,78,.15);color:var(--sage);}
-.badge-closed{background:rgba(156,74,52,.15);color:var(--brick);}
-.badge-full{background:rgba(156,74,52,.15);color:var(--brick);}
 .badge-pending{background:#c9974f;color:#1b1b13;}
 .badge-approved{background:#6fae82;color:#1b1b13;}
 .badge-declined{background:#c98f82;color:#1b1b13;}
@@ -102,10 +70,6 @@ input[type="password"]::-ms-reveal{filter:invert(93%) sepia(9%) saturate(340%) h
 .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
 .field-error{font-size:.8rem;color:var(--brick);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 .field input.invalid,.field select.invalid,.field textarea.invalid{border-color:var(--brick);}
-.checkbox-list{display:flex;flex-direction:column;gap:6px;}
-.checkbox-list label{display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;text-transform:none;letter-spacing:0;font-size:.95rem;opacity:1;}
-.checkbox-list input{width:auto;}
-.form-panel{background:var(--paper);border:1px dashed var(--line-strong);border-radius:6px;padding:18px;margin-top:12px;}
 .notice{padding:12px 14px;border-radius:4px;margin-bottom:16px;font-size:.92rem;}
 .notice-success{background:rgba(95,111,78,.15);border:1px solid var(--sage);color:#6FAE82;}
 .notice-error{background:rgba(156,74,52,.12);border:1px solid var(--brick);color:#e0a898;}
@@ -151,10 +115,6 @@ table.admin-table th,table.admin-table td{text-align:left;padding:8px 10px;borde
 table.admin-table th{font-family:'IBM Plex Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.04em;opacity:.7;}
 table.admin-table.admin-table-dark{color:#f0ead8;}
 table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{border-bottom-color:rgba(240,234,216,.25);}
-.admin-subnav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
-.admin-subnav button{background:var(--paper-light);border:1px solid var(--line-strong);padding:8px 14px;border-radius:4px;font-family:'IBM Plex Mono',monospace;font-size:.82rem;}
-.admin-subnav button.active{background:var(--espresso);color:var(--paper-light);}
-.footer{display:none;text-align:center;padding:30px 20px 10px;font-family:'IBM Plex Mono',monospace;font-size:.75rem;opacity:.55;}
 .loading-line{font-family:'IBM Plex Mono',monospace;opacity:.6;padding:40px 0;text-align:center;}
 
 /* ===================== Home screen ===================== */
@@ -287,20 +247,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 </head>
 <body>
 
-<div class="topbar" id="topbar">
-  <div class="topbar-inner">
-    <div class="brand" id="brandTitle">Café Gestalt</div>
-    <nav class="tabs" id="navTabs">
-      <button data-nav="home">Home</button>
-      <button data-nav="reserve">Reserve a Seat</button>
-      <button data-nav="talk">Give a Talk</button>
-      <button data-nav="admin">Admin</button>
-    </nav>
-  </div>
-</div>
-
 <div id="app" class="home-active"><div class="loading-line">Page is brewing…</div></div>
-<div class="footer" id="siteFooter">Come as you are. You may not leave as you were.</div>
 
 <script>
 /* ===================== Supabase config ===================== */
@@ -341,96 +288,87 @@ const CAFE_ADDRESS = 'Kraatarinraitti 6 B12, Tampere';
 function emailAddressBlock() {
   return `<div style="background:#E4D9C0;color:#0F2E20;border-radius:4px;padding:12px 16px;margin:14px 0;font-family:monospace;font-size:.92rem;">${CAFE_ADDRESS}</div>`;
 }
-
-function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
+// Shared wrapper + subtitle line + call-to-action button markup that every email template below
+// builds on, so the styling only needs to change in one place.
+function emailShell(heading, subtitle, bodyHtml) {
   return `
   <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">You're booked for Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
-    <p>Hi ${name}, your seat is reserved. We look forward to seeing you.</p>
-<p></p>
-<p>Come find us at:</p>
-    ${emailAddressBlock()}
-<p></p>
-<p>Ring the bell and come on up!</p>
-    <p>If your plans change, please cancel so your seat can go to someone on the waitlist:</p>
-    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
-    <p style="font-size:.85rem;opacity:.6;">This link will work until the day of the session.</p>
+    <h2 style="font-size:1.4rem;margin-bottom:4px;">${heading}</h2>
+    <p style="opacity:.7;margin-top:0;">${subtitle}</p>
+    ${bodyHtml}
   </div>`;
+}
+function eventDateLine(eventDate, eventLabel) {
+  return `${eventDate}${eventLabel ? ' — ' + eventLabel : ''}`;
+}
+function emailButtonHtml(url, label, outline) {
+  const style = outline
+    ? 'background:none;border:1px solid #1A553D;color:#1A553D;padding:9px 17px;border-radius:4px;text-decoration:none;font-family:monospace;'
+    : 'background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;';
+  return `<p><a href="${url}" style="${style}">${label}</a></p>`;
+}
+
+function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
+  return emailShell("You're booked for Café Gestalt", eventDateLine(eventDate, eventLabel), `
+    <p>Hi ${name}, your seat is reserved. We look forward to seeing you.</p>
+    <p></p>
+    <p>Come find us at:</p>
+    ${emailAddressBlock()}
+    <p></p>
+    <p>Ring the bell and come on up!</p>
+    <p>If your plans change, please cancel so your seat can go to someone on the waitlist:</p>
+    ${emailButtonHtml(cancelUrl, 'Cancel my reservation')}
+    <p style="font-size:.85rem;opacity:.6;">This link will work until the day of the session.</p>`);
 }
 
 function emailReservationPending(name, eventDate, eventLabel) {
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">We've got your request — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
-    <p>Hi ${name}, thanks for requesting a seat. We review requests by hand — we'll email you as soon as it's confirmed, or if we're not able to fit you in this time.</p>
-  </div>`;
+  return emailShell("We've got your request — Café Gestalt", eventDateLine(eventDate, eventLabel), `
+    <p>Hi ${name}, thanks for requesting a seat. We review requests by hand — we'll email you as soon as it's confirmed, or if we're not able to fit you in this time.</p>`);
 }
 
 function emailReservationApproved(name, eventDate, eventLabel, cancelUrl) {
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your seat is confirmed — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+  return emailShell('Your seat is confirmed — Café Gestalt', eventDateLine(eventDate, eventLabel), `
     <p>Hi ${name}, good news — your reservation request has been confirmed. We look forward to seeing you.</p>
-<p></p>
-<p>Come find us at:</p>
+    <p></p>
+    <p>Come find us at:</p>
     ${emailAddressBlock()}
-<p></p>
-<p>Ring the bell and come on up!</p>
+    <p></p>
+    <p>Ring the bell and come on up!</p>
     <p>If your plans change, please cancel so your seat can go to someone else:</p>
-    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
-  </div>`;
+    ${emailButtonHtml(cancelUrl, 'Cancel my reservation')}`);
 }
 
 function emailReservationDeclined(name, eventDate, eventLabel) {
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">About your request — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
-    <p>Hi ${name}, thanks for your interest — we're not able to offer you a seat for this session. We hope to see you at a future one.</p>
-  </div>`;
+  return emailShell('About your request — Café Gestalt', eventDateLine(eventDate, eventLabel), `
+    <p>Hi ${name}, thanks for your interest — we're not able to offer you a seat for this session. We hope to see you at a future one.</p>`);
 }
 
 function emailWaitlistNotify(name, eventDate, eventLabel, claimUrl, declineUrl) {
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">A seat has opened up at Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+  return emailShell('A seat has opened up at Café Gestalt', eventDateLine(eventDate, eventLabel), `
     <p>Hi ${name}, you're next on the waitlist and a seat has just become available.</p>
     <p>You have ${WAITLIST_RESPONSE_WINDOW_HOURS} hours to claim it before it's offered to the next person on the waitlist:</p>
-    <p><a href="${claimUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Claim my seat</a></p>
+    ${emailButtonHtml(claimUrl, 'Claim my seat')}
     <p>Know you can't make it? Let us know so we can offer it sooner:</p>
-    <p><a href="${declineUrl}" style="background:none;border:1px solid #1A553D;color:#1A553D;padding:9px 17px;border-radius:4px;text-decoration:none;font-family:monospace;">No thanks, skip me</a></p>
-    <p style="font-size:.85rem;opacity:.6;">If you take no action within ${WAITLIST_RESPONSE_WINDOW_HOURS} hours, we'll automatically offer the seat to the next person.</p>
-  </div>`;
+    ${emailButtonHtml(declineUrl, 'No thanks, skip me', true)}
+    <p style="font-size:.85rem;opacity:.6;">If you take no action within ${WAITLIST_RESPONSE_WINDOW_HOURS} hours, we'll automatically offer the seat to the next person.</p>`);
 }
 
 function emailWaitlistConfirm(name, eventDate, eventLabel, cancelUrl) {
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your seat is confirmed — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${eventDate}${eventLabel ? ' — ' + eventLabel : ''}</p>
+  return emailShell('Your seat is confirmed — Café Gestalt', eventDateLine(eventDate, eventLabel), `
     <p>Hi ${name}, great news — your waitlisted seat is now confirmed. See you there.</p>
     <p>Need to cancel?</p>
-    <p><a href="${cancelUrl}" style="background:#1A553D;color:#F0EAD8;padding:10px 18px;border-radius:4px;text-decoration:none;font-family:monospace;">Cancel my reservation</a></p>
-  </div>`;
+    ${emailButtonHtml(cancelUrl, 'Cancel my reservation')}`);
 }
 
 function emailNewSubmissionNotify(data) {
   const kindLabel = data.type === 'theme' ? 'Theme idea' : 'Talk proposal';
   const dates = (data.availableDates||[]).length ? data.availableDates.map(d => fmtDate(d)).join(', ') : '—';
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">New ${kindLabel.toLowerCase()} submitted</h2>
-    <p style="opacity:.7;margin-top:0;">${escapeHtml(data.topic)}</p>
+  return emailShell(`New ${kindLabel.toLowerCase()} submitted`, escapeHtml(data.topic), `
     <p><strong>From:</strong> ${escapeHtml(data.name)} (${escapeHtml(data.email)})</p>
     <p>${escapeHtml(data.description)}</p>
     <p><strong>Available dates:</strong> ${dates}</p>
     ${data.notes ? `<p><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : ''}
-    <p style="font-size:.85rem;opacity:.6;">Review it in the admin panel under Talks.</p>
-  </div>`;
+    <p style="font-size:.85rem;opacity:.6;">Review it in the admin panel under Talks.</p>`);
 }
 
 function emailTalkReceived(data) {
@@ -439,10 +377,7 @@ function emailTalkReceived(data) {
   const datesHtml = dates.length
     ? `<p style="margin:10px 0 4px;"><strong>Dates you suggested:</strong></p><ul style="margin:0;padding-left:20px;">${dates.map(d => `<li>${fmtDate(d)}</li>`).join('')}</ul>`
     : '';
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">We've got your ${kindLabel} — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${escapeHtml(data.topic)}</p>
+  return emailShell(`We've got your ${kindLabel} — Café Gestalt`, escapeHtml(data.topic), `
     <p>Hi ${escapeHtml(data.name)}, thanks for your suggestion! We review submissions by hand — we'll email you once we've made a decision.</p>
     <div style="background:#E4D9C0;color:#0F2E20;border-radius:4px;padding:14px 16px;margin:14px 0;">
       <p style="margin:0 0 8px;font-weight:700;">Here's what you sent us:</p>
@@ -450,30 +385,21 @@ function emailTalkReceived(data) {
       <p style="margin:0 0 6px;"><strong>Description:</strong> ${escapeHtml(data.description)}</p>
       ${datesHtml}
       ${data.notes ? `<p style="margin:10px 0 0;"><strong>Notes:</strong> ${escapeHtml(data.notes)}</p>` : ''}
-    </div>
-  </div>`;
+    </div>`);
 }
 
 function emailTalkApproved(name, topic, type) {
   const kindLabel = type === 'theme' ? 'idea' : 'talk';
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">Your ${kindLabel} was approved — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
-    <p>Hi ${escapeHtml(name)}, good news — we'd love to have you. We'll follow up separately to lock in a date and other details.</p>
-  </div>`;
+  return emailShell(`Your ${kindLabel} was approved — Café Gestalt`, escapeHtml(topic), `
+    <p>Hi ${escapeHtml(name)}, good news — we'd love to have you. We'll follow up separately to lock in a date and other details.</p>`);
 }
 
 function emailTalkDeclined(name, topic, type, reason) {
   const kindLabel = type === 'theme' ? 'idea' : 'talk';
-  return `
-  <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
-    <h2 style="font-size:1.4rem;margin-bottom:4px;">About your ${kindLabel} — Café Gestalt</h2>
-    <p style="opacity:.7;margin-top:0;">${escapeHtml(topic)}</p>
+  return emailShell(`About your ${kindLabel} — Café Gestalt`, escapeHtml(topic), `
     <p>Hi ${escapeHtml(name)}, thanks for sending this in — we're not able to take it forward this time.</p>
     ${reason ? `<p>${escapeHtml(reason).replace(/\n/g, '<br>')}</p>` : ''}
-    <p>We hope you'll pitch us again in the future.</p>
-  </div>`;
+    <p>We hope you'll pitch us again in the future.</p>`);
 }
 
 async function supaFetch(path, opts = {}) {
@@ -491,6 +417,23 @@ async function supaFetch(path, opts = {}) {
   }
   const text = await res.text();
   return text ? JSON.parse(text) : null;
+}
+
+// Shared "look up a record by its one-time token" flow used by the cancel/claim/decline-waitlist
+// views. Returns { row } on success, or { errorHtml } to render in place of the form when
+// there's no token, the lookup failed, or nothing matched.
+async function lookupByToken(table, tokenField, token, messages) {
+  if (!token) return { errorHtml: `<div class="field-hint">${messages.noToken}</div>` };
+  let rows;
+  try {
+    rows = await supaFetch(table + '?' + tokenField + '=eq.' + token + '&select=*');
+  } catch(e) {
+    return { errorHtml: `<div class="notice notice-error">${messages.fetchError}</div>` };
+  }
+  if (!rows || !rows.length) {
+    return { errorHtml: `<div class="sess-row">${messages.notFound}</div>` };
+  }
+  return { row: rows[0] };
 }
 
 /* ===================== data helpers ===================== */
@@ -584,10 +527,11 @@ async function deleteWaitlistEntry(id) {
 }
 
 const WAITLIST_RESPONSE_WINDOW_HOURS = 6;
+const WAITLIST_CLAIM_CUTOFF_HOURS = 48; // waitlist seats can't be promoted/claimed once the event is this close
 
 // After a cancellation: notify the next unclaimed, un-notified waitlist person if >48h to event
 async function promoteWaitlist(eventId, eventDate, eventLabel) {
-  if (hoursUntil(eventDate) < 48) return; // window closed
+  if (hoursUntil(eventDate) < WAITLIST_CLAIM_CUTOFF_HOURS) return; // window closed
   const list = await loadWaitlist(eventId);
   const next = list.find(w => !w.claimed && !w.notified);
   if (!next) return;
@@ -677,6 +621,25 @@ function capacityWidget(capacity, reserved) {
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 }
+// Shared ".home-session-card" markup used on the home page, the reserve schedule, and the
+// reserve form — `stats` needs at least {spotsLeft, cap}; `actionHtml` is optional.
+function sessionCardHtml(ev, stats, actionHtml) {
+  const d = new Date(ev.date + 'T00:00:00');
+  const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
+  const year = isNaN(d) ? '' : d.getFullYear();
+  return `
+    <div class="home-session-card">
+      <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span class="home-session-title">${fmtTime(ev.time)}</span>` : ''}</div>
+      <div class="home-session-body">
+        <div>
+          <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
+          ${ev.notes ? `<div class="home-session-notes">${escapeHtml(ev.notes)}</div>` : ''}
+        </div>
+        <div class="home-session-meta"><span>${stats.spotsLeft} of ${stats.cap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(ev.rsvp_by)}</span></div>
+        ${actionHtml || ''}
+      </div>
+    </div>`;
+}
 
 /* ===================== state ===================== */
 let STATE = {
@@ -704,17 +667,11 @@ function upcomingEvents() {
 }
 
 /* ===================== nav ===================== */
-function setActiveTab() {
-  document.querySelectorAll('#navTabs button').forEach(b => {
-    b.classList.toggle('active', b.dataset.nav === STATE.view);
-  });
-}
 async function navigate(view) {
   STATE.view = view; STATE.notice = null;
   if (view !== 'reserve' && view !== 'reserveForm') STATE.openReserveFormFor = null;
   if (view === 'reserve') invalidateReserveStats();
   window.location.hash = view;
-  setActiveTab();
   await render();
   window.scrollTo(0, 0);
 }
@@ -744,8 +701,6 @@ async function render() {
   }
   app.innerHTML = html;
   firstRenderDone = true;
-  // update brand
-  document.getElementById('brandTitle').textContent = (STATE.cafeInfo && STATE.cafeInfo.name) || 'Café Gestalt';
   app.classList.add('home-active');
   // The loading placeholder above briefly collapses the page's height, which makes the
   // browser clamp the scroll position — restore it so in-place actions (delete, confirm,
@@ -785,7 +740,7 @@ async function renderHome() {
   const info = STATE.cafeInfo;
   const next = upcomingEvents()[0];
 
-  let sessionCardHtml = `
+  let nextCardHtml = `
     <div class="home-session-card">
       <div class="home-session-body"><div class="home-session-title">No session scheduled yet — check back soon.</div></div>
     </div>`;
@@ -796,9 +751,6 @@ async function renderHome() {
     const spotsLeft = Math.max(0, cap - rc);
     const rsvpClosed = !isFuture(next.rsvp_by);
     const full = spotsLeft <= 0;
-    const d = new Date(next.date + 'T00:00:00');
-    const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
-    const year = isNaN(d) ? '' : d.getFullYear();
 
     let actionHtml;
     if (full) {
@@ -809,18 +761,7 @@ async function renderHome() {
       actionHtml = '<button class="home-btn" data-nav="reserve">Reserve a seat</button>';
     }
 
-    sessionCardHtml = `
-    <div class="home-session-card">
-      <div class="home-session-date">${dayMonth}<br/>${year}${next.time ? `<br/><span class="home-session-title">${fmtTime(next.time)}</span>` : ''}</div>
-      <div class="home-session-body">
-        <div>
-          <div class="home-session-title">${next.label ? escapeHtml(next.label) : 'Café Gestalt session'}</div>
-          ${next.notes ? `<div class="home-session-notes">${escapeHtml(next.notes)}</div>` : ''}
-        </div>
-        <div class="home-session-meta"><span>${spotsLeft} of ${cap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(next.rsvp_by)}</span></div>
-        ${actionHtml}
-      </div>
-    </div>`;
+    nextCardHtml = sessionCardHtml(next, { spotsLeft, cap }, actionHtml);
   }
 
   const howParas = (info.how_it_works || '').split(/\n\n+/).map(p => p.trim()).filter(Boolean);
@@ -837,7 +778,7 @@ async function renderHome() {
     <div class="home-grid">
       <div class="home-col"${!next ? ' style="justify-content:flex-start;"' : ''}>
         <div class="home-eyebrow">NEXT SESSION</div>
-        ${sessionCardHtml}
+        ${nextCardHtml}
       </div>
       <div class="home-col">
         <div class="home-eyebrow">PROPOSE A TALK OR THEME</div>
@@ -892,9 +833,6 @@ async function renderReserve() {
 
   const fStats = await getEventStats(first);
   const { spotsLeft: fSpotsLeft, cap: fCap, rsvpClosed: fRsvpClosed, full: fFull, waitlistCount: fWaitlistCount } = fStats;
-  const fd = new Date(first.date + 'T00:00:00');
-  const fDayMonth = isNaN(fd) ? '' : fd.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
-  const fYear = isNaN(fd) ? '' : fd.getFullYear();
 
   const nextSessionHtml = `
   <div class="sess-next">
@@ -902,17 +840,7 @@ async function renderReserve() {
     <div class="sess-next-copy">
      <div class="sess-next-inner">
       <div class="home-eyebrow" style="margin-bottom:0;">NEXT SESSION</div>
-      <div class="home-session-card">
-        <div class="home-session-date">${fDayMonth}<br/>${fYear}${first.time ? `<br/><span class="home-session-title">${fmtTime(first.time)}</span>` : ''}</div>
-        <div class="home-session-body">
-          <div>
-            <div class="home-session-title">${first.label ? escapeHtml(first.label) : 'Café Gestalt session'}</div>
-            ${first.notes ? `<div class="home-session-notes">${escapeHtml(first.notes)}</div>` : ''}
-          </div>
-          <div class="home-session-meta"><span>${fSpotsLeft} of ${fCap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(first.rsvp_by)}</span></div>
-          ${buildAction(first, fSpotsLeft, fFull, fRsvpClosed, fWaitlistCount)}
-        </div>
-      </div>
+      ${sessionCardHtml(first, { spotsLeft: fSpotsLeft, cap: fCap }, buildAction(first, fSpotsLeft, fFull, fRsvpClosed, fWaitlistCount))}
      </div>
     </div>
   </div>`;
@@ -975,21 +903,7 @@ async function renderReserveForm() {
   }
 
   const { spotsLeft, cap, rsvpClosed, full } = await getEventStats(ev);
-  const d = new Date(ev.date + 'T00:00:00');
-  const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
-  const year = isNaN(d) ? '' : d.getFullYear();
-
-  const cardHtml = `
-  <div class="home-session-card">
-    <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span class="home-session-title">${fmtTime(ev.time)}</span>` : ''}</div>
-    <div class="home-session-body">
-      <div>
-        <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
-        ${ev.notes ? `<div class="home-session-notes">${escapeHtml(ev.notes)}</div>` : ''}
-      </div>
-      <div class="home-session-meta"><span>${spotsLeft} of ${cap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(ev.rsvp_by)}</span></div>
-    </div>
-  </div>`;
+  const cardHtml = sessionCardHtml(ev, { spotsLeft, cap }, '');
 
   if (rsvpClosed || (isWaitlist ? !full : full)) {
     return shell(`
@@ -1031,7 +945,7 @@ async function renderReserveForm() {
   } else {
     formHtml = `
     <div class="form-panel-dark">
-      <p style="margin:0 0 12px;font-size:.92rem;">This session is full. Add your name to the waitlist — if a seat opens up and there's more than 48 hours until the session, we'll email you first.</p>
+      <p style="margin:0 0 12px;font-size:.92rem;">This session is full. Add your name to the waitlist — if a seat opens up and there's more than ${WAITLIST_CLAIM_CUTOFF_HOURS} hours until the session, we'll email you first.</p>
       <form data-form="waitlist" data-event-id="${ev.id}" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name"/></div>
         <div class="field"><label>Email</label><input type="email" name="email"/></div>
@@ -1064,21 +978,12 @@ async function renderCancel() {
     ${darkFooterHtml()}
   </div>`;
 
-  const token = STATE.cancelToken;
-  if (!token) return shell('<div class="field-hint">No cancellation token found.</div>');
-
-  let rows;
-  try {
-    rows = await supaFetch('reservations?cancel_token=eq.' + token + '&select=*');
-  } catch(e) {
-    return shell('<div class="notice notice-error">Could not look up your reservation. Please try again.</div>');
-  }
-
-  if (!rows || !rows.length) {
-    return shell('<div class="sess-row">This reservation has already been cancelled or the link is invalid.</div>');
-  }
-
-  const r = rows[0];
+  const { row: r, errorHtml } = await lookupByToken('reservations', 'cancel_token', STATE.cancelToken, {
+    noToken: 'No cancellation token found.',
+    fetchError: 'Could not look up your reservation. Please try again.',
+    notFound: 'This reservation has already been cancelled or the link is invalid.'
+  });
+  if (errorHtml) return shell(errorHtml);
   const ev = STATE.events.find(e => e.id === r.event_id);
   const eventDate = ev ? ev.date : '';
   const eventLabel = ev ? ev.label : '';
@@ -1116,21 +1021,13 @@ async function renderClaim() {
     ${darkFooterHtml()}
   </div>`;
 
-  const token = STATE.claimToken;
-  if (!token) return shell('<div class="field-hint">No claim token found.</div>');
+  const { row: w, errorHtml } = await lookupByToken('waitlist', 'claim_token', STATE.claimToken, {
+    noToken: 'No claim token found.',
+    fetchError: 'Could not look up your waitlist entry. Please try again.',
+    notFound: 'This link is invalid or has already been used.'
+  });
+  if (errorHtml) return shell(errorHtml);
 
-  let rows;
-  try {
-    rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
-  } catch(e) {
-    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
-  }
-
-  if (!rows || !rows.length) {
-    return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
-  }
-
-  const w = rows[0];
   const ev = STATE.events.find(e => e.id === w.event_id);
   const eventDate = ev ? ev.date : '';
   const eventLabel = ev ? ev.label : '';
@@ -1150,8 +1047,8 @@ async function renderClaim() {
     return shell(`<div class="sess-row">Sorry — this offer expired after ${WAITLIST_RESPONSE_WINDOW_HOURS} hours with no response, so we've offered the seat to the next person on the waitlist.</div>`);
   }
 
-  if (hoursUntil(eventDate) < 48) {
-    return shell('<div class="sess-row">Sorry — the claim window for this session has closed (less than 48 hours to go).</div>');
+  if (hoursUntil(eventDate) < WAITLIST_CLAIM_CUTOFF_HOURS) {
+    return shell(`<div class="sess-row">Sorry — the claim window for this session has closed (less than ${WAITLIST_CLAIM_CUTOFF_HOURS} hours to go).</div>`);
   }
 
   // Check there's still a seat
@@ -1186,21 +1083,13 @@ async function renderDeclineWaitlist() {
     ${darkFooterHtml()}
   </div>`;
 
-  const token = STATE.declineToken;
-  if (!token) return shell('<div class="field-hint">No token found.</div>');
+  const { row: w, errorHtml } = await lookupByToken('waitlist', 'claim_token', STATE.declineToken, {
+    noToken: 'No token found.',
+    fetchError: 'Could not look up your waitlist entry. Please try again.',
+    notFound: 'This link is invalid or has already been used.'
+  });
+  if (errorHtml) return shell(errorHtml);
 
-  let rows;
-  try {
-    rows = await supaFetch('waitlist?claim_token=eq.' + token + '&select=*');
-  } catch(e) {
-    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
-  }
-
-  if (!rows || !rows.length) {
-    return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
-  }
-
-  const w = rows[0];
   const ev = STATE.events.find(e => e.id === w.event_id);
   const eventDate = ev ? ev.date : '';
   const eventLabel = ev ? ev.label : '';
@@ -1342,37 +1231,51 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
   return html;
 }
 
-async function renderTalk() {
-  const submitNoticeHtml = STATE.notice ? `<div style="margin-top:16px;text-align:right;color:#6FAE82;font-size:.92rem;">${escapeHtml(STATE.notice.text)}</div>` : '';
+// Config driving the two near-identical submission forms below — everything that differs
+// between "give a talk" and "suggest a theme" lives here; the shared markup lives in
+// talkOrThemeFormHtml().
+const TALK_FORM_CONFIG = {
+  talk: {
+    intro: `<p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
+      <p style="margin:0 0 16px;">As a guideline, talks and presentations can be anywhere from 20-40 minutes long, workshops up to an hour. Got something different in mind? Mention it in the notes and we'll work it out together.</p>`,
+    topicLabel: 'Talk or workshop topic / title',
+    topicPlaceholder: '',
+    descriptionPlaceholder: "What's the talk about? Who is it for?",
+    notesPlaceholder: 'Format needs, length, anything else we should know',
+    showCalendar: true,
+    submitLabel: 'Submit proposal'
+  },
+  theme: {
+    intro: `<p style="margin:0 0 16px;">Have an idea for a session theme — a book club, a craft day, a screening? Tell us what you have in mind.</p>`,
+    topicLabel: 'Theme idea',
+    topicPlaceholder: 'e.g. Silent book club, Natural dyeing workshop',
+    descriptionPlaceholder: 'What would this session look like?',
+    notesPlaceholder: 'Anything else we should know',
+    showCalendar: false,
+    submitLabel: 'Submit idea'
+  }
+};
 
+function talkOrThemeFormHtml(mode) {
+  const cfg = TALK_FORM_CONFIG[mode];
+  const submitNoticeHtml = STATE.notice ? `<div style="margin-top:16px;text-align:right;color:#6FAE82;font-size:.92rem;">${escapeHtml(STATE.notice.text)}</div>` : '';
+  return `
+      ${cfg.intro}
+      <form data-form="${mode}" novalidate>
+        <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
+        <div class="field"><label>${cfg.topicLabel}</label><input type="text" name="topic"${cfg.topicPlaceholder ? ` placeholder="${cfg.topicPlaceholder}"` : ''} value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
+        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="${cfg.descriptionPlaceholder}">${escapeHtml(TALK_DRAFT.description)}</textarea><div class="field-hint">Max 250 characters.</div></div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="${cfg.notesPlaceholder}">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
+        ${cfg.showCalendar ? renderCalendarPicker() : ''}
+        <div class="form-actions-right"><button class="home-btn" type="submit">${cfg.submitLabel}</button></div>
+        ${submitNoticeHtml}
+      </form>`;
+}
+
+async function renderTalk() {
   const modeBtn = (mode, label) => `<button type="button" class="${TALK_MODE===mode ? 'home-btn' : 'home-btn-outline'}" data-action="set-talk-mode" data-mode="${mode}">${label}</button>`;
   const tabs = `<div class="talk-tabs">${modeBtn('talk', 'Give a talk')}${modeBtn('theme', 'Suggest a theme')}</div>`;
-
-  const talkForm = `
-      <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
-</p>As a guideline, talks and presentations can be anywhere from 20-40 minutes long. Workshops can be up to an hour. If you have other needs or ideas for your program, please add them to the notes section and let's discuss what's possible!</p>
-      <form data-form="talk" novalidate>
-        <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
-        <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
-        <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
-        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="What's the talk about? Who is it for?">${escapeHtml(TALK_DRAFT.description)}</textarea><div class="field-hint">Max 250 characters.</div></div>
-        ${renderCalendarPicker()}
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
-        <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
-        ${TALK_MODE === 'talk' ? submitNoticeHtml : ''}
-      </form>`;
-
-  const themeForm = `
-      <p style="margin:0 0 16px;">Have an idea for a session theme — a book club, a craft day, a screening? Tell us what you have in mind.</p>
-      <form data-form="theme" novalidate>
-        <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
-        <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
-        <div class="field"><label>Theme idea</label><input type="text" name="topic" placeholder="e.g. Silent book club, Natural dyeing workshop" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
-        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="What would this session look like?">${escapeHtml(TALK_DRAFT.description)}</textarea><div class="field-hint">Max 250 characters.</div></div>
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
-        <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
-        ${TALK_MODE === 'theme' ? submitNoticeHtml : ''}
-      </form>`;
 
   return `
   <div class="home-view">
@@ -1381,7 +1284,7 @@ async function renderTalk() {
     <div class="talk-panel">
       ${tabs}
       <div class="form-panel-dark">
-        ${TALK_MODE === 'talk' ? talkForm : themeForm}
+        ${talkOrThemeFormHtml(TALK_MODE)}
       </div>
     </div>
     ${darkFooterHtml()}
@@ -1657,6 +1560,170 @@ document.addEventListener('keydown', async (e) => {
   e.preventDefault();
   await navigate(navEl.dataset.nav);
 });
+// Dispatch table for every [data-action] click handler, keyed by the action name. Each
+// handler receives the matched element. Kept as a table (rather than one long if/else chain)
+// so each action reads as its own small unit.
+const CLICK_ACTIONS = {
+  'toggle-mobile-nav': async (el) => {
+    const links = document.getElementById('homeNavLinks');
+    const isOpen = links.classList.toggle('is-open');
+    el.classList.toggle('is-open', isOpen);
+    el.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  },
+  'scroll-how': async () => {
+    document.getElementById('home-how-it-works')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  },
+  'toggle-diet-field': async (el) => {
+    const textarea = el.closest('.field').querySelector('textarea[name="dietaryNeeds"]');
+    if (textarea) {
+      textarea.style.display = el.checked ? 'none' : '';
+      if (el.checked) textarea.value = '';
+    }
+  },
+  'set-talk-mode': async (el) => {
+    TALK_MODE = el.dataset.mode;
+    TALK_PICKER.openMonths.clear();
+    TALK_PICKER.selectedDays.clear();
+    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
+    await render();
+  },
+  'toggle-month': async (el) => {
+    captureTalkDraft();
+    const m = el.dataset.month;
+    if (TALK_PICKER.openMonths.has(m)) TALK_PICKER.openMonths.delete(m);
+    else TALK_PICKER.openMonths.add(m);
+    await render();
+  },
+  'pick-day': async (el) => {
+    if (el.dataset.past === 'true') return;
+    captureTalkDraft();
+    const iso = el.dataset.iso;
+    if (TALK_PICKER.selectedDays.has(iso)) TALK_PICKER.selectedDays.delete(iso);
+    else TALK_PICKER.selectedDays.add(iso);
+    await render();
+  },
+  'open-reserve-form': async (el) => {
+    STATE.openReserveFormFor = el.dataset.eventId;
+    await navigate('reserveForm');
+  },
+  'cancel-reserve-form': async () => {
+    STATE.openReserveFormFor = null;
+    await navigate('reserve');
+  },
+  'admin-tab': async (el) => {
+    ADMIN_TAB = el.dataset.tab;
+    CREATE_EVENT_PREFILL = null;
+    await render();
+    window.scrollTo(0, 0);
+  },
+  'lock-admin': async () => {
+    STATE.adminUnlocked = false; await render(); window.scrollTo(0, 0);
+  },
+  'open-edit-event': async (el) => {
+    STATE.openEditEventFor = el.dataset.eventId; await render();
+  },
+  'cancel-edit-event': async () => {
+    STATE.openEditEventFor = null; await render();
+  },
+  'delete-event': async (el) => {
+    if (confirm('Delete this session? All reservations for it will also be deleted.')) {
+      await deleteEvent(el.dataset.eventId);
+      STATE.events = await loadEvents();
+      invalidateReserveStats();
+      STATE.notice = { type:'success', text:'Session deleted.' }; await render();
+    }
+  },
+  'delete-reservation': async (el) => {
+    if (confirm('Remove this reservation?')) {
+      const ev = STATE.events.find(e => e.id === el.dataset.eventId);
+      await deleteReservation(el.dataset.id);
+      if (ev) await promoteWaitlist(ev.id, ev.date, ev.label);
+      invalidateReserveStats();
+      STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
+    }
+  },
+  'confirm-reservation': async (el) => {
+    const ev = STATE.events.find(e => e.id === el.dataset.eventId);
+    const reservation = await updateReservationStatus(el.dataset.id, 'confirmed');
+    invalidateReserveStats();
+    if (reservation && ev) {
+      const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
+      await sendEmail(
+        reservation.email,
+        'Your reservation — Café Gestalt ' + fmtDate(ev.date),
+        emailReservationApproved(reservation.name, fmtDate(ev.date), ev.label||'', cancelUrl)
+      );
+      STATE.notice = { type:'success', text:'Reservation confirmed and guest notified.' };
+    } else {
+      STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
+    }
+    await render();
+  },
+  'decline-reservation': async (el) => {
+    if (confirm('Decline this request? The guest will be emailed.')) {
+      const ev = STATE.events.find(e => e.id === el.dataset.eventId);
+      const reservation = await updateReservationStatus(el.dataset.id, 'declined');
+      invalidateReserveStats();
+      if (reservation && ev) {
+        await sendEmail(
+          reservation.email,
+          'Your request — Café Gestalt ' + fmtDate(ev.date),
+          emailReservationDeclined(reservation.name, fmtDate(ev.date), ev.label||'')
+        );
+        STATE.notice = { type:'success', text:'Request declined and guest notified.' };
+      } else {
+        STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
+      }
+      await render();
+    }
+  },
+  'delete-waitlist': async (el) => {
+    if (confirm('Remove this person from the waitlist?')) {
+      await deleteWaitlistEntry(el.dataset.id);
+      invalidateReserveStats();
+      STATE.notice = { type:'success', text:'Waitlist entry removed.' }; await render();
+    }
+  },
+  'delete-talk': async (el) => {
+    if (confirm('Delete this talk proposal?')) {
+      await deleteTalk(el.dataset.id);
+      STATE.talks = STATE.talks.filter(t => t.id !== el.dataset.id);
+      STATE.notice = { type:'success', text:'Talk proposal deleted.' }; await render();
+    }
+  },
+  'approve-talk': async (el) => {
+    const t = STATE.talks.find(x => x.id === el.dataset.id);
+    if (t) {
+      t.status = 'approved';
+      await updateTalk(t);
+      await sendEmail(t.email, 'Your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' was approved — Café Gestalt', emailTalkApproved(t.name, t.topic, t.submission_type));
+      STATE.notice = { type:'success', text:'Marked approved and submitter notified.' }; await render();
+    }
+  },
+  'open-decline-talk-modal': async (el) => {
+    STATE.declineTalkModalFor = el.dataset.id;
+    await render();
+  },
+  'cancel-decline-talk': async () => {
+    STATE.declineTalkModalFor = null;
+    await render();
+  },
+  'create-session-from-talk': async (el) => {
+    const t = STATE.talks.find(x => x.id === el.dataset.id);
+    if (t) {
+      CREATE_EVENT_PREFILL = {
+        label: t.topic,
+        notes: t.description,
+        date: (t.available_dates && t.available_dates[0]) || '',
+        fromTalkId: t.id
+      };
+      ADMIN_TAB = 'sessions';
+      await render();
+      window.scrollTo(0, 0);
+    }
+  }
+};
+
 document.addEventListener('click', async (e) => {
   const navBtn = e.target.closest('[data-nav]');
   if (navBtn) { await navigate(navBtn.dataset.nav); return; }
@@ -1671,145 +1738,8 @@ document.addEventListener('click', async (e) => {
     }
     return;
   }
-  const action = actionEl.dataset.action;
-
-  if (action === 'toggle-mobile-nav') {
-    const links = document.getElementById('homeNavLinks');
-    const isOpen = links.classList.toggle('is-open');
-    actionEl.classList.toggle('is-open', isOpen);
-    actionEl.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  } else if (action === 'scroll-how') {
-    document.getElementById('home-how-it-works')?.scrollIntoView({ behavior:'smooth', block:'start' });
-  } else if (action === 'toggle-diet-field') {
-    const textarea = actionEl.closest('.field').querySelector('textarea[name="dietaryNeeds"]');
-    if (textarea) {
-      textarea.style.display = actionEl.checked ? 'none' : '';
-      if (actionEl.checked) textarea.value = '';
-    }
-  } else if (action === 'set-talk-mode') {
-    TALK_MODE = actionEl.dataset.mode;
-    TALK_PICKER.openMonths.clear();
-    TALK_PICKER.selectedDays.clear();
-    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
-    await render();
-  } else if (action === 'toggle-month') {
-    captureTalkDraft();
-    const m = actionEl.dataset.month;
-    if (TALK_PICKER.openMonths.has(m)) TALK_PICKER.openMonths.delete(m);
-    else TALK_PICKER.openMonths.add(m);
-    await render();
-  } else if (action === 'pick-day') {
-    if (actionEl.dataset.past === 'true') return;
-    captureTalkDraft();
-    const iso = actionEl.dataset.iso;
-    if (TALK_PICKER.selectedDays.has(iso)) TALK_PICKER.selectedDays.delete(iso);
-    else TALK_PICKER.selectedDays.add(iso);
-    await render();
-  } else if (action === 'open-reserve-form') {
-    STATE.openReserveFormFor = actionEl.dataset.eventId;
-    await navigate('reserveForm');
-  } else if (action === 'cancel-reserve-form') {
-    STATE.openReserveFormFor = null;
-    await navigate('reserve');
-  } else if (action === 'admin-tab') {
-    ADMIN_TAB = actionEl.dataset.tab;
-    CREATE_EVENT_PREFILL = null;
-    await render();
-    window.scrollTo(0, 0);
-  } else if (action === 'lock-admin') {
-    STATE.adminUnlocked = false; await render(); window.scrollTo(0, 0);
-  } else if (action === 'open-edit-event') {
-    STATE.openEditEventFor = actionEl.dataset.eventId; await render();
-  } else if (action === 'cancel-edit-event') {
-    STATE.openEditEventFor = null; await render();
-  } else if (action === 'delete-event') {
-    if (confirm('Delete this session? All reservations for it will also be deleted.')) {
-      await deleteEvent(actionEl.dataset.eventId);
-      STATE.events = await loadEvents();
-      invalidateReserveStats();
-      STATE.notice = { type:'success', text:'Session deleted.' }; await render();
-    }
-  } else if (action === 'delete-reservation') {
-    if (confirm('Remove this reservation?')) {
-      const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
-      await deleteReservation(actionEl.dataset.id);
-      if (ev) await promoteWaitlist(ev.id, ev.date, ev.label);
-      invalidateReserveStats();
-      STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
-    }
-  } else if (action === 'confirm-reservation') {
-    const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
-    const reservation = await updateReservationStatus(actionEl.dataset.id, 'confirmed');
-    invalidateReserveStats();
-    if (reservation && ev) {
-      const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
-      await sendEmail(
-        reservation.email,
-        'Your reservation — Café Gestalt ' + fmtDate(ev.date),
-        emailReservationApproved(reservation.name, fmtDate(ev.date), ev.label||'', cancelUrl)
-      );
-      STATE.notice = { type:'success', text:'Reservation confirmed and guest notified.' };
-    } else {
-      STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
-    }
-    await render();
-  } else if (action === 'decline-reservation') {
-    if (confirm('Decline this request? The guest will be emailed.')) {
-      const ev = STATE.events.find(e => e.id === actionEl.dataset.eventId);
-      const reservation = await updateReservationStatus(actionEl.dataset.id, 'declined');
-      invalidateReserveStats();
-      if (reservation && ev) {
-        await sendEmail(
-          reservation.email,
-          'Your request — Café Gestalt ' + fmtDate(ev.date),
-          emailReservationDeclined(reservation.name, fmtDate(ev.date), ev.label||'')
-        );
-        STATE.notice = { type:'success', text:'Request declined and guest notified.' };
-      } else {
-        STATE.notice = { type:'error', text:'Could not update this reservation — check the reservations table has an UPDATE policy for the anon role in Supabase.' };
-      }
-      await render();
-    }
-  } else if (action === 'delete-waitlist') {
-    if (confirm('Remove this person from the waitlist?')) {
-      await deleteWaitlistEntry(actionEl.dataset.id);
-      invalidateReserveStats();
-      STATE.notice = { type:'success', text:'Waitlist entry removed.' }; await render();
-    }
-  } else if (action === 'delete-talk') {
-    if (confirm('Delete this talk proposal?')) {
-      await deleteTalk(actionEl.dataset.id);
-      STATE.talks = STATE.talks.filter(t => t.id !== actionEl.dataset.id);
-      STATE.notice = { type:'success', text:'Talk proposal deleted.' }; await render();
-    }
-  } else if (action === 'approve-talk') {
-    const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
-    if (t) {
-      t.status = 'approved';
-      await updateTalk(t);
-      await sendEmail(t.email, 'Your ' + (t.submission_type === 'theme' ? 'idea' : 'talk') + ' was approved — Café Gestalt', emailTalkApproved(t.name, t.topic, t.submission_type));
-      STATE.notice = { type:'success', text:'Marked approved and submitter notified.' }; await render();
-    }
-  } else if (action === 'open-decline-talk-modal') {
-    STATE.declineTalkModalFor = actionEl.dataset.id;
-    await render();
-  } else if (action === 'cancel-decline-talk') {
-    STATE.declineTalkModalFor = null;
-    await render();
-  } else if (action === 'create-session-from-talk') {
-    const t = STATE.talks.find(x => x.id === actionEl.dataset.id);
-    if (t) {
-      CREATE_EVENT_PREFILL = {
-        label: t.topic,
-        notes: t.description,
-        date: (t.available_dates && t.available_dates[0]) || '',
-        fromTalkId: t.id
-      };
-      ADMIN_TAB = 'sessions';
-      await render();
-      window.scrollTo(0, 0);
-    }
-  }
+  const handler = CLICK_ACTIONS[actionEl.dataset.action];
+  if (handler) await handler(actionEl);
 });
 
 /* ===================== inline validation ===================== */
@@ -1846,14 +1776,10 @@ function validateForm(form, rules) {
   return valid;
 }
 
-document.addEventListener('submit', async (e) => {
-  const form = e.target.closest('form[data-form]');
-  if (!form) return;
-  e.preventDefault();
-  const type = form.dataset.form;
-  const fd = new FormData(form);
-
-  if (type === 'reserve') {
+// Dispatch table for every [data-form] submit handler, keyed by the form type. Each handler
+// receives the submitted form element and its FormData.
+const SUBMIT_HANDLERS = {
+  reserve: async (form, fd) => {
     const valid = validateForm(form, {
       name:  { required: 'Please enter your name.' },
       email: { required: 'Please enter your email.', email: 'Please enter a valid email address.' }
@@ -1862,7 +1788,6 @@ document.addEventListener('submit', async (e) => {
     const noSpecialDiet = form.querySelector('[name="noSpecialDiet"]').checked;
     const dietaryNeeds = (fd.get('dietaryNeeds')||'').trim();
     if (!noSpecialDiet && !dietaryNeeds) {
-      valid === false || null; // keep going to show dietary error
       form.querySelector('[name="dietaryNeeds"]').classList.add('invalid');
       const existing = form.querySelector('[name="dietaryNeeds"]').closest('.field').querySelector('.field-error');
       if (!existing) {
@@ -1871,7 +1796,6 @@ document.addEventListener('submit', async (e) => {
         msg.textContent = 'Please describe your dietary needs, or tick "No special dietary needs".';
         form.querySelector('[name="dietaryNeeds"]').closest('.field').appendChild(msg);
       }
-      if (!valid) return;
       return;
     }
     if (!valid) return;
@@ -1908,25 +1832,26 @@ document.addEventListener('submit', async (e) => {
     }
     invalidateReserveStats();
     STATE.openReserveFormFor = null;
-    STATE.view = 'reserve'; window.location.hash = 'reserve'; setActiveTab();
+    STATE.view = 'reserve'; window.location.hash = 'reserve';
     await render();
+  },
 
-  } else if (type === 'waitlist') {
+  waitlist: async (form, fd) => {
     const valid = validateForm(form, {
       name:  { required: 'Please enter your name.' },
       email: { required: 'Please enter your email.', email: 'Please enter a valid email address.' }
     });
     if (!valid) return;
     const eventId = form.dataset.eventId;
-    const ev = STATE.events.find(x => x.id === eventId);
     await addToWaitlist(eventId, { name:fd.get('name'), email:fd.get('email'), partySize:1, notes:fd.get('notes')||'' });
     invalidateReserveStats();
     STATE.notice = { type:'success', text:"You're on the waitlist. We'll email you if a seat opens up." };
     STATE.openReserveFormFor = null;
-    STATE.view = 'reserve'; window.location.hash = 'reserve'; setActiveTab();
+    STATE.view = 'reserve'; window.location.hash = 'reserve';
     await render();
+  },
 
-  } else if (type === 'do-cancel') {
+  'do-cancel': async (form) => {
     const reservationId = form.dataset.reservationId;
     const eventId       = form.dataset.eventId;
     const eventDate     = form.dataset.eventDate;
@@ -1939,8 +1864,9 @@ document.addEventListener('submit', async (e) => {
     STATE.notice = { type:'success', text:'Your reservation has been cancelled.' };
     await refreshCore();
     await render();
+  },
 
-  } else if (type === 'do-claim') {
+  'do-claim': async (form) => {
     const waitlistId = form.dataset.waitlistId;
     const eventId    = form.dataset.eventId;
     const eventDate  = form.dataset.eventDate;
@@ -1982,8 +1908,9 @@ document.addEventListener('submit', async (e) => {
     STATE.claimToken = null;
     STATE.view = 'home';
     await render();
+  },
 
-  } else if (type === 'do-decline-waitlist') {
+  'do-decline-waitlist': async (form) => {
     const waitlistId = form.dataset.waitlistId;
     const eventId     = form.dataset.eventId;
     const eventDate    = form.dataset.eventDate;
@@ -2000,8 +1927,9 @@ document.addEventListener('submit', async (e) => {
     STATE.view = 'home';
     STATE.notice = { type:'success', text:"Thanks for letting us know — we've offered the seat to the next person on the waitlist." };
     await render();
+  },
 
-  } else if (type === 'talk') {
+  talk: async (form, fd) => {
     const valid = validateForm(form, {
       name:        { required: 'Please enter your name.' },
       email:       { required: 'Please enter your email.', email: 'Please enter a valid email address.' },
@@ -2020,8 +1948,9 @@ document.addEventListener('submit', async (e) => {
     TALK_MODE = 'talk';
     STATE.notice = { type:'success', text:"Thanks! We'll follow up to confirm a date." };
     form.reset(); await render();
+  },
 
-  } else if (type === 'theme') {
+  theme: async (form, fd) => {
     const valid = validateForm(form, {
       name:        { required: 'Please enter your name.' },
       email:       { required: 'Please enter your email.', email: 'Please enter a valid email address.' },
@@ -2037,29 +1966,34 @@ document.addEventListener('submit', async (e) => {
     TALK_MODE = 'talk';
     STATE.notice = { type:'success', text:"Thanks for the idea! We'll be in touch." };
     form.reset(); await render();
+  },
 
-  } else if (type === 'set-passcode') {
+  'set-passcode': async (form, fd) => {
     await savePasscode(fd.get('passcode'));
     STATE.adminUnlocked = true;
     STATE.notice = { type:'success', text:'Passcode set. Welcome in.' }; await render();
+  },
 
-  } else if (type === 'unlock-admin') {
+  'unlock-admin': async (form, fd) => {
     const code = await loadPasscode();
     if (fd.get('passcode') === code) { STATE.adminUnlocked = true; STATE.notice = null; }
     else { STATE.notice = { type:'error', text:'Incorrect passcode.' }; }
     await render();
+  },
 
-  } else if (type === 'cafe-info') {
+  'cafe-info': async (form, fd) => {
     STATE.cafeInfo = { ...STATE.cafeInfo, name:fd.get('name'), tagline:fd.get('tagline'), about:fd.get('about'), hours:fd.get('hours'), how_it_works:fd.get('how_it_works')||'' };
     await saveCafeInfo(STATE.cafeInfo);
     STATE.notice = { type:'success', text:'Cafe info saved.' }; await render();
+  },
 
-  } else if (type === 'reservation-settings') {
+  'reservation-settings': async (form) => {
     STATE.cafeInfo.require_confirmation = form.querySelector('[name="requireConfirmation"]').checked;
     await saveCafeInfo(STATE.cafeInfo);
     STATE.notice = { type:'success', text:'Reservation setting saved.' }; await render();
+  },
 
-  } else if (type === 'decline-talk-reason') {
+  'decline-talk-reason': async (form, fd) => {
     const t = STATE.talks.find(x => x.id === form.dataset.id);
     if (t) {
       const reason = (fd.get('reason')||'').trim();
@@ -2070,8 +2004,9 @@ document.addEventListener('submit', async (e) => {
       STATE.notice = { type:'success', text:'Declined and submitter notified.' };
     }
     await render();
+  },
 
-  } else if (type === 'create-event') {
+  'create-event': async (form, fd) => {
     const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
     const fromTalkId = form.dataset.fromTalkId;
     if (fromTalkId && created && created[0]) {
@@ -2082,14 +2017,23 @@ document.addEventListener('submit', async (e) => {
     STATE.events = await loadEvents();
     invalidateReserveStats();
     STATE.notice = { type:'success', text:'Session created.' }; await render();
+  },
 
-  } else if (type === 'edit-event') {
+  'edit-event': async (form, fd) => {
     await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
     STATE.events = await loadEvents();
     invalidateReserveStats();
     STATE.openEditEventFor = null;
     STATE.notice = { type:'success', text:'Session updated.' }; await render();
   }
+};
+
+document.addEventListener('submit', async (e) => {
+  const form = e.target.closest('form[data-form]');
+  if (!form) return;
+  e.preventDefault();
+  const handler = SUBMIT_HANDLERS[form.dataset.form];
+  if (handler) await handler(form, new FormData(form));
 });
 
 /* ===================== init ===================== */
@@ -2109,7 +2053,7 @@ window.addEventListener('hashchange', async () => {
   }
   if (STATE.view !== 'reserve' && STATE.view !== 'reserveForm') STATE.openReserveFormFor = null;
   if (STATE.view === 'reserve') invalidateReserveStats();
-  setActiveTab(); await render();
+  await render();
 });
 
 (async function init() {
@@ -2130,7 +2074,7 @@ window.addEventListener('hashchange', async () => {
     STATE.view = hash || 'home';
   }
 
-  setActiveTab(); await render();
+  await render();
 })();
 </script>
 </body>
