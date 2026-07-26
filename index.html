@@ -1335,12 +1335,12 @@ async function renderTalk() {
 
   const talkForm = `
       <p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
-      <p>As a guideline, talks and presentations can be anywhere from 20-40 minutes long. Workshops can be up to an hour. If you have other needs or ideas for your program, please add them to the notes section and let's discuss what's possible!</p>
+</p>As a guideline, talks and presentations can be anywhere from 20-40 minutes long. Workshops can be up to an hour. If you have other needs or ideas for your program, please add them to the notes section and let's discuss what's possible!</p>
       <form data-form="talk" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
         <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
         <div class="field"><label>Talk or workshop topic / title</label><input type="text" name="topic" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
-        <div class="field"><label>Description</label><textarea name="description" placeholder="What's the talk about? Who is it for?">${escapeHtml(TALK_DRAFT.description)}</textarea></div>
+        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="What's the talk about? Who is it for?">${escapeHtml(TALK_DRAFT.description)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         ${renderCalendarPicker()}
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Format needs, length, anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit proposal</button></div>
