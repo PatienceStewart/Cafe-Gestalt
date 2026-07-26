@@ -995,7 +995,8 @@ async function renderReserveForm() {
     <div class="form-panel-dark">
       <form data-form="reserve" data-event-id="${ev.id}" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name"/></div>
-        <div class="field"><label>Email</label><input type="email" name="email"/></div>
+        <div class="field"><label>Email</label><input type="email" name="email"/>
+          <div class="field-hint">The address of Café Gestalt will be included with your reservation confirmation, so make sure this is an email that works!</div></div>
         <div class="field"><label>Party size</label><select name="partySize">${options}</select>
           <div class="field-hint">Only ${spotsLeft} seat${spotsLeft===1?'':'s'} left.</div></div>
         <div class="field">
@@ -1032,6 +1033,7 @@ async function renderReserveForm() {
     ${titleRow(isWaitlist ? 'Join the waitlist' : reserveTitle)}
     <div class="sess-form-wrap">
       ${cardHtml}
+      <div class="sess-form-note">Please note that Café Gestalt is not wheelchair accessible.</div>
       ${formHtml}
     </div>
   `);
@@ -1294,7 +1296,7 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
   let html = label
     ? `<div class="field"><label>${label}</label>`
     : `<div class="field">`;
-  if (label) html += '<div class="field-hint" style="margin-bottom:10px;">Open a month, then tap days that work for you. You can open multiple months.</div>';
+  if (label) html += '<div class="field-hint" style="margin-bottom:10px;">Open a month, then select days that work for you. You can open multiple months.</div>';
 
   months.forEach(({ key, label }) => {
     const isOpen = TALK_PICKER.openMonths.has(key);
@@ -1351,11 +1353,6 @@ async function renderTalk() {
         <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
         <div class="field"><label>Theme idea</label><input type="text" name="topic" placeholder="e.g. Silent book club, Natural dyeing workshop" value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
         <div class="field"><label>Description</label><textarea name="description" placeholder="What would this session look like?">${escapeHtml(TALK_DRAFT.description)}</textarea></div>
-        <div class="field">
-          <label>Preferred dates (optional)</label>
-          <div class="field-hint" style="margin-bottom:8px;">If you have dates in mind, open a month and tap days that work. You can select dates across multiple months.</div>
-          ${renderCalendarPicker(null)}
-        </div>
         <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="Anything else we should know">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="form-actions-right"><button class="home-btn" type="submit">Submit idea</button></div>
         ${TALK_MODE === 'theme' ? submitNoticeHtml : ''}
@@ -2016,13 +2013,10 @@ document.addEventListener('submit', async (e) => {
       description: { required: 'Please add a short description of your idea.' }
     });
     if (!valid) return;
-    const availableDates = [...TALK_PICKER.selectedDays].sort();
-    const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'theme' };
+    const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates:[], notes:fd.get('notes')||'', type:'theme' };
     await addTalk(submission);
     await sendEmail(ADMIN_NOTIFY_EMAIL, 'New theme idea — ' + submission.topic, emailNewSubmissionNotify(submission));
     await sendEmail(submission.email, "We've got your idea — Café Gestalt", emailTalkReceived(submission.name, submission.topic, submission.type));
-    TALK_PICKER.openMonths.clear();
-    TALK_PICKER.selectedDays.clear();
     TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
     TALK_MODE = 'talk';
     STATE.notice = { type:'success', text:"Thanks for the idea! We'll be in touch." };
