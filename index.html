@@ -25,6 +25,9 @@
 @media(max-width:1000px){
   :root{--page-inset:20vw;}
 }
+@media(max-width:600px){
+  :root{--page-inset:10vw;}
+}
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;overflow-x:hidden;}
 body{background-color:#1b1b13;color:#f0ead8;font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
@@ -132,17 +135,21 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:80px auto 0;}
 .home-col{flex:1 1 300px;min-width:260px;display:flex;flex-direction:column;justify-content:space-between;gap:18px;}
 .home-eyebrow{font-family:'Source Code Pro',monospace;font-size:.95rem;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;display:inline-block;}
-.home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;gap:18px;width:100%;}
-.home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;}
-.home-session-body{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0;container-type:inline-size;}
+.home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:14px;width:100%;}
+.session-card-header{display:flex;gap:18px;align-items:stretch;}
+.home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;display:flex;flex-direction:column;justify-content:center;}
+.session-doors-time{font-family:'Source Sans 3',sans-serif;font-size:1rem;}
+.session-title-col{display:flex;flex-direction:column;justify-content:flex-start;gap:4px;flex:1;min-width:0;}
 .home-session-title{font-family:'Source Serif 4',serif;font-size:1.1rem;}
-.home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;margin-top:2px;white-space:pre-line;}
-.home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;row-gap:2px;opacity:.9;}
+.session-presenter{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.8;}
+.home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;white-space:pre-line;text-align:left;}
+.session-card-footer{display:flex;flex-direction:column;align-items:flex-end;gap:8px;container-type:inline-size;}
+.home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;row-gap:2px;opacity:.9;justify-content:flex-end;}
 .home-session-meta span{white-space:normal;}
 @container (max-width: 260px) {
-  .home-session-meta{flex-direction:column;align-items:flex-start;gap:2px;}
+  .home-session-meta{flex-direction:column;align-items:flex-end;gap:2px;}
   .home-session-meta .meta-dot{display:none;}
-  .home-session-meta span{white-space:normal;width:100%;}
+  .home-session-meta span{white-space:normal;width:100%;text-align:right;}
 }
 .home-btn{display:inline-block;align-self:flex-end;background:#e4d9c0;color:#1b1b13;border:none;padding:8px 14px;border-radius:6px;font-family:'Source Serif 4',serif;font-size:.95rem;cursor:pointer;}
 .home-btn:hover{background:#f0ead8;}
@@ -178,7 +185,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .sess-title{font-family:'Source Serif 4',serif;font-weight:400;font-size:clamp(1.4rem,3vw,2rem);color:#f0ead8;text-align:center;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:40px auto 0;}
 .sess-next{display:flex;flex-wrap:wrap;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:56px auto 0;border-radius:24px;overflow:hidden;}
 .sess-next-img{flex:1 1 40%;min-height:300px;background:url('session-photo.jpg') center/cover no-repeat;}
-.sess-next-copy{flex:1 1 60%;background:#2f2f25;padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.sess-next-copy{flex:1 1 60%;background:#2f2f25;padding:clamp(16px,5vw,32px);display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .sess-next-inner{display:flex;flex-direction:column;gap:24px;width:100%;max-width:440px;}
 @media(max-width:1000px){
   .reserve-view{position:relative;z-index:0;}
@@ -452,13 +459,13 @@ async function loadEvents() {
   return await supaFetch('events?select=*&order=date.asc') || [];
 }
 async function createEvent(ev) {
-  return await supaFetch('events', { method:'POST', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
+  return await supaFetch('events', { method:'POST', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||null, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
 }
 async function deleteEvent(id) {
   await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
 }
 async function updateEvent(ev) {
-  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
+  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||null, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
 }
 
 async function loadReservations(eventId) {
@@ -625,16 +632,43 @@ function sessionCardHtml(ev, stats, actionHtml) {
   const year = isNaN(d) ? '' : d.getFullYear();
   return `
     <div class="home-session-card">
-      <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span class="home-session-title">${fmtTime(ev.time)}</span>` : ''}</div>
-      <div class="home-session-body">
-        <div>
+      <div class="session-card-header">
+        <div class="home-session-date">${dayMonth}<br/>${year}${ev.time ? `<br/><span class="session-doors-time">Doors ${fmtTime(ev.time)}</span>` : ''}</div>
+        <div class="session-title-col">
           <div class="home-session-title">${ev.label ? escapeHtml(ev.label) : 'Café Gestalt session'}</div>
-          ${ev.notes ? `<div class="home-session-notes">${escapeHtml(ev.notes)}</div>` : ''}
+          ${ev.presenter ? `<div class="session-presenter">${escapeHtml(ev.presenter)}</div>` : ''}
         </div>
+      </div>
+      ${ev.notes ? `<div class="home-session-notes">${escapeHtml(ev.notes)}</div>` : ''}
+      <div class="session-card-footer">
         <div class="home-session-meta"><span>${stats.spotsLeft} of ${stats.cap} seats available</span><span class="meta-dot">·</span><span>RSVP by ${fmtDate(ev.rsvp_by)}</span></div>
         ${actionHtml || ''}
       </div>
     </div>`;
+}
+
+// Scales each session card's title font-size so it visually fills the same height as its
+// date/time column (which has a fixed, predictable height from its font-size and line count),
+// rather than sitting centered with unused space above/below when the title is short.
+function fitSessionTitlesToDateHeight() {
+  document.querySelectorAll('.session-card-header').forEach(header => {
+    const dateEl = header.querySelector('.home-session-date');
+    const titleEl = header.querySelector('.home-session-title');
+    if (!dateEl || !titleEl) return;
+    const lineCount = dateEl.querySelectorAll('br').length + 1;
+    const dateLineHeight = parseFloat(getComputedStyle(dateEl).lineHeight);
+    const targetHeight = dateLineHeight * lineCount;
+    titleEl.style.lineHeight = '1.15';
+    // Cap at the date column's own font-size so a short title can't grow past it and
+    // invert the card's visual hierarchy (date/time should stay the more prominent text).
+    let lo = 12, hi = parseFloat(getComputedStyle(dateEl).fontSize);
+    for (let i = 0; i < 10; i++) {
+      const mid = (lo + hi) / 2;
+      titleEl.style.fontSize = mid + 'px';
+      if (titleEl.scrollHeight > targetHeight) hi = mid; else lo = mid;
+    }
+    titleEl.style.fontSize = lo + 'px';
+  });
 }
 
 /* ===================== state ===================== */
@@ -699,11 +733,17 @@ async function render() {
   app.innerHTML = html;
   firstRenderDone = true;
   app.classList.add('home-active');
+  fitSessionTitlesToDateHeight();
   // The loading placeholder above briefly collapses the page's height, which makes the
   // browser clamp the scroll position — restore it so in-place actions (delete, confirm,
   // approve, etc.) don't visibly jump. Real page/tab navigation resets to top separately.
   window.scrollTo(0, scrollY);
 }
+let RESIZE_FIT_TIMER = null;
+window.addEventListener('resize', () => {
+  clearTimeout(RESIZE_FIT_TIMER);
+  RESIZE_FIT_TIMER = setTimeout(fitSessionTitlesToDateHeight, 150);
+});
 
 /* ===================== dark page chrome (shared) ===================== */
 function darkNavHtml(activeView, opts) {
@@ -740,7 +780,7 @@ async function renderHome() {
 
   let nextCardHtml = `
     <div class="home-session-card">
-      <div class="home-session-body"><div class="home-session-title">No session scheduled yet — check back soon.</div></div>
+      <div class="home-session-title">No session scheduled yet — check back soon.</div>
     </div>`;
   if (next) {
     const res = await loadReservations(next.id);
@@ -1329,7 +1369,7 @@ async function renderTalk() {
 let ADMIN_TAB = 'overview';
 // Set when "Create session from this" is clicked on a talk/theme; pre-fills the
 // Sessions tab's create-event form, and gets linked back once that session is created.
-let CREATE_EVENT_PREFILL = null; // { label, notes, date, fromTalkId }
+let CREATE_EVENT_PREFILL = null; // { label, presenter, notes, date, fromTalkId }
 
 async function renderAdmin() {
   const code = await loadPasscode();
@@ -1440,6 +1480,7 @@ async function renderAdminSessions() {
           <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" required/></div>
           <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="10" required/></div>
           <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" value="${escapeHtml(prefill.label||'')}" placeholder="e.g. Talk: The physics of coffee"/></div>
+          <div class="field"><label>Presenter (optional)</label><input type="text" name="presenter" value="${escapeHtml(prefill.presenter||'')}" placeholder="e.g. Elvira Kim"/></div>
         </div>
         <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" maxlength="250" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
         <div class="field">
@@ -1494,6 +1535,7 @@ async function renderAdminSessions() {
             <div class="field"><label>RSVP-by date</label><input type="date" name="rsvpBy" value="${ev.rsvp_by}" required/></div>
             <div class="field"><label>Seat capacity</label><input type="number" name="capacity" min="1" value="${ev.capacity}" required/></div>
             <div class="field"><label>Theme / label</label><input type="text" name="label" value="${escapeHtml(ev.label||'')}"/></div>
+            <div class="field"><label>Presenter (optional)</label><input type="text" name="presenter" value="${escapeHtml(ev.presenter||'')}"/></div>
           </div>
           <div class="field"><label>Notes shown to guests</label><textarea name="notes" maxlength="250">${escapeHtml(ev.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
           <div class="field">
@@ -1744,6 +1786,7 @@ const CLICK_ACTIONS = {
     if (t) {
       CREATE_EVENT_PREFILL = {
         label: t.topic,
+        presenter: t.submission_type === 'theme' ? '' : t.name,
         notes: t.description,
         date: (t.available_dates && t.available_dates[0]) || '',
         fromTalkId: t.id
@@ -2038,7 +2081,7 @@ const SUBMIT_HANDLERS = {
   },
 
   'create-event': async (form, fd) => {
-    const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
+    const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
     const fromTalkId = form.dataset.fromTalkId;
     if (fromTalkId && created && created[0]) {
       const t = STATE.talks.find(x => x.id === fromTalkId);
@@ -2051,7 +2094,7 @@ const SUBMIT_HANDLERS = {
   },
 
   'edit-event': async (form, fd) => {
-    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
+    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
     STATE.events = await loadEvents();
     invalidateReserveStats();
     STATE.openEditEventFor = null;
