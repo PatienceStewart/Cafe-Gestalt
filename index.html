@@ -20,9 +20,13 @@
   --brick:#7A4F4A;
   --line:rgba(15,46,32,0.18);
   --line-strong:rgba(15,46,32,0.35);
+  --page-inset:20px;
+}
+@media(max-width:1000px){
+  :root{--page-inset:20vw;}
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;overflow-x:hidden;}
 body{background-color:#1b1b13;color:#f0ead8;font-family:'Source Serif 4',Georgia,serif;line-height:1.5;-webkit-font-smoothing:antialiased;}
 img,svg{display:block;}
 a{color:inherit;}
@@ -131,7 +135,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .home-hamburger .ham-icon-close{display:none;}
 .home-hamburger.is-open .ham-icon-open{display:none;}
 .home-hamburger.is-open .ham-icon-close{display:block;}
-@media(max-width:640px){
+@media(max-width:1000px){
   .home-hamburger{display:block;}
   .home-nav-links{display:none;position:absolute;top:100%;right:0;margin-top:8px;flex-direction:column;flex-wrap:nowrap;background:#1b1b13;border:1px solid rgba(240,234,216,.25);border-radius:8px;padding:6px;min-width:200px;z-index:20;gap:2px;}
   .home-nav-links.is-open{display:flex;}
@@ -159,17 +163,17 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
   }
   .home-hero-tagline .tagline-line{display:inline;}
 }
-.home-sub{font-family:'Source Sans 3',sans-serif;font-size:1.25rem;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
-.home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;}
+.home-sub{font-family:'Source Sans 3',sans-serif;font-size:1.25rem;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:80px auto 0;}
+.home-grid{display:flex;gap:40px;flex-wrap:wrap;justify-content:space-between;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:80px auto 0;}
 .home-col{flex:1 1 300px;min-width:260px;display:flex;flex-direction:column;justify-content:space-between;gap:18px;}
 .home-eyebrow{font-family:'Source Code Pro',monospace;font-size:.95rem;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;display:inline-block;}
-.home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;gap:18px;width:100%;max-width:440px;}
+.home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;gap:18px;width:100%;}
 .home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;}
 .home-session-body{display:flex;flex-direction:column;gap:12px;flex:1;min-width:0;container-type:inline-size;}
 .home-session-title{font-family:'Source Serif 4',serif;font-size:1.1rem;}
 .home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;margin-top:2px;white-space:pre-line;}
-.home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:nowrap;opacity:.9;}
-.home-session-meta span{white-space:nowrap;}
+.home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;row-gap:2px;opacity:.9;}
+.home-session-meta span{white-space:normal;}
 @container (max-width: 260px) {
   .home-session-meta{flex-direction:column;align-items:flex-start;gap:2px;}
   .home-session-meta .meta-dot{display:none;}
@@ -190,12 +194,12 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
   .button-row{flex-direction:column;}
   .button-row .home-btn,.button-row .home-btn-outline,.button-row .home-btn-danger{width:100%;text-align:center;box-sizing:border-box;}
 }
-.home-how{display:flex;flex-wrap:wrap;width:calc(100% - 40px);max-width:950px;margin:112px auto 0;border-radius:24px;overflow:hidden;}
+.home-how{display:flex;flex-wrap:wrap;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:112px auto 0;border-radius:24px;overflow:hidden;}
 .home-how-img{flex:1 1 300px;min-height:300px;background:url('coffee-overhead.png') center/cover no-repeat;}
 .home-how-copy{flex:1 1 300px;background:#2f2f25;padding:32px;display:flex;flex-direction:column;gap:18px;justify-content:center;}
 .home-how-copy p{font-family:'Source Serif 4',serif;font-size:1rem;line-height:1.6;margin:0 0 14px;}
 .home-how-copy p:last-child{margin:0;}
-.home-footer{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;text-align:center;width:calc(100% - 40px);max-width:950px;margin:80px auto 0;font-family:'Source Code Pro',monospace;font-size:.85rem;}
+.home-footer{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;text-align:center;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:80px auto 0;font-family:'Source Code Pro',monospace;font-size:.85rem;}
 .home-footer .dotted{text-decoration:underline dotted;text-underline-offset:3px;}
 @media(max-width:640px){
   .home-footer{flex-direction:column;gap:8px;}
@@ -206,8 +210,8 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 
 /* ===================== Dark page chrome (shared, non-hero pages) ===================== */
 .sess-header{padding:20px clamp(20px,5vw,80px) 0;}
-.sess-title{font-family:'Source Serif 4',serif;font-weight:400;font-size:clamp(1.4rem,3vw,2rem);color:#f0ead8;text-align:center;width:calc(100% - 40px);max-width:950px;margin:40px auto 0;}
-.sess-next{display:flex;flex-wrap:wrap;width:calc(100% - 40px);max-width:950px;margin:56px auto 0;border-radius:24px;overflow:hidden;}
+.sess-title{font-family:'Source Serif 4',serif;font-weight:400;font-size:clamp(1.4rem,3vw,2rem);color:#f0ead8;text-align:center;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:40px auto 0;}
+.sess-next{display:flex;flex-wrap:wrap;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:56px auto 0;border-radius:24px;overflow:hidden;}
 .sess-next-img{flex:1 1 40%;min-height:300px;background:url('session-photo.jpg') center/cover no-repeat;}
 .sess-next-copy{flex:1 1 60%;background:#2f2f25;padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .sess-next-inner{display:flex;flex-direction:column;gap:24px;width:100%;max-width:440px;}
@@ -215,23 +219,23 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
   .sess-next-img{display:none;}
   .sess-next-copy{flex:1 1 100%;}
 }
-.sess-list{width:calc(100% - 40px);max-width:950px;margin:40px auto 0;display:flex;flex-direction:column;gap:16px;}
+.sess-list{width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:40px auto 0;display:flex;flex-direction:column;gap:16px;}
 .sess-row{background:#2f2f25;border:1px solid #f0ead8;border-radius:12px;padding:20px clamp(16px,3vw,40px);color:#f0ead8;}
 .sess-row-top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .sess-row-info{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
 .sess-row-action{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 .sess-row-date,.sess-row-name{font-family:'Source Serif 4',serif;font-size:1.2rem;color:#f0ead8;}
 .sess-row-seats{font-family:'Source Sans 3',sans-serif;font-size:.95rem;color:#f0ead8;opacity:.9;}
-.sess-empty{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;width:calc(100% - 40px);max-width:950px;margin:40px auto 0;}
-.sess-form-wrap{width:calc(100% - 40px);max-width:440px;margin:32px auto 0;display:flex;flex-direction:column;gap:24px;}
+.sess-empty{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:40px auto 0;}
+.sess-form-wrap{width:calc(100% - (var(--page-inset) * 2));max-width:440px;margin:32px auto 0;display:flex;flex-direction:column;gap:24px;}
 .sess-form-note{font-family:'Source Sans 3',sans-serif;color:#f0ead8;opacity:.85;}
-.sess-form-header{display:flex;align-items:center;gap:12px;width:calc(100% - 40px);max-width:440px;margin:40px auto 0;}
+.sess-form-header{display:flex;align-items:center;gap:12px;width:calc(100% - (var(--page-inset) * 2));max-width:440px;margin:40px auto 0;}
 .sess-form-header .sess-title{margin:0;text-align:left;width:auto;max-width:none;flex:1;}
 .sess-back-btn{background:none;border:none;color:#f0ead8;cursor:pointer;padding:4px;margin:0;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.85;}
 .sess-back-btn:hover{opacity:1;}
 .sess-back-btn svg{width:24px;height:24px;}
 
-.talk-panel{width:calc(100% - 40px);max-width:640px;margin:40px auto 0;}
+.talk-panel{width:calc(100% - (var(--page-inset) * 2));max-width:640px;margin:40px auto 0;}
 .talk-tabs{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
 .talk-panel .form-panel-dark{margin-top:0;}
 .form-panel-dark{background:#1b1b13;border:1px dashed rgba(240,234,216,.3);border-radius:6px;padding:18px;margin-top:16px;color:#f0ead8;}
@@ -243,6 +247,31 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .form-panel-dark .field-hint{font-size:.8rem;opacity:.65;margin-top:4px;}
 .form-panel-dark .field-error{font-size:.8rem;color:#e0a898;margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 .form-panel-dark .field input.invalid,.form-panel-dark .field select.invalid,.form-panel-dark .field textarea.invalid{border-color:#e0a898;}
+
+/* ===================== About page ===================== */
+.about-wrap{width:calc(100% - (var(--page-inset) * 2));max-width:1120px;margin:168px auto 0;}
+.about-wrap.about-ai{margin-top:80px;}
+.about-intro{font-family:'Source Serif 4',serif;font-weight:400;font-size:1.7rem;margin:0 0 40px;}
+.about-ai .about-intro{margin-bottom:20px;}
+.about-ai-text{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.65;opacity:.9;margin:0 0 16px;}
+.about-ai-text:last-child{margin:0;}
+.about-grid{display:flex;align-items:stretch;gap:48px;flex-wrap:wrap;}
+.about-col{flex:1 1 280px;min-width:240px;display:flex;flex-direction:column;gap:14px;}
+.about-col-head{display:flex;align-items:center;gap:12px;}
+.about-col-head h2{font-family:'Source Serif 4',serif;font-weight:400;font-size:1.3rem;margin:0;}
+.about-col p{font-family:'Source Serif 4',serif;font-size:1.05rem;line-height:1.6;opacity:.85;margin:0;}
+.about-col .home-btn{width:100%;text-align:center;margin-top:auto;}
+.about-icon{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex:none;}
+.about-photo{width:100%;min-height:260px;aspect-ratio:1440/678;background:url('about-shelf.jpg') center 70%/cover no-repeat;margin-top:90px;}
+@media(max-width:1000px){
+  .about-grid{flex-direction:column;}
+  .about-col{flex:none;width:100%;max-width:480px;margin:0 auto;}
+}
+@media(max-width:640px){
+  .about-wrap{margin-top:96px;}
+  .about-wrap.about-ai{margin-top:48px;}
+  .about-photo{margin-top:48px;}
+}
 </style>
 </head>
 <body>
@@ -688,6 +717,7 @@ async function render() {
   let html = '';
   try {
     if (STATE.view === 'home')         html = await renderHome();
+    else if (STATE.view === 'about')   html = await renderAbout();
     else if (STATE.view === 'reserve') html = await renderReserve();
     else if (STATE.view === 'reserveForm') html = await renderReserveForm();
     else if (STATE.view === 'talk')    html = await renderTalk();
@@ -720,6 +750,7 @@ function darkNavHtml(activeView, opts) {
       <svg class="ham-icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
     </button>
     <div class="home-nav-links" id="homeNavLinks">
+      <button data-nav="about"${activeCls('about')}>About Gestalt</button>
       <button data-nav="reserve"${activeCls('reserve')}>Upcoming sessions</button>
       <button data-nav="talk"${activeCls('talk')}>Give a talk</button>
       <button data-nav="admin"${activeCls('admin')}>Admin</button>
@@ -784,13 +815,13 @@ async function renderHome() {
         <div class="home-eyebrow">PROPOSE A TALK OR THEME</div>
         <p class="home-propose-copy">Have an idea worth sharing over coffee? Want to suggest an activity for an upcoming session? Tell us what you have in mind and we'll follow up.</p>
         <div class="home-propose-actions">
-          <button class="home-btn-outline" data-action="scroll-how">Learn more</button>
+          <button class="home-btn-outline" data-nav="about">Learn more</button>
           <button class="home-btn" data-nav="talk">Share with us</button>
         </div>
       </div>
     </div>
 
-    <div class="home-how" id="home-how-it-works">
+    <div class="home-how">
       <div class="home-how-img" role="img" aria-label="Coffee cup shot from above"></div>
       <div class="home-how-copy">
         <div class="home-eyebrow" style="margin-bottom:0;">HOW IT WORKS</div>
@@ -801,6 +832,42 @@ async function renderHome() {
     ${darkFooterHtml()}
   </div>
   `;
+}
+
+/* ===================== about ===================== */
+const ABOUT_ICON_COFFEE = `<svg width="32" height="32" viewBox="0 0 22 18.0081" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.86662 17.0081H16.1107M16.5258 10.1323C16.8127 8.10044 16.7037 5.79028 16.5258 4.00288C16.352 2.25576 16.1124 1.00812 16.1124 1.00812L1.86477 1.14755C1.86477 1.14755 -0.0809802 10.1323 1.86477 13.1266C3.81347 16.1255 6.14144 17.0081 9.07348 17.0081C11.4191 17.0081 15.135 14.9837 16.1124 11.9889C16.2989 11.4172 16.4331 10.7893 16.5258 10.1323ZM16.5258 4.00288C18 3.00812 21 3.00812 21 5.00114C21 6.99765 19.8704 10.2722 16.5258 10.1323" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
+const ABOUT_ICON_TALK = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 1C24.2783 1 31 7.72173 31 16C31 24.2783 24.2782 31 16 31H4.50195C4.25678 30.9999 4.02782 30.8848 3.88184 30.6924L3.8252 30.6055C3.68724 30.3613 3.69114 30.0622 3.83496 29.8223L4.5625 28.6094C5.1635 27.608 5.07438 26.3376 4.33984 25.4307H4.33887C2.25063 22.8541 1.00001 19.573 1 16C1 7.72172 7.72154 1 16 1ZM7.77734 13.2227C6.24402 13.2228 5 14.4666 5 16C5.00003 17.5333 6.24404 18.7772 7.77734 18.7773C9.31057 18.7773 10.5556 17.5337 10.5557 16C10.5557 14.4663 9.31059 13.2227 7.77734 13.2227ZM16 13.2227C14.4668 13.2227 13.2217 14.4663 13.2217 16C13.2217 17.5337 14.4668 18.7773 16 18.7773C17.5335 18.7773 18.7773 17.5335 18.7773 16C18.7773 14.4665 17.5335 13.2227 16 13.2227ZM24.2773 13.2227C22.744 13.2228 21.5 14.4666 21.5 16C21.5 17.5333 22.744 18.7772 24.2773 18.7773C25.8108 18.7773 27.0556 17.5335 27.0557 16C27.0557 14.4665 25.8108 13.2227 24.2773 13.2227Z" stroke="currentColor" stroke-width="2"/></svg>`;
+const ABOUT_ICON_LIGHTBULB = `<svg width="22" height="32" viewBox="0 0 22 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.05497 25.7921H5.05497C5.05497 26.3444 5.50269 26.7921 6.05497 26.7921V25.7921ZM15.9624 25.7921V26.7921C16.5147 26.7921 16.9624 26.3444 16.9624 25.7921H15.9624ZM17.3422 19.8239L18.0305 20.5494L17.3422 19.8239ZM21 10.5737L22 10.5737L21 10.5737ZM1.00451 10.5737L0.00471944 10.5534L1.00451 10.5737ZM4.46402 19.6257L5.12504 18.8753L4.46402 19.6257ZM6.05497 25.7921V26.7921H15.9624V25.7921V24.7921H6.05497V25.7921ZM15.9624 25.7921H16.9624C16.9624 24.728 16.9646 23.6456 17.122 22.6726C17.2809 21.6903 17.5749 20.9815 18.0305 20.5494L17.3422 19.8239L16.654 19.0984C15.7297 19.9753 15.3338 21.2027 15.1477 22.3532C14.9601 23.513 14.9624 24.7602 14.9624 25.7921H15.9624ZM17.3422 19.8239L18.0305 20.5494C19.8202 18.8516 20.8319 17.175 21.3825 15.4755C21.9272 13.7943 22 12.1489 22 10.5737L21 10.5737L20 10.5737C20 12.1022 19.924 13.4881 19.4799 14.8591C19.0416 16.2118 18.2245 17.6085 16.654 19.0984L17.3422 19.8239ZM21 10.5737L22 10.5737C22 6.12026 18.5345 0 11.2818 0V1V2C17.1443 2 20 6.91564 20 10.5737L21 10.5737ZM11.2818 1V0C4.12865 0 0.111163 5.31638 0.00471944 10.5534L1.00451 10.5737L2.00431 10.594C2.09077 6.34003 5.31993 2 11.2818 2V1ZM1.00451 10.5737L0.00471944 10.5534C-0.0827632 14.8575 1.04086 17.9429 3.80301 20.3761L4.46402 19.6257L5.12504 18.8753C2.90804 16.9223 1.92567 14.4631 2.00431 10.594L1.00451 10.5737ZM4.46402 19.6257L3.80301 20.3761C4.37304 20.8782 4.6984 21.5778 4.8731 22.5131C5.05174 23.4696 5.05497 24.5629 5.05497 25.7921H6.05497H7.05497C7.05497 24.6081 7.05821 23.319 6.8391 22.1459C6.61606 20.9517 6.14596 19.7747 5.12504 18.8753L4.46402 19.6257ZM7.271 25.7921L6.28411 25.6307C6.17919 26.2723 6.15003 27.2882 6.2891 28.2712C6.35927 28.7672 6.47681 29.2887 6.66835 29.7666C6.85695 30.2372 7.14317 30.7303 7.58905 31.0932L8.22023 30.3175L8.85141 29.5419C8.76317 29.4701 8.64174 29.3143 8.52481 29.0226C8.41081 28.7381 8.32491 28.3837 8.26938 27.9911C8.15703 27.1969 8.18738 26.3847 8.25789 25.9535L7.271 25.7921ZM8.22023 30.3175L7.58905 31.0932C8.01514 31.4399 8.55779 31.6505 9.07823 31.7808C9.61273 31.9146 10.2007 31.9827 10.7807 31.9971C11.9099 32.0251 13.175 31.8521 14.0684 31.4152L13.6291 30.5169L13.1898 29.6186C12.6971 29.8595 11.7919 30.0215 10.8303 29.9977C10.3648 29.9862 9.92725 29.9316 9.56401 29.8407C9.18671 29.7462 8.95944 29.6298 8.85141 29.5419L8.22023 30.3175ZM13.6291 30.5169L14.0684 31.4152C14.661 31.1255 15.0658 30.6307 15.3373 30.1318C15.6104 29.6297 15.7834 29.0616 15.8865 28.5156C16.0867 27.4556 16.0617 26.2582 15.7951 25.4713L14.848 25.7921L13.9009 26.113C14.0225 26.4721 14.0811 27.2981 13.9213 28.1445C13.8443 28.5518 13.7265 28.9076 13.5805 29.1759C13.4328 29.4473 13.2902 29.5694 13.1898 29.6186L13.6291 30.5169Z" fill="currentColor"/></svg>`;
+
+function aboutColHtml(icon, title, text, btnHtml) {
+  return `
+    <div class="about-col">
+      <div class="about-col-head"><span class="about-icon">${icon}</span><h2>${title}</h2></div>
+      <p>${text}</p>
+      ${btnHtml || ''}
+    </div>`;
+}
+
+async function renderAbout() {
+  return `
+  <div class="home-view">
+    <div class="sess-header">${darkNavHtml('about', { onFlatBg: true })}</div>
+    <div class="about-wrap">
+      <p class="about-intro">Café Gestalt is comprised of two things: Coffee and discussion.</p>
+      <div class="about-grid">
+        ${aboutColHtml(ABOUT_ICON_COFFEE, 'The coffee:', `Gestalt’s menu changes every month according to the season and the whims of the barista-- no filter coffee or a plain cappuccinos here. Instead, expect house-made seasonal syrups, creamy cold foams, and experimental combinations that might surprise you!`)}
+        ${aboutColHtml(ABOUT_ICON_TALK, 'The discussion:', `Anyone (literally anyone) can lead a session: casual chats and polished presentations are equally welcome here. Are you a metaphysics expert? Obsessed with 1600s Danish cattle trade? Film buff with a niche obsession? Share with us! The only rule is, you can’t use AI to write or illustrate your presentation.`, '<button class="home-btn" data-nav="talk">Give a talk</button>')}
+        ${aboutColHtml(ABOUT_ICON_LIGHTBULB, 'The curious people:', `Whether you like learning just for the fun of it or want to spend less time on your phone, come and join us for any session that interests you. There’s plenty of time to chat before and after the talks! We meet in an apartment, so space is limited and by reservation, but there’s a new session every month.`, '<button class="home-btn" data-nav="reserve">Reserve a seat</button>')}
+      </div>
+    </div>
+    <div class="about-wrap about-ai">
+      <p class="about-intro">Wait, what was that about AI?</p>
+      <p class="about-ai-text">Café Gestalt was inspired by a want for more authentic interaction and a need to get offline and out of the algorithm. AI is the antithesis of this: built on the stolen intellectual property of millions of artists, writers, and anyone who’s ever put anything out on the internet.</p>
+      <p class="about-ai-text">You can make a presentation from scraps and duct tape, or read your lecture from a notebook you're holding directly in front of your face... we want to hear it and celebrate it! But we want to hear what <em>you</em> have to say, not what the capitalist theft machine <em>thinks</em> you want to say.</p>
+    </div>
+    <div class="about-photo" role="img" aria-label="A shelf of glassware and vases"></div>
+    ${darkFooterHtml()}
+  </div>`;
 }
 
 /* ===================== reserve ===================== */
@@ -1344,7 +1411,7 @@ async function renderAdmin() {
   else if (ADMIN_TAB === 'talks') body = renderAdminTalks();
 
   return shell(`
-    <div style="width:calc(100% - 40px);max-width:900px;margin:40px auto 0;">
+    <div style="width:calc(100% - (var(--page-inset) * 2));max-width:900px;margin:40px auto 0;">
       <div style="display:flex;justify-content:flex-end;margin-bottom:16px;">
         <button class="home-btn-outline btn-small" data-action="lock-admin">Lock</button>
       </div>
@@ -1569,9 +1636,6 @@ const CLICK_ACTIONS = {
     const isOpen = links.classList.toggle('is-open');
     el.classList.toggle('is-open', isOpen);
     el.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-  },
-  'scroll-how': async () => {
-    document.getElementById('home-how-it-works')?.scrollIntoView({ behavior:'smooth', block:'start' });
   },
   'toggle-diet-field': async (el) => {
     const textarea = el.closest('.field').querySelector('textarea[name="dietaryNeeds"]');
