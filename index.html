@@ -77,41 +77,6 @@ input[type="password"]::-ms-reveal{filter:invert(93%) sepia(9%) saturate(340%) h
 .notice{padding:12px 14px;border-radius:4px;margin-bottom:16px;font-size:.92rem;}
 .notice-success{background:rgba(95,111,78,.15);border:1px solid var(--sage);color:#6FAE82;}
 .notice-error{background:rgba(156,74,52,.12);border:1px solid var(--brick);color:#e0a898;}
-.how-it-works{
-  background:var(--ink);
-  background-image:radial-gradient(circle at 85% 30%,rgba(255,255,255,.035),transparent 40%),radial-gradient(circle at 15% 80%,rgba(255,255,255,.03),transparent 45%);
-  color:var(--paper-light);
-  margin:24px -20px 0;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  border-radius:24px;
-  overflow:hidden;
-}
-.how-it-works-img{
-  min-height:380px;
-  background:url('cafe-photo.jpeg') center center / cover no-repeat;
-}
-.how-it-works-copy{
-  padding:48px 40px;
-}
-.how-it-works-copy h2{
-  font-family:'Kavivanar',cursive;
-  font-size:1.6rem;
-  margin:0 0 16px;
-  color:var(--paper-light);
-}
-.how-it-works-copy p{
-  font-size:1rem;
-  line-height:1.7;
-  opacity:.88;
-  margin:0 0 14px;
-}
-.how-it-works-copy p:last-child{margin:0;}
-@media(max-width:640px){
-  .how-it-works{grid-template-columns:1fr;}
-  .how-it-works-img{min-height:240px;}
-  .how-it-works-copy{padding:32px 20px;}
-}
 .table-scroll{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;}
 table.admin-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.9rem;}
 .table-scroll table.admin-table{min-width:600px;margin-top:0;}
@@ -215,7 +180,9 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .sess-next-img{flex:1 1 40%;min-height:300px;background:url('session-photo.jpg') center/cover no-repeat;}
 .sess-next-copy{flex:1 1 60%;background:#2f2f25;padding:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
 .sess-next-inner{display:flex;flex-direction:column;gap:24px;width:100%;max-width:440px;}
-@media(max-width:640px){
+@media(max-width:1000px){
+  .reserve-view{position:relative;z-index:0;}
+  .reserve-view::before{content:'';position:absolute;inset:0;background:url('Gestalt group.webp') center/cover no-repeat;opacity:.2;pointer-events:none;z-index:-1;}
   .sess-next-img{display:none;}
   .sess-next-copy{flex:1 1 100%;}
 }
@@ -876,7 +843,7 @@ async function renderReserve() {
   const noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
 
   const shell = (innerHtml) => `
-  <div class="home-view">
+  <div class="home-view reserve-view">
     <div class="sess-header">${darkNavHtml('reserve', { onFlatBg: true })}</div>
     <h1 class="sess-title">Session schedule</h1>
     ${innerHtml}
