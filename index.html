@@ -2081,24 +2081,34 @@ const SUBMIT_HANDLERS = {
   },
 
   'create-event': async (form, fd) => {
-    const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
-    const fromTalkId = form.dataset.fromTalkId;
-    if (fromTalkId && created && created[0]) {
-      const t = STATE.talks.find(x => x.id === fromTalkId);
-      if (t) { t.assigned_event_id = created[0].id; await updateTalk(t); }
+    try {
+      const created = await createEvent({ date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
+      const fromTalkId = form.dataset.fromTalkId;
+      if (fromTalkId && created && created[0]) {
+        const t = STATE.talks.find(x => x.id === fromTalkId);
+        if (t) { t.assigned_event_id = created[0].id; await updateTalk(t); }
+      }
+      CREATE_EVENT_PREFILL = null;
+      STATE.events = await loadEvents();
+      invalidateReserveStats();
+      STATE.notice = { type:'success', text:'Session created.' };
+    } catch(err) {
+      STATE.notice = { type:'error', text:'Could not create session: ' + err.message };
     }
-    CREATE_EVENT_PREFILL = null;
-    STATE.events = await loadEvents();
-    invalidateReserveStats();
-    STATE.notice = { type:'success', text:'Session created.' }; await render();
+    await render();
   },
 
   'edit-event': async (form, fd) => {
-    await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
-    STATE.events = await loadEvents();
-    invalidateReserveStats();
-    STATE.openEditEventFor = null;
-    STATE.notice = { type:'success', text:'Session updated.' }; await render();
+    try {
+      await updateEvent({ id:form.dataset.eventId, date:fd.get('date'), time:fd.get('time')||'', rsvpBy:fd.get('rsvpBy'), capacity:parseInt(fd.get('capacity'))||1, label:fd.get('label')||'', presenter:fd.get('presenter')||'', notes:fd.get('notes')||'', requireConfirmation: form.querySelector('[name="requireConfirmation"]').checked });
+      STATE.events = await loadEvents();
+      invalidateReserveStats();
+      STATE.openEditEventFor = null;
+      STATE.notice = { type:'success', text:'Session updated.' };
+    } catch(err) {
+      STATE.notice = { type:'error', text:'Could not update session: ' + err.message };
+    }
+    await render();
   }
 };
 
