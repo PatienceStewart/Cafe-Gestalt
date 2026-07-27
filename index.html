@@ -137,11 +137,11 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .home-eyebrow{font-family:'Source Code Pro',monospace;font-size:.95rem;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;display:inline-block;}
 .home-session-card{border:1px solid #f0ead8;border-radius:24px;padding:16px;display:flex;flex-direction:column;gap:14px;width:100%;}
 .session-card-header{display:flex;gap:18px;align-items:stretch;}
-.home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;display:flex;flex-direction:column;justify-content:flex-start;}
-.session-doors-time{font-family:'Source Sans 3',sans-serif;font-size:1rem;margin-top:auto;}
+.home-session-date{font-family:'Source Serif 4',serif;font-size:1.4rem;text-align:right;flex-shrink:0;line-height:1.15;white-space:nowrap;display:flex;flex-direction:column;justify-content:flex-start;gap:4px;}
+.session-doors-time{font-family:'Source Sans 3',sans-serif;font-size:1rem;}
 .session-title-col{display:flex;flex-direction:column;justify-content:flex-start;gap:4px;flex:1;min-width:0;}
 .home-session-title{font-family:'Source Serif 4',serif;font-size:1.1rem;}
-.session-presenter{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.8;}
+.session-presenter{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.8;position:relative;top:-3px;}
 .home-session-notes{font-family:'Source Serif 4',serif;font-size:.95rem;opacity:.85;white-space:pre-line;text-align:left;}
 .session-card-footer{display:flex;flex-direction:column;align-items:flex-end;gap:8px;container-type:inline-size;}
 .home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;row-gap:2px;opacity:.9;justify-content:flex-end;}
@@ -658,9 +658,15 @@ function fitSessionTitlesToDateHeight() {
     const dateEl = header.querySelector('.home-session-date');
     const titleEl = header.querySelector('.home-session-title');
     if (!dateEl || !titleEl) return;
-    const lineCount = dateEl.querySelectorAll('br').length + 1 + (dateEl.querySelector('.session-doors-time') ? 1 : 0);
-    const dateLineHeight = parseFloat(getComputedStyle(dateEl).lineHeight);
-    const targetHeight = dateLineHeight * lineCount;
+    // Target only the day/month+year block's rendered height (not the "Doors" line below
+    // it), so the title ends up exactly as tall as that block — which keeps the presenter
+    // line and the "Doors" line starting at the same y position. Measure it directly (rather
+    // than computing from font-size/line-height) so this can't drift out of sync with
+    // whatever the browser actually renders — including before web fonts finish loading.
+    const dateBlock = dateEl.firstElementChild;
+    if (!dateBlock) return;
+    const targetHeight = dateBlock.offsetHeight;
+    if (!targetHeight) return;
     titleEl.style.lineHeight = '1.15';
     // Cap at the date column's own font-size so a short title can't grow past it and
     // invert the card's visual hierarchy (date/time should stay the more prominent text).
@@ -747,6 +753,12 @@ window.addEventListener('resize', () => {
   clearTimeout(RESIZE_FIT_TIMER);
   RESIZE_FIT_TIMER = setTimeout(fitSessionTitlesToDateHeight, 150);
 });
+// The very first render can happen before the @import'd Google Fonts finish loading, so the
+// initial fit gets measured against fallback-font metrics and ends up wrong once the real
+// font swaps in. Re-run the fit once fonts are actually ready to correct for that.
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(fitSessionTitlesToDateHeight);
+}
 
 /* ===================== dark page chrome (shared) ===================== */
 function darkNavHtml(activeView, opts) {
