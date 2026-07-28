@@ -146,7 +146,7 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .session-card-footer{display:flex;flex-direction:column;align-items:flex-end;gap:8px;container-type:inline-size;}
 .home-session-meta{font-family:'Source Sans 3',sans-serif;font-size:.9rem;display:flex;gap:8px;flex-wrap:wrap;row-gap:2px;opacity:.9;justify-content:flex-end;}
 .home-session-meta span{white-space:normal;}
-@container (max-width: 260px) {
+@container (max-width: 360px) {
   .home-session-meta{flex-direction:column;align-items:flex-end;gap:2px;}
   .home-session-meta .meta-dot{display:none;}
   .home-session-meta span{white-space:normal;width:100%;text-align:right;}
@@ -623,6 +623,11 @@ function capacityWidget(capacity, reserved) {
 }
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+}
+// Live character-count hint for a maxlength'd input/textarea — pairs with the delegated
+// 'input' listener below that keeps the count updated as the user types.
+function charCountHint(value, max) {
+  return `<div class="field-hint" data-max="${max}">${(value||'').length}/${max}</div>`;
 }
 // Shared ".home-session-card" markup used on the home page, the reserve schedule, and the
 // reserve form — `stats` needs at least {spotsLeft, cap}; `actionHtml` is optional.
@@ -1354,9 +1359,9 @@ function talkOrThemeFormHtml(mode) {
       <form data-form="${mode}" novalidate>
         <div class="field"><label>Name</label><input type="text" name="name" value="${escapeHtml(TALK_DRAFT.name)}"/></div>
         <div class="field"><label>Email</label><input type="email" name="email" value="${escapeHtml(TALK_DRAFT.email)}"/></div>
-        <div class="field"><label>${cfg.topicLabel}</label><input type="text" name="topic"${cfg.topicPlaceholder ? ` placeholder="${cfg.topicPlaceholder}"` : ''} value="${escapeHtml(TALK_DRAFT.topic)}"/></div>
-        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="${cfg.descriptionPlaceholder}">${escapeHtml(TALK_DRAFT.description)}</textarea><div class="field-hint">Max 250 characters.</div></div>
-        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="${cfg.notesPlaceholder}">${escapeHtml(TALK_DRAFT.notes)}</textarea><div class="field-hint">Max 250 characters.</div></div>
+        <div class="field"><label>${cfg.topicLabel}</label><input type="text" name="topic" maxlength="40"${cfg.topicPlaceholder ? ` placeholder="${cfg.topicPlaceholder}"` : ''} value="${escapeHtml(TALK_DRAFT.topic)}"/>${charCountHint(TALK_DRAFT.topic, 40)}</div>
+        <div class="field"><label>Description</label><textarea name="description" maxlength="250" placeholder="${cfg.descriptionPlaceholder}">${escapeHtml(TALK_DRAFT.description)}</textarea>${charCountHint(TALK_DRAFT.description, 250)}</div>
+        <div class="field"><label>Other notes (optional)</label><textarea name="notes" maxlength="250" placeholder="${cfg.notesPlaceholder}">${escapeHtml(TALK_DRAFT.notes)}</textarea>${charCountHint(TALK_DRAFT.notes, 250)}</div>
         ${cfg.showCalendar ? renderCalendarPicker() : ''}
         <div class="form-actions-right"><button class="home-btn" type="submit">${cfg.submitLabel}</button></div>
         ${submitNoticeHtml}
@@ -1498,7 +1503,7 @@ async function renderAdminSessions() {
           <div class="field"><label>Theme / label (optional)</label><input type="text" name="label" value="${escapeHtml(prefill.label||'')}" placeholder="e.g. Talk: The physics of coffee"/></div>
           <div class="field"><label>Presenter (optional)</label><input type="text" name="presenter" value="${escapeHtml(prefill.presenter||'')}" placeholder="e.g. Elvira Kim"/></div>
         </div>
-        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" maxlength="250" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
+        <div class="field"><label>Notes shown to guests (optional)</label><textarea name="notes" maxlength="250" placeholder="e.g. we'll be seated in two small clusters of 5">${escapeHtml(prefill.notes||'')}</textarea>${charCountHint(prefill.notes, 250)}</div>
         <div class="field">
           <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
             <input type="checkbox" name="requireConfirmation" value="yes" style="width:auto;" ${info.require_confirmation ? 'checked' : ''}/> Require confirmation before this session's reservations are booked
@@ -1553,7 +1558,7 @@ async function renderAdminSessions() {
             <div class="field"><label>Theme / label</label><input type="text" name="label" value="${escapeHtml(ev.label||'')}"/></div>
             <div class="field"><label>Presenter (optional)</label><input type="text" name="presenter" value="${escapeHtml(ev.presenter||'')}"/></div>
           </div>
-          <div class="field"><label>Notes shown to guests</label><textarea name="notes" maxlength="250">${escapeHtml(ev.notes||'')}</textarea><div class="field-hint">Max 250 characters.</div></div>
+          <div class="field"><label>Notes shown to guests</label><textarea name="notes" maxlength="250">${escapeHtml(ev.notes||'')}</textarea>${charCountHint(ev.notes, 250)}</div>
           <div class="field">
             <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-size:.95rem;">
               <input type="checkbox" name="requireConfirmation" value="yes" style="width:auto;" ${ev.require_confirmation ? 'checked' : ''}/> Require confirmation before this session's reservations are booked
@@ -1830,6 +1835,14 @@ document.addEventListener('click', async (e) => {
   }
   const handler = CLICK_ACTIONS[actionEl.dataset.action];
   if (handler) await handler(actionEl);
+});
+
+// Keeps every maxlength'd field's live "n/max" hint (see charCountHint) in sync while typing.
+document.addEventListener('input', (e) => {
+  const el = e.target;
+  if (el.maxLength == null || el.maxLength < 0) return;
+  const hint = el.closest('.field')?.querySelector('.field-hint[data-max]');
+  if (hint) hint.textContent = el.value.length + '/' + el.maxLength;
 });
 
 /* ===================== inline validation ===================== */
