@@ -521,13 +521,16 @@ async function getEventStats(ev) {
 }
 async function addReservation(eventId, data) {
   const token = genToken();
-  const rows = await supaFetch('reservations', { method:'POST', body:{
+  // return=minimal: no public SELECT policy exists on reservations, so asking PostgREST to
+  // hand back the inserted row (the default) would itself be blocked by RLS. Not needed anyway —
+  // the only field callers use (cancel_token) was generated locally above.
+  await supaFetch('reservations', { method:'POST', prefer:'return=minimal', body:{
     event_id: eventId, name: data.name, email: data.email,
     party_size: data.partySize, notes: data.notes||'',
     dietary_needs: data.dietaryNeeds||'', cancel_token: token,
     status: data.status || 'confirmed'
   }});
-  return rows && rows[0] ? rows[0] : null;
+  return { cancel_token: token };
 }
 async function deleteReservation(id) {
   await adminWrite('delete-reservation', { id });
@@ -538,7 +541,9 @@ async function updateReservationStatus(id, status) {
 }
 
 async function addToWaitlist(eventId, data) {
-  return await supaFetch('waitlist', { method:'POST', body:{
+  // return=minimal: no public SELECT policy exists on waitlist, and callers don't use the
+  // returned row anyway.
+  await supaFetch('waitlist', { method:'POST', prefer:'return=minimal', body:{
     event_id: eventId, name: data.name, email: data.email,
     party_size: data.partySize, notes: data.notes||'',
     claim_token: genToken(), claimed: false, notified: false
@@ -570,7 +575,9 @@ async function loadAllTalks() {
   return await adminWrite('list-talks', {}) || [];
 }
 async function addTalk(data) {
-  return await supaFetch('talks', { method:'POST', body:{ name:data.name, email:data.email, topic:data.topic, description:data.description, available_dates:data.availableDates, notes:data.notes||'', status:'pending', assigned_event_id:null, submission_type:data.type||'talk' } });
+  // return=minimal: no public SELECT policy exists on talks, and callers don't use the
+  // returned row anyway.
+  await supaFetch('talks', { method:'POST', prefer:'return=minimal', body:{ name:data.name, email:data.email, topic:data.topic, description:data.description, available_dates:data.availableDates, notes:data.notes||'', status:'pending', assigned_event_id:null, submission_type:data.type||'talk' } });
 }
 async function updateTalk(talk) {
   await adminWrite('update-talk', { id:talk.id, status:talk.status, assigned_event_id:talk.assigned_event_id||null });
