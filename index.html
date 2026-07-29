@@ -263,6 +263,41 @@ const PROXY_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/send-email';
 const SITE_URL  = 'https://cafegestalt.com';
 const ADMIN_NOTIFY_EMAIL = 'patiencem.stewart@gmail.com';
 
+/* ===================== admin auth (server-verified passcode) ===================== */
+const ADMIN_LOGIN_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-login';
+const ADMIN_WRITE_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-write';
+let ADMIN_TOKEN = null; // in-memory only — admin has to re-enter the passcode after a reload
+
+async function adminLoginRequest(body) {
+  const res = await fetch(ADMIN_LOGIN_URL, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Admin login failed');
+  return data;
+}
+async function adminPasscodeStatus() {
+  return (await adminLoginRequest({ action: 'status' })).hasPasscode;
+}
+async function adminSetPasscode(passcode) {
+  ADMIN_TOKEN = (await adminLoginRequest({ action: 'set', passcode })).token;
+}
+async function adminUnlock(passcode) {
+  ADMIN_TOKEN = (await adminLoginRequest({ action: 'unlock', passcode })).token;
+}
+// Proxy for every admin-only read/write — runs server-side with the Supabase service role key,
+// gated on the session token issued by adminSetPasscode/adminUnlock above.
+async function adminWrite(action, payload) {
+  const res = await fetch(ADMIN_WRITE_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ADMIN_TOKEN },
+    body: JSON.stringify({ action, payload })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Admin action failed');
+  return data.result;
+}
+
 async function sendEmail(to, subject, htmlBody) {
   try {
     const res = await fetch(PROXY_URL, {
@@ -422,23 +457,6 @@ async function supaFetch(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-// Shared "look up a record by its one-time token" flow used by the cancel/claim/decline-waitlist
-// views. Returns { row } on success, or { errorHtml } to render in place of the form when
-// there's no token, the lookup failed, or nothing matched.
-async function lookupByToken(table, tokenField, token, messages) {
-  if (!token) return { errorHtml: `<div class="field-hint">${messages.noToken}</div>` };
-  let rows;
-  try {
-    rows = await supaFetch(table + '?' + tokenField + '=eq.' + token + '&select=*');
-  } catch(e) {
-    return { errorHtml: `<div class="notice notice-error">${messages.fetchError}</div>` };
-  }
-  if (!rows || !rows.length) {
-    return { errorHtml: `<div class="sess-row">${messages.notFound}</div>` };
-  }
-  return { row: rows[0] };
-}
-
 /* ===================== data helpers ===================== */
 
 async function loadCafeInfo() {
@@ -452,24 +470,36 @@ async function loadCafeInfo() {
   };
 }
 async function saveCafeInfo(info) {
-  await supaFetch('cafe_info?id=eq.1', { method:'PATCH', body:{ name:info.name, tagline:info.tagline, about:info.about, hours:info.hours, how_it_works:info.how_it_works, require_confirmation:!!info.require_confirmation } });
+  await adminWrite('save-cafe-info', { name:info.name, tagline:info.tagline, about:info.about, hours:info.hours, how_it_works:info.how_it_works, require_confirmation:!!info.require_confirmation });
 }
 
 async function loadEvents() {
   return await supaFetch('events?select=*&order=date.asc') || [];
 }
 async function createEvent(ev) {
-  return await supaFetch('events', { method:'POST', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||null, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
+  return await adminWrite('create-event', { date:ev.date, time:ev.time||'', rsvpBy:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||'', notes:ev.notes, requireConfirmation:!!ev.requireConfirmation });
 }
 async function deleteEvent(id) {
-  await supaFetch('events?id=eq.' + id, { method:'DELETE', prefer:'return=minimal', headers:{ 'Prefer':'return=minimal' } });
+  await adminWrite('delete-event', { id });
 }
 async function updateEvent(ev) {
-  await supaFetch('events?id=eq.' + ev.id, { method:'PATCH', body:{ date:ev.date, time:ev.time||null, rsvp_by:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||null, notes:ev.notes, require_confirmation:!!ev.requireConfirmation } });
+  await adminWrite('update-event', { id:ev.id, date:ev.date, time:ev.time||'', rsvpBy:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||'', notes:ev.notes, requireConfirmation:!!ev.requireConfirmation });
 }
 
-async function loadReservations(eventId) {
-  return await supaFetch('reservations?event_id=eq.' + eventId + '&select=*&order=created_at.asc') || [];
+// Reserved/waitlist counts only — no personal data — via a SECURITY DEFINER Postgres function,
+// so the public site can show "3 of 8 seats left" without any public read access to the
+// reservations/waitlist tables themselves.
+async function fetchEventStats(eventId) {
+  return await supaFetch('rpc/get_event_stats', { method:'POST', body:{ p_event_id: String(eventId) } }) || { reserved_count:0, waitlist_count:0 };
+}
+
+// Admin-only, full-detail listings (name/email/dietary/notes) — go through the authenticated
+// admin-write proxy since they expose guest PII.
+async function adminListReservations(eventId) {
+  return await adminWrite('list-reservations', { eventId }) || [];
+}
+async function adminListWaitlist(eventId) {
+  return await adminWrite('list-waitlist', { eventId }) || [];
 }
 
 // Cache of per-event reservation/waitlist stats used by the Upcoming Sessions page, so
@@ -479,16 +509,13 @@ const RESERVE_STATS_CACHE = new Map();
 function invalidateReserveStats() { RESERVE_STATS_CACHE.clear(); }
 async function getEventStats(ev) {
   if (RESERVE_STATS_CACHE.has(ev.id)) return RESERVE_STATS_CACHE.get(ev.id);
-  const res = await loadReservations(ev.id);
-  let wl = await loadWaitlist(ev.id);
-  wl = await expireStaleWaitlistOffers(ev, wl);
-  const rc = reservedCount(res);
+  await advanceWaitlist(ev.id, ev.date, ev.label);
+  const { reserved_count, waitlist_count } = await fetchEventStats(ev.id);
   const cap = parseInt(ev.capacity) || 0;
-  const spotsLeft = Math.max(0, cap - rc);
+  const spotsLeft = Math.max(0, cap - reserved_count);
   const rsvpClosed = !isFuture(ev.rsvp_by);
   const full = spotsLeft <= 0;
-  const waitlistCount = wl.filter(w => !w.claimed && !w.declined).length;
-  const stats = { res, wl, rc, cap, spotsLeft, rsvpClosed, full, waitlistCount };
+  const stats = { rc: reserved_count, cap, spotsLeft, rsvpClosed, full, waitlistCount: waitlist_count };
   RESERVE_STATS_CACHE.set(ev.id, stats);
   return stats;
 }
@@ -503,16 +530,13 @@ async function addReservation(eventId, data) {
   return rows && rows[0] ? rows[0] : null;
 }
 async function deleteReservation(id) {
-  await supaFetch('reservations?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
+  await adminWrite('delete-reservation', { id });
 }
 async function updateReservationStatus(id, status) {
-  const rows = await supaFetch('reservations?id=eq.' + id, { method:'PATCH', body:{ status } });
+  const rows = await adminWrite('update-reservation-status', { id, status });
   return rows && rows[0] ? rows[0] : null;
 }
 
-async function loadWaitlist(eventId) {
-  return await supaFetch('waitlist?event_id=eq.' + eventId + '&order=created_at.asc&select=*') || [];
-}
 async function addToWaitlist(eventId, data) {
   return await supaFetch('waitlist', { method:'POST', body:{
     event_id: eventId, name: data.name, email: data.email,
@@ -520,23 +544,18 @@ async function addToWaitlist(eventId, data) {
     claim_token: genToken(), claimed: false, notified: false
   }});
 }
-async function updateWaitlistEntry(entry) {
-  await supaFetch('waitlist?id=eq.' + entry.id, { method:'PATCH', body:{
-    claimed: entry.claimed, notified: entry.notified, notified_at: entry.notified_at||null, declined: !!entry.declined
-  }});
-}
 async function deleteWaitlistEntry(id) {
-  await supaFetch('waitlist?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' }});
+  await adminWrite('delete-waitlist', { id });
 }
 
 const WAITLIST_RESPONSE_WINDOW_HOURS = 6;
 const WAITLIST_CLAIM_CUTOFF_HOURS = 48; // waitlist seats can't be promoted/claimed once the event is this close
 
-// After a cancellation: notify the next unclaimed, un-notified waitlist person if >48h to event
-async function promoteWaitlist(eventId, eventDate, eventLabel) {
-  if (hoursUntil(eventDate) < WAITLIST_CLAIM_CUTOFF_HOURS) return; // window closed
-  const list = await loadWaitlist(eventId);
-  const next = list.find(w => !w.claimed && !w.notified);
+// Expires stale (unanswered) offers and notifies the next person on the waitlist, if a seat is
+// available and the event is still far enough out. All of that runs server-side inside the
+// advance_waitlist() Postgres function (SECURITY DEFINER) — the client just sends the email.
+async function advanceWaitlist(eventId, eventDate, eventLabel) {
+  const next = await supaFetch('rpc/advance_waitlist', { method:'POST', body:{ p_event_id: String(eventId) } });
   if (!next) return;
   const claimUrl = SITE_URL + '/#claim?token=' + next.claim_token;
   const declineUrl = SITE_URL + '/#decline?token=' + next.claim_token;
@@ -545,45 +564,19 @@ async function promoteWaitlist(eventId, eventDate, eventLabel) {
     'A seat has opened at Café Gestalt — ' + fmtDate(eventDate),
     emailWaitlistNotify(next.name, fmtDate(eventDate), eventLabel, claimUrl, declineUrl)
   );
-  next.notified = true;
-  next.notified_at = new Date().toISOString();
-  await updateWaitlistEntry(next);
-}
-
-// Waitlist offers that sat unanswered past the response window are treated as declined,
-// which lets promoteWaitlist's "next un-notified person" search move on to whoever's next.
-async function expireStaleWaitlistOffers(ev, wl) {
-  const cutoff = WAITLIST_RESPONSE_WINDOW_HOURS * 3600 * 1000;
-  const stale = wl.filter(w => w.notified && !w.claimed && !w.declined && w.notified_at
-    && (Date.now() - new Date(w.notified_at).getTime()) > cutoff);
-  if (!stale.length) return wl;
-  for (const w of stale) {
-    w.declined = true;
-    await updateWaitlistEntry(w);
-    await promoteWaitlist(ev.id, ev.date, ev.label);
-  }
-  return await loadWaitlist(ev.id);
 }
 
 async function loadAllTalks() {
-  return await supaFetch('talks?select=*&order=created_at.desc') || [];
+  return await adminWrite('list-talks', {}) || [];
 }
 async function addTalk(data) {
   return await supaFetch('talks', { method:'POST', body:{ name:data.name, email:data.email, topic:data.topic, description:data.description, available_dates:data.availableDates, notes:data.notes||'', status:'pending', assigned_event_id:null, submission_type:data.type||'talk' } });
 }
 async function updateTalk(talk) {
-  await supaFetch('talks?id=eq.' + talk.id, { method:'PATCH', body:{ status:talk.status, assigned_event_id:talk.assigned_event_id||null } });
+  await adminWrite('update-talk', { id:talk.id, status:talk.status, assigned_event_id:talk.assigned_event_id||null });
 }
 async function deleteTalk(id) {
-  await supaFetch('talks?id=eq.' + id, { method:'DELETE', headers:{ 'Prefer':'return=minimal' } });
-}
-
-async function loadPasscode() {
-  const rows = await supaFetch('admin_config?id=eq.1&select=passcode');
-  return rows && rows[0] ? rows[0].passcode : '';
-}
-async function savePasscode(code) {
-  await supaFetch('admin_config?id=eq.1', { method:'PATCH', body:{ passcode:code } });
+  await adminWrite('delete-talk', { id });
 }
 
 /* ===================== utils ===================== */
@@ -804,12 +797,7 @@ async function renderHome() {
       <div class="home-session-title">No session scheduled yet — check back soon.</div>
     </div>`;
   if (next) {
-    const res = await loadReservations(next.id);
-    const rc = reservedCount(res);
-    const cap = parseInt(next.capacity) || 0;
-    const spotsLeft = Math.max(0, cap - rc);
-    const rsvpClosed = !isFuture(next.rsvp_by);
-    const full = spotsLeft <= 0;
+    const { spotsLeft, cap, rsvpClosed, full } = await getEventStats(next);
 
     let actionHtml;
     if (full) {
@@ -1073,12 +1061,14 @@ async function renderCancel() {
     ${darkFooterHtml()}
   </div>`;
 
-  const { row: r, errorHtml } = await lookupByToken('reservations', 'cancel_token', STATE.cancelToken, {
-    noToken: 'No cancellation token found.',
-    fetchError: 'Could not look up your reservation. Please try again.',
-    notFound: 'This reservation has already been cancelled or the link is invalid.'
-  });
-  if (errorHtml) return shell(errorHtml);
+  if (!STATE.cancelToken) return shell('<div class="field-hint">No cancellation token found.</div>');
+  let r;
+  try {
+    r = await supaFetch('rpc/get_reservation_by_token', { method:'POST', body:{ p_token: STATE.cancelToken } });
+  } catch (e) {
+    return shell('<div class="notice notice-error">Could not look up your reservation. Please try again.</div>');
+  }
+  if (!r) return shell('<div class="sess-row">This reservation has already been cancelled or the link is invalid.</div>');
   const ev = STATE.events.find(e => e.id === r.event_id);
   const eventDate = ev ? ev.date : '';
   const eventLabel = ev ? ev.label : '';
@@ -1098,7 +1088,7 @@ async function renderCancel() {
         <div class="field-hint">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''} · ${r.party_size} seat${r.party_size===1?'':'s'}</div>
       </div>
       <p style="font-size:.9rem;opacity:.75;">Once cancelled, your seat will be released and the next person on the waitlist (if any) will be notified.</p>
-      <form data-form="do-cancel" data-reservation-id="${r.id}" data-event-id="${r.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+      <form data-form="do-cancel" data-event-id="${r.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
         <div class="button-row">
           <button class="home-btn" type="submit" style="background:#a85c48;color:#f0ead8;">Confirm cancellation</button>
           <button class="home-btn-outline" type="button" data-nav="home">Keep my seat</button>
@@ -1116,12 +1106,14 @@ async function renderClaim() {
     ${darkFooterHtml()}
   </div>`;
 
-  const { row: w, errorHtml } = await lookupByToken('waitlist', 'claim_token', STATE.claimToken, {
-    noToken: 'No claim token found.',
-    fetchError: 'Could not look up your waitlist entry. Please try again.',
-    notFound: 'This link is invalid or has already been used.'
-  });
-  if (errorHtml) return shell(errorHtml);
+  if (!STATE.claimToken) return shell('<div class="field-hint">No claim token found.</div>');
+  let w;
+  try {
+    w = await supaFetch('rpc/get_waitlist_by_token', { method:'POST', body:{ p_token: STATE.claimToken } });
+  } catch (e) {
+    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
+  }
+  if (!w) return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
 
   const ev = STATE.events.find(e => e.id === w.event_id);
   const eventDate = ev ? ev.date : '';
@@ -1136,9 +1128,8 @@ async function renderClaim() {
   }
 
   if (w.notified && w.notified_at && (Date.now() - new Date(w.notified_at).getTime()) > WAITLIST_RESPONSE_WINDOW_HOURS * 3600 * 1000) {
-    w.declined = true;
-    await updateWaitlistEntry(w);
-    if (ev) { await promoteWaitlist(ev.id, ev.date, ev.label); invalidateReserveStats(); }
+    await supaFetch('rpc/decline_waitlist_by_token', { method:'POST', body:{ p_token: STATE.claimToken } });
+    if (ev) { await advanceWaitlist(ev.id, ev.date, ev.label); invalidateReserveStats(); }
     return shell(`<div class="sess-row">Sorry — this offer expired after ${WAITLIST_RESPONSE_WINDOW_HOURS} hours with no response, so we've offered the seat to the next person on the waitlist.</div>`);
   }
 
@@ -1146,11 +1137,10 @@ async function renderClaim() {
     return shell(`<div class="sess-row">Sorry — the claim window for this session has closed (less than ${WAITLIST_CLAIM_CUTOFF_HOURS} hours to go).</div>`);
   }
 
-  // Check there's still a seat
-  const res = await loadReservations(w.event_id);
-  const rc = reservedCount(res);
+  // Check there's still a seat (the claim itself re-checks this atomically server-side too)
+  const { reserved_count } = await fetchEventStats(w.event_id);
   const cap = ev ? parseInt(ev.capacity)||0 : 0;
-  if (rc >= cap) {
+  if (reserved_count >= cap) {
     return shell('<div class="sess-row">Sorry — the seat was just taken by someone else. We\'ll be in touch if another opens up.</div>');
   }
 
@@ -1163,7 +1153,7 @@ async function renderClaim() {
         <div style="font-weight:700;">${fmtDate(eventDate)}${eventLabel ? ' — '+escapeHtml(eventLabel) : ''}</div>
         <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
       </div>
-      <form data-form="do-claim" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+      <form data-form="do-claim" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
         <button class="home-btn" type="submit">Confirm — claim my seat</button>
       </form>
     </div>`);
@@ -1178,12 +1168,14 @@ async function renderDeclineWaitlist() {
     ${darkFooterHtml()}
   </div>`;
 
-  const { row: w, errorHtml } = await lookupByToken('waitlist', 'claim_token', STATE.declineToken, {
-    noToken: 'No token found.',
-    fetchError: 'Could not look up your waitlist entry. Please try again.',
-    notFound: 'This link is invalid or has already been used.'
-  });
-  if (errorHtml) return shell(errorHtml);
+  if (!STATE.declineToken) return shell('<div class="field-hint">No token found.</div>');
+  let w;
+  try {
+    w = await supaFetch('rpc/get_waitlist_by_token', { method:'POST', body:{ p_token: STATE.declineToken } });
+  } catch (e) {
+    return shell('<div class="notice notice-error">Could not look up your waitlist entry. Please try again.</div>');
+  }
+  if (!w) return shell('<div class="sess-row">This link is invalid or has already been used.</div>');
 
   const ev = STATE.events.find(e => e.id === w.event_id);
   const eventDate = ev ? ev.date : '';
@@ -1207,7 +1199,7 @@ async function renderDeclineWaitlist() {
         <div class="field-hint">${escapeHtml(w.name)} · ${w.party_size} seat${w.party_size===1?'':'s'}</div>
       </div>
       <p style="font-size:.9rem;opacity:.75;">If you decline, we'll offer the seat to the next person on the waitlist right away.</p>
-      <form data-form="do-decline-waitlist" data-waitlist-id="${w.id}" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
+      <form data-form="do-decline-waitlist" data-event-id="${w.event_id}" data-event-date="${eventDate}" data-event-label="${escapeHtml(eventLabel||'')}">
         <button class="home-btn-outline" type="submit">No thanks, skip me</button>
       </form>
     </div>`);
@@ -1393,7 +1385,6 @@ let ADMIN_TAB = 'overview';
 let CREATE_EVENT_PREFILL = null; // { label, presenter, notes, date, fromTalkId }
 
 async function renderAdmin() {
-  const code = await loadPasscode();
   const shell = (innerHtml) => `
   <div class="home-view">
     <div class="sess-header">${darkNavHtml('admin', { onFlatBg: true })}</div>
@@ -1403,7 +1394,8 @@ async function renderAdmin() {
   </div>`;
 
   if (!STATE.adminUnlocked) {
-    if (!code) return shell(`
+    const hasPasscode = await adminPasscodeStatus();
+    if (!hasPasscode) return shell(`
       <div class="sess-form-wrap">
         <p class="sess-form-note">No admin passcode set yet. Choose one now.</p>
         <div class="form-panel-dark">
@@ -1522,7 +1514,7 @@ async function renderAdminSessions() {
       sessionsHtml += `<div style="margin:28px 0 16px;padding-top:16px;border-top:1px solid rgba(240,234,216,.25);"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;letter-spacing:.05em;">Past sessions</div></div>`;
       pastDividerShown = true;
     }
-    const res = await loadReservations(ev.id);
+    const res = await adminListReservations(ev.id);
     const rc = reservedCount(res);
     const isEditing = STATE.openEditEventFor === ev.id;
 
@@ -1588,8 +1580,8 @@ async function renderAdminSessions() {
       ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>` : ''}
       ${confirmedRes.length ? `<div class="table-scroll" style="margin-top:14px;"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
       ${await (async () => {
-        let wl = await loadWaitlist(ev.id);
-        wl = await expireStaleWaitlistOffers(ev, wl);
+        await advanceWaitlist(ev.id, ev.date, ev.label);
+        const wl = await adminListWaitlist(ev.id);
         if (!wl.length) return '';
         const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td style="width:1%;text-align:right;white-space:nowrap;"><button class="home-btn-danger btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
         return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th style="width:1%;"></th></tr></thead><tbody>${wrows}</tbody></table></div></div>`;
@@ -1711,7 +1703,7 @@ const CLICK_ACTIONS = {
     window.scrollTo(0, 0);
   },
   'lock-admin': async () => {
-    STATE.adminUnlocked = false; await render(); window.scrollTo(0, 0);
+    STATE.adminUnlocked = false; ADMIN_TOKEN = null; await render(); window.scrollTo(0, 0);
   },
   'open-edit-event': async (el) => {
     STATE.openEditEventFor = el.dataset.eventId; await render();
@@ -1731,7 +1723,7 @@ const CLICK_ACTIONS = {
     if (confirm('Remove this reservation?')) {
       const ev = STATE.events.find(e => e.id === el.dataset.eventId);
       await deleteReservation(el.dataset.id);
-      if (ev) await promoteWaitlist(ev.id, ev.date, ev.label);
+      if (ev) await advanceWaitlist(ev.id, ev.date, ev.label);
       invalidateReserveStats();
       STATE.notice = { type:'success', text:'Reservation removed.' }; await render();
     }
@@ -1905,9 +1897,8 @@ const SUBMIT_HANDLERS = {
     const eventId = form.dataset.eventId;
     const ev = STATE.events.find(x => x.id === eventId);
     const partySize = parseInt(fd.get('partySize')) || 1;
-    const res = await loadReservations(eventId);
-    const rc = reservedCount(res);
-    if (rc + partySize > (parseInt(ev.capacity) || 0)) {
+    const { reserved_count } = await fetchEventStats(eventId);
+    if (reserved_count + partySize > (parseInt(ev.capacity) || 0)) {
       STATE.notice = { type:'error', text:'Sorry — that session just filled up. Try a smaller party or another date.' };
     } else {
       const requiresConfirmation = !!(ev && ev.require_confirmation);
@@ -1955,12 +1946,11 @@ const SUBMIT_HANDLERS = {
   },
 
   'do-cancel': async (form) => {
-    const reservationId = form.dataset.reservationId;
-    const eventId       = form.dataset.eventId;
-    const eventDate     = form.dataset.eventDate;
-    const eventLabel    = form.dataset.eventLabel;
-    await deleteReservation(reservationId);
-    await promoteWaitlist(eventId, eventDate, eventLabel);
+    const eventId    = form.dataset.eventId;
+    const eventDate  = form.dataset.eventDate;
+    const eventLabel = form.dataset.eventLabel;
+    await supaFetch('rpc/cancel_reservation_by_token', { method:'POST', body:{ p_token: STATE.cancelToken } });
+    await advanceWaitlist(eventId, eventDate, eventLabel);
     invalidateReserveStats();
     STATE.cancelToken = null;
     STATE.view = 'home';
@@ -1970,43 +1960,23 @@ const SUBMIT_HANDLERS = {
   },
 
   'do-claim': async (form) => {
-    const waitlistId = form.dataset.waitlistId;
-    const eventId    = form.dataset.eventId;
     const eventDate  = form.dataset.eventDate;
     const eventLabel = form.dataset.eventLabel;
-    const ev = STATE.events.find(x => x.id === eventId);
 
-    // Re-check capacity
-    const res = await loadReservations(eventId);
-    const rc = reservedCount(res);
-    const cap = ev ? parseInt(ev.capacity)||0 : 0;
-    if (rc >= cap) {
-      STATE.notice = { type:'error', text:'Sorry — the seat was just taken. We\'ll be in touch if another opens up.' };
+    // Atomically re-checks capacity, creates the reservation, and marks the waitlist entry
+    // claimed — see claim_waitlist_by_token() in the Supabase migration.
+    const claimed = await supaFetch('rpc/claim_waitlist_by_token', { method:'POST', body:{ p_token: STATE.claimToken } });
+    invalidateReserveStats();
+    if (!claimed) {
+      STATE.notice = { type:'error', text:'Sorry — the seat was just taken, or this link is no longer valid.' };
       await render(); return;
     }
 
-    // Get waitlist entry for name/email
-    const wRows = await supaFetch('waitlist?id=eq.' + waitlistId + '&select=*');
-    const w = wRows && wRows[0];
-    if (!w) { STATE.notice = { type:'error', text:'Could not find your waitlist entry.' }; await render(); return; }
-
-    // Create reservation
-    const reservation = await addReservation(eventId, { name:w.name, email:w.email, partySize:w.party_size, notes:w.notes||'' });
-
-    // Mark waitlist entry as claimed
-    w.claimed = true;
-    await updateWaitlistEntry(w);
-    invalidateReserveStats();
-
-    // Send confirmation
-    if (reservation) {
-      const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
-      await sendEmail(
-        w.email,
-        'Your seat is confirmed — Café Gestalt ' + fmtDate(eventDate),
-        emailWaitlistConfirm(w.name, fmtDate(eventDate), eventLabel, cancelUrl)
-      );
-    }
+    await sendEmail(
+      claimed.email,
+      'Your seat is confirmed — Café Gestalt ' + fmtDate(eventDate),
+      emailWaitlistConfirm(claimed.name, fmtDate(eventDate), eventLabel, SITE_URL + '/#cancel?token=' + claimed.cancel_token)
+    );
     STATE.notice = { type:'success', text:"You're booked! Check your email for confirmation." };
     STATE.claimToken = null;
     STATE.view = 'home';
@@ -2014,17 +1984,11 @@ const SUBMIT_HANDLERS = {
   },
 
   'do-decline-waitlist': async (form) => {
-    const waitlistId = form.dataset.waitlistId;
-    const eventId     = form.dataset.eventId;
-    const eventDate    = form.dataset.eventDate;
-    const eventLabel   = form.dataset.eventLabel;
-    const wRows = await supaFetch('waitlist?id=eq.' + waitlistId + '&select=*');
-    const w = wRows && wRows[0];
-    if (w) {
-      w.declined = true;
-      await updateWaitlistEntry(w);
-      await promoteWaitlist(eventId, eventDate, eventLabel);
-    }
+    const eventId    = form.dataset.eventId;
+    const eventDate  = form.dataset.eventDate;
+    const eventLabel = form.dataset.eventLabel;
+    const declined = await supaFetch('rpc/decline_waitlist_by_token', { method:'POST', body:{ p_token: STATE.declineToken } });
+    if (declined) await advanceWaitlist(eventId, eventDate, eventLabel);
     invalidateReserveStats();
     STATE.declineToken = null;
     STATE.view = 'home';
@@ -2072,15 +2036,24 @@ const SUBMIT_HANDLERS = {
   },
 
   'set-passcode': async (form, fd) => {
-    await savePasscode(fd.get('passcode'));
-    STATE.adminUnlocked = true;
-    STATE.notice = { type:'success', text:'Passcode set. Welcome in.' }; await render();
+    try {
+      await adminSetPasscode(fd.get('passcode'));
+      STATE.adminUnlocked = true;
+      STATE.notice = { type:'success', text:'Passcode set. Welcome in.' };
+    } catch (e) {
+      STATE.notice = { type:'error', text:e.message };
+    }
+    await render();
   },
 
   'unlock-admin': async (form, fd) => {
-    const code = await loadPasscode();
-    if (fd.get('passcode') === code) { STATE.adminUnlocked = true; STATE.notice = null; }
-    else { STATE.notice = { type:'error', text:'Incorrect passcode.' }; }
+    try {
+      await adminUnlock(fd.get('passcode'));
+      STATE.adminUnlocked = true;
+      STATE.notice = null;
+    } catch (e) {
+      STATE.notice = { type:'error', text:'Incorrect passcode.' };
+    }
     await render();
   },
 
