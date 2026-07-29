@@ -752,10 +752,17 @@ async function render() {
   // approve, etc.) don't visibly jump. Real page/tab navigation resets to top separately.
   window.scrollTo(0, scrollY);
 }
-let RESIZE_FIT_TIMER = null;
+// rAF-throttled rather than debounced, so the title's JS-computed font-size tracks the resize
+// live (roughly every frame) instead of sitting frozen until 150ms after the resize stops —
+// the date/year column next to it is pure CSS (clamp()), so it already updates every frame.
+let RESIZE_FIT_SCHEDULED = false;
 window.addEventListener('resize', () => {
-  clearTimeout(RESIZE_FIT_TIMER);
-  RESIZE_FIT_TIMER = setTimeout(fitSessionTitlesToDateHeight, 150);
+  if (RESIZE_FIT_SCHEDULED) return;
+  RESIZE_FIT_SCHEDULED = true;
+  requestAnimationFrame(() => {
+    RESIZE_FIT_SCHEDULED = false;
+    fitSessionTitlesToDateHeight();
+  });
 });
 // The very first render can happen before the @import'd Google Fonts finish loading, so the
 // initial fit gets measured against fallback-font metrics and ends up wrong once the real
