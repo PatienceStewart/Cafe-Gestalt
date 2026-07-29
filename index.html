@@ -266,7 +266,21 @@ const ADMIN_NOTIFY_EMAIL = 'patiencem.stewart@gmail.com';
 /* ===================== admin auth (server-verified passcode) ===================== */
 const ADMIN_LOGIN_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-login';
 const ADMIN_WRITE_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-write';
+const PUBLIC_SUBMIT_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/public-submit';
 let ADMIN_TOKEN = null; // in-memory only — admin has to re-enter the passcode after a reload
+
+// Guest-facing inserts (reservations/waitlist/talks) go through this proxy instead of straight
+// to Supabase, so they can be rate-limited server-side (browsers can't reliably rate-limit
+// themselves, and Postgres/PostgREST here has no reliable view of the caller's real IP).
+async function publicSubmit(action, payload) {
+  const res = await fetch(PUBLIC_SUBMIT_URL, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, payload })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data.result;
+}
 
 async function adminLoginRequest(body) {
   const res = await fetch(ADMIN_LOGIN_URL, {
@@ -309,11 +323,6 @@ async function sendEmail(to, subject, htmlBody) {
   } catch(e) {
     console.error('Email proxy error:', e);
   }
-}
-
-function genToken() {
-  return Array.from(crypto.getRandomValues(new Uint8Array(18)))
-    .map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
 function hoursUntil(isoDate) {
@@ -520,17 +529,10 @@ async function getEventStats(ev) {
   return stats;
 }
 async function addReservation(eventId, data) {
-  const token = genToken();
-  // return=minimal: no public SELECT policy exists on reservations, so asking PostgREST to
-  // hand back the inserted row (the default) would itself be blocked by RLS. Not needed anyway —
-  // the only field callers use (cancel_token) was generated locally above.
-  await supaFetch('reservations', { method:'POST', prefer:'return=minimal', body:{
-    event_id: eventId, name: data.name, email: data.email,
-    party_size: data.partySize, notes: data.notes||'',
-    dietary_needs: data.dietaryNeeds||'', cancel_token: token,
-    status: data.status || 'confirmed'
-  }});
-  return { cancel_token: token };
+  return await publicSubmit('reservation', {
+    eventId, name: data.name, email: data.email, partySize: data.partySize,
+    notes: data.notes || '', dietaryNeeds: data.dietaryNeeds || '', status: data.status || 'confirmed'
+  });
 }
 async function deleteReservation(id) {
   await adminWrite('delete-reservation', { id });
@@ -541,13 +543,9 @@ async function updateReservationStatus(id, status) {
 }
 
 async function addToWaitlist(eventId, data) {
-  // return=minimal: no public SELECT policy exists on waitlist, and callers don't use the
-  // returned row anyway.
-  await supaFetch('waitlist', { method:'POST', prefer:'return=minimal', body:{
-    event_id: eventId, name: data.name, email: data.email,
-    party_size: data.partySize, notes: data.notes||'',
-    claim_token: genToken(), claimed: false, notified: false
-  }});
+  await publicSubmit('waitlist', {
+    eventId, name: data.name, email: data.email, partySize: data.partySize, notes: data.notes || ''
+  });
 }
 async function deleteWaitlistEntry(id) {
   await adminWrite('delete-waitlist', { id });
@@ -575,9 +573,10 @@ async function loadAllTalks() {
   return await adminWrite('list-talks', {}) || [];
 }
 async function addTalk(data) {
-  // return=minimal: no public SELECT policy exists on talks, and callers don't use the
-  // returned row anyway.
-  await supaFetch('talks', { method:'POST', prefer:'return=minimal', body:{ name:data.name, email:data.email, topic:data.topic, description:data.description, available_dates:data.availableDates, notes:data.notes||'', status:'pending', assigned_event_id:null, submission_type:data.type||'talk' } });
+  await publicSubmit('talk', {
+    name: data.name, email: data.email, topic: data.topic, description: data.description,
+    availableDates: data.availableDates, notes: data.notes || '', type: data.type || 'talk'
+  });
 }
 async function updateTalk(talk) {
   await adminWrite('update-talk', { id:talk.id, status:talk.status, assigned_event_id:talk.assigned_event_id||null });
@@ -1909,26 +1908,30 @@ const SUBMIT_HANDLERS = {
       STATE.notice = { type:'error', text:'Sorry — that session just filled up. Try a smaller party or another date.' };
     } else {
       const requiresConfirmation = !!(ev && ev.require_confirmation);
-      const reservation = await addReservation(eventId, {
-        name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'',
-        dietaryNeeds: noSpecialDiet ? 'No special dietary needs' : dietaryNeeds,
-        status: requiresConfirmation ? 'pending' : 'confirmed'
-      });
-      if (reservation && requiresConfirmation) {
-        await sendEmail(
-          fd.get('email'),
-          'Your request — Café Gestalt ' + fmtDate(ev.date),
-          emailReservationPending(fd.get('name'), fmtDate(ev.date), ev.label||'')
-        );
-        STATE.notice = { type:'success', text:"Request sent! We'll email you once it's confirmed." };
-      } else if (reservation) {
-        const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
-        await sendEmail(
-          fd.get('email'),
-          'Your reservation — Café Gestalt ' + fmtDate(ev.date),
-          emailConfirmation(fd.get('name'), fmtDate(ev.date), ev.label||'', cancelUrl)
-        );
-        STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation." };
+      try {
+        const reservation = await addReservation(eventId, {
+          name:fd.get('name'), email:fd.get('email'), partySize, notes:fd.get('notes')||'',
+          dietaryNeeds: noSpecialDiet ? 'No special dietary needs' : dietaryNeeds,
+          status: requiresConfirmation ? 'pending' : 'confirmed'
+        });
+        if (reservation && requiresConfirmation) {
+          await sendEmail(
+            fd.get('email'),
+            'Your request — Café Gestalt ' + fmtDate(ev.date),
+            emailReservationPending(fd.get('name'), fmtDate(ev.date), ev.label||'')
+          );
+          STATE.notice = { type:'success', text:"Request sent! We'll email you once it's confirmed." };
+        } else if (reservation) {
+          const cancelUrl = SITE_URL + '/#cancel?token=' + reservation.cancel_token;
+          await sendEmail(
+            fd.get('email'),
+            'Your reservation — Café Gestalt ' + fmtDate(ev.date),
+            emailConfirmation(fd.get('name'), fmtDate(ev.date), ev.label||'', cancelUrl)
+          );
+          STATE.notice = { type:'success', text:"You're booked! Check your email for a confirmation." };
+        }
+      } catch (e) {
+        STATE.notice = { type:'error', text: e.message || 'Could not complete your reservation. Please try again.' };
       }
     }
     invalidateReserveStats();
@@ -1944,9 +1947,13 @@ const SUBMIT_HANDLERS = {
     });
     if (!valid) return;
     const eventId = form.dataset.eventId;
-    await addToWaitlist(eventId, { name:fd.get('name'), email:fd.get('email'), partySize:1, notes:fd.get('notes')||'' });
+    try {
+      await addToWaitlist(eventId, { name:fd.get('name'), email:fd.get('email'), partySize:1, notes:fd.get('notes')||'' });
+      STATE.notice = { type:'success', text:"You're on the waitlist. We'll email you if a seat opens up." };
+    } catch (e) {
+      STATE.notice = { type:'error', text: e.message || 'Could not join the waitlist. Please try again.' };
+    }
     invalidateReserveStats();
-    STATE.notice = { type:'success', text:"You're on the waitlist. We'll email you if a seat opens up." };
     STATE.openReserveFormFor = null;
     STATE.view = 'reserve'; window.location.hash = 'reserve';
     await render();
@@ -2013,15 +2020,20 @@ const SUBMIT_HANDLERS = {
     if (!valid) return;
     const availableDates = [...TALK_PICKER.selectedDays].sort();
     const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates, notes:fd.get('notes')||'', type:'talk' };
-    await addTalk(submission);
-    await sendEmail(ADMIN_NOTIFY_EMAIL, 'New talk proposal — ' + submission.topic, emailNewSubmissionNotify(submission));
-    await sendEmail(submission.email, "We've got your talk proposal — Café Gestalt", emailTalkReceived(submission));
-    TALK_PICKER.openMonths.clear();
-    TALK_PICKER.selectedDays.clear();
-    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
-    TALK_MODE = 'talk';
-    STATE.notice = { type:'success', text:"Thanks! We'll follow up to confirm a date." };
-    form.reset(); await render();
+    try {
+      await addTalk(submission);
+      await sendEmail(ADMIN_NOTIFY_EMAIL, 'New talk proposal — ' + submission.topic, emailNewSubmissionNotify(submission));
+      await sendEmail(submission.email, "We've got your talk proposal — Café Gestalt", emailTalkReceived(submission));
+      TALK_PICKER.openMonths.clear();
+      TALK_PICKER.selectedDays.clear();
+      TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
+      TALK_MODE = 'talk';
+      STATE.notice = { type:'success', text:"Thanks! We'll follow up to confirm a date." };
+      form.reset();
+    } catch (e) {
+      STATE.notice = { type:'error', text: e.message || 'Could not submit your talk proposal. Please try again.' };
+    }
+    await render();
   },
 
   theme: async (form, fd) => {
@@ -2033,13 +2045,18 @@ const SUBMIT_HANDLERS = {
     });
     if (!valid) return;
     const submission = { name:fd.get('name'), email:fd.get('email'), topic:fd.get('topic'), description:fd.get('description'), availableDates:[], notes:fd.get('notes')||'', type:'theme' };
-    await addTalk(submission);
-    await sendEmail(ADMIN_NOTIFY_EMAIL, 'New theme idea — ' + submission.topic, emailNewSubmissionNotify(submission));
-    await sendEmail(submission.email, "We've got your idea — Café Gestalt", emailTalkReceived(submission));
-    TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
-    TALK_MODE = 'talk';
-    STATE.notice = { type:'success', text:"Thanks for the idea! We'll be in touch." };
-    form.reset(); await render();
+    try {
+      await addTalk(submission);
+      await sendEmail(ADMIN_NOTIFY_EMAIL, 'New theme idea — ' + submission.topic, emailNewSubmissionNotify(submission));
+      await sendEmail(submission.email, "We've got your idea — Café Gestalt", emailTalkReceived(submission));
+      TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
+      TALK_MODE = 'talk';
+      STATE.notice = { type:'success', text:"Thanks for the idea! We'll be in touch." };
+      form.reset();
+    } catch (e) {
+      STATE.notice = { type:'error', text: e.message || 'Could not submit your idea. Please try again.' };
+    }
+    await render();
   },
 
   'set-passcode': async (form, fd) => {
