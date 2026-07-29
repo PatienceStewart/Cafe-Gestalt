@@ -313,7 +313,7 @@ function emailButtonHtml(url, label, outline) {
 
 function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
   return emailShell("You're booked for Café Gestalt", eventDateLine(eventDate, eventLabel), `
-    <p>Hi ${name}, your seat is reserved. We look forward to seeing you.</p>
+    <p>Hi ${escapeHtml(name)}, your seat is reserved. We look forward to seeing you.</p>
     <p></p>
     <p>Come find us at:</p>
     ${emailAddressBlock()}
@@ -326,12 +326,12 @@ function emailConfirmation(name, eventDate, eventLabel, cancelUrl) {
 
 function emailReservationPending(name, eventDate, eventLabel) {
   return emailShell("We've got your request — Café Gestalt", eventDateLine(eventDate, eventLabel), `
-    <p>Hi ${name}, thanks for requesting a seat. We review requests by hand — we'll email you as soon as it's confirmed, or if we're not able to fit you in this time.</p>`);
+    <p>Hi ${escapeHtml(name)}, thanks for requesting a seat. We review requests by hand — we'll email you as soon as it's confirmed, or if we're not able to fit you in this time.</p>`);
 }
 
 function emailReservationApproved(name, eventDate, eventLabel, cancelUrl) {
   return emailShell('Your seat is confirmed — Café Gestalt', eventDateLine(eventDate, eventLabel), `
-    <p>Hi ${name}, good news — your reservation request has been confirmed. We look forward to seeing you.</p>
+    <p>Hi ${escapeHtml(name)}, good news — your reservation request has been confirmed. We look forward to seeing you.</p>
     <p></p>
     <p>Come find us at:</p>
     ${emailAddressBlock()}
