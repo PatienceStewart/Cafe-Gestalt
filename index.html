@@ -278,8 +278,20 @@ let ADMIN_TOKEN = null; // in-memory only — admin has to re-enter the passcode
 // Guest-facing inserts (reservations/waitlist/talks) go through this proxy instead of straight
 // to Supabase, so they can be rate-limited server-side (browsers can't reliably rate-limit
 // themselves, and Postgres/PostgREST here has no reliable view of the caller's real IP).
+// fetch() throws a bare TypeError (message just "Failed to fetch", with no useful detail) when
+// a request never gets a response at all — offline, a blocked/refused connection, a firewall,
+// a browser extension, etc. Surface a message people can actually act on instead of that raw
+// text ending up on screen verbatim.
+async function friendlyFetch(url, opts) {
+  try {
+    return await fetch(url, opts);
+  } catch (e) {
+    throw new Error('Could not reach the server — check your connection and try again.');
+  }
+}
+
 async function publicSubmit(action, payload) {
-  const res = await fetch(PUBLIC_SUBMIT_URL, {
+  const res = await friendlyFetch(PUBLIC_SUBMIT_URL, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action, payload })
   });
@@ -289,7 +301,7 @@ async function publicSubmit(action, payload) {
 }
 
 async function adminLoginRequest(body) {
-  const res = await fetch(ADMIN_LOGIN_URL, {
+  const res = await friendlyFetch(ADMIN_LOGIN_URL, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
   });
   const data = await res.json();
@@ -308,7 +320,7 @@ async function adminUnlock(passcode) {
 // Proxy for every admin-only read/write — runs server-side with the Supabase service role key,
 // gated on the session token issued by adminSetPasscode/adminUnlock above.
 async function adminWrite(action, payload) {
-  const res = await fetch(ADMIN_WRITE_URL, {
+  const res = await friendlyFetch(ADMIN_WRITE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ADMIN_TOKEN },
     body: JSON.stringify({ action, payload })
@@ -463,7 +475,7 @@ async function supaFetch(path, opts = {}) {
     'Prefer': opts.prefer || 'return=representation',
     ...opts.headers
   };
-  const res = await fetch(url, { method: opts.method || 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
+  const res = await friendlyFetch(url, { method: opts.method || 'GET', headers, body: opts.body ? JSON.stringify(opts.body) : undefined });
   if (!res.ok) {
     const err = await res.text();
     throw new Error('Supabase error ' + res.status + ': ' + err);
