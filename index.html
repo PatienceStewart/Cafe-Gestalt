@@ -2059,7 +2059,7 @@ const SUBMIT_HANDLERS = {
       STATE.adminUnlocked = true;
       STATE.notice = null;
     } catch (e) {
-      STATE.notice = { type:'error', text:'Incorrect passcode.' };
+      STATE.notice = { type:'error', text: e.message || 'Incorrect passcode.' };
     }
     await render();
   },
