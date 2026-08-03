@@ -693,6 +693,20 @@ async function refreshCore() {
   STATE.events = await loadEvents();
 }
 
+// The very first render can be triggered from more than one place (init() on page load, or a
+// 'hashchange' firing before init() finishes its initial fetch) — sharing one in-flight promise
+// here means whichever caller gets there first does the fetch and everyone else just waits on
+// it, instead of a second caller racing ahead with STATE.cafeInfo/events still unset.
+let initialLoadPromise = null;
+function ensureInitialLoad() {
+  if (!initialLoadPromise) {
+    // On genuine failure (not just a race), let the next render() attempt (e.g. a nav click)
+    // retry the fetch instead of replaying the same cached rejection forever.
+    initialLoadPromise = refreshCore().catch(e => { initialLoadPromise = null; throw e; });
+  }
+  return initialLoadPromise;
+}
+
 function upcomingEvents() {
   return STATE.events.filter(e => isFuture(e.date)).sort((a,b) => a.date.localeCompare(b.date));
 }
@@ -718,6 +732,7 @@ async function render() {
   if (firstRenderDone) app.innerHTML = '<div class="loading-line">loading…</div>';
   let html = '';
   try {
+    await ensureInitialLoad();
     if (STATE.view === 'home')         html = await renderHome();
     else if (STATE.view === 'about')   html = await renderAbout();
     else if (STATE.view === 'reserve') html = await renderReserve();
@@ -2143,7 +2158,6 @@ window.addEventListener('hashchange', async () => {
 });
 
 (async function init() {
-  await refreshCore();
   const hash = window.location.hash.replace('#','');
 
   // Handle cancel?token=xxx and claim?token=xxx
