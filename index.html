@@ -794,11 +794,11 @@ async function renderHome() {
       <div class="home-session-title">No session scheduled yet — check back soon.</div>
     </div>`;
   if (next) {
-    const { spotsLeft, cap, rsvpClosed, full } = await getEventStats(next);
+    const { spotsLeft, cap, rsvpClosed, full, waitlistCount } = await getEventStats(next);
 
     let actionHtml;
     if (full) {
-      actionHtml = '<div class="home-session-note">This session is full.</div>';
+      actionHtml = `<button class="home-btn-outline" data-action="open-reserve-form" data-event-id="${next.id}-waitlist">Waitlist${waitlistCount > 0 ? ' ('+waitlistCount+')' : ''}</button>`;
     } else if (rsvpClosed) {
       actionHtml = '<div class="home-session-note">RSVP is now closed.</div>';
     } else {
