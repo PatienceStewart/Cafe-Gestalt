@@ -641,6 +641,7 @@ let STATE = {
   cafeInfo: null,
   events: [],
   talks: [],
+  talksLoaded: false,
   adminUnlocked: false,
   notice: null,
   openReserveFormFor: null,
@@ -1341,7 +1342,10 @@ async function renderAdmin() {
       </div>`);
   }
 
-  STATE.talks = await loadAllTalks();
+  if (!STATE.talksLoaded) {
+    STATE.talks = await loadAllTalks();
+    STATE.talksLoaded = true;
+  }
   const upEvents = upcomingEvents();
   const pending = STATE.talks.filter(t => t.status === 'pending').length;
   let subnav = ['overview','cafe info','sessions','talks'].map(tab =>
@@ -1435,12 +1439,19 @@ async function renderAdminSessions() {
     ...STATE.events.filter(e => isFuture(e.date)).sort((a,b) => a.date.localeCompare(b.date)),
     ...STATE.events.filter(e => !isFuture(e.date)).sort((a,b) => b.date.localeCompare(a.date)),
   ];
-  for (const ev of allSorted) {
+  const perEvent = await Promise.all(allSorted.map(async ev => {
+    const [res, wl] = await Promise.all([
+      adminListReservations(ev.id),
+      advanceWaitlist(ev.id, ev.date, ev.label).then(() => adminListWaitlist(ev.id)),
+    ]);
+    return { res, wl };
+  }));
+  for (const [i, ev] of allSorted.entries()) {
+    const { res, wl } = perEvent[i];
     if (!pastDividerShown && !isFuture(ev.date)) {
       sessionsHtml += `<div style="margin:28px 0 16px;padding-top:16px;border-top:1px solid rgba(240,234,216,.25);"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;letter-spacing:.05em;">Past sessions</div></div>`;
       pastDividerShown = true;
     }
-    const res = await adminListReservations(ev.id);
     const rc = reservedCount(res);
     const isEditing = STATE.openEditEventFor === ev.id;
 
@@ -1505,9 +1516,7 @@ async function renderAdminSessions() {
       ${editForm}
       ${pendingRows.length ? `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Pending requests (${pendingRes.length})</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${pendingRows}</tbody></table></div></div>` : ''}
       ${confirmedRes.length ? `<div class="table-scroll" style="margin-top:14px;"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Dietary</th><th>Notes</th><th style="width:1%;"></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="field-hint" style="margin-top:10px;">No confirmed reservations yet.</div>'}
-      ${await (async () => {
-        await advanceWaitlist(ev.id, ev.date, ev.label);
-        const wl = await adminListWaitlist(ev.id);
+      ${(() => {
         if (!wl.length) return '';
         const wrows = wl.map(w => `<tr><td>${escapeHtml(w.name)}</td><td>${escapeHtml(w.email)}</td><td>${w.party_size}</td><td>${w.declined?'<span class=\'badge badge-pending\'>Declined/expired</span>':''} ${w.notified && !w.declined?'<span class=\'badge badge-pending\'>Notified</span>':''} ${w.claimed?'<span class=\'badge badge-approved\'>Claimed</span>':''}</td><td style="width:1%;text-align:right;white-space:nowrap;"><button class="home-btn-danger btn-small" data-action="delete-waitlist" data-id="${w.id}">Remove</button></td></tr>`).join('');
         return `<div style="margin-top:14px;"><div class="mono" style="font-size:.75rem;opacity:.6;text-transform:uppercase;margin-bottom:6px;">Waitlist (${wl.filter(w=>!w.claimed && !w.declined).length} active)</div><div class="table-scroll"><table class="admin-table admin-table-dark"><thead><tr><th>Name</th><th>Email</th><th>Party</th><th>Status</th><th style="width:1%;"></th></tr></thead><tbody>${wrows}</tbody></table></div></div>`;
@@ -1625,7 +1634,7 @@ const CLICK_ACTIONS = {
     window.scrollTo(0, 0);
   },
   'lock-admin': async () => {
-    STATE.adminUnlocked = false; ADMIN_TOKEN = null; await render(); window.scrollTo(0, 0);
+    STATE.adminUnlocked = false; STATE.talksLoaded = false; ADMIN_TOKEN = null; await render(); window.scrollTo(0, 0);
   },
   'open-edit-event': async (el) => {
     STATE.openEditEventFor = el.dataset.eventId; await render();
