@@ -856,8 +856,9 @@ async function renderReserve() {
   }
 
   const [first, ...rest] = events;
+  const allStats = await Promise.all(events.map(ev => getEventStats(ev)));
 
-  const fStats = await getEventStats(first);
+  const fStats = allStats[0];
   const { spotsLeft: fSpotsLeft, cap: fCap, rsvpClosed: fRsvpClosed, full: fFull, waitlistCount: fWaitlistCount } = fStats;
 
   const nextSessionHtml = `
@@ -872,8 +873,8 @@ async function renderReserve() {
   </div>`;
 
   let rowsHtml = '';
-  for (const ev of rest) {
-    const { spotsLeft, cap, rsvpClosed, full, waitlistCount } = await getEventStats(ev);
+  for (const [i, ev] of rest.entries()) {
+    const { spotsLeft, cap, rsvpClosed, full, waitlistCount } = allStats[i + 1];
 
     rowsHtml += `
     <div class="sess-row">
