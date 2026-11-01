@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Café Gestalt</title>
 <script>
-// In-app browsers (Instagram etc.) can open the site over plain http://, and the API only
-// accepts requests from https:// pages — so bounce to https before anything else loads.
 if (location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
   location.replace('https://' + location.host + location.pathname + location.search + location.hash);
 }
@@ -96,7 +94,6 @@ table.admin-table.admin-table-dark{color:#f0ead8;}
 table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{border-bottom-color:rgba(240,234,216,.25);}
 .loading-line{font-family:'IBM Plex Mono',monospace;opacity:.6;padding:40px 0;text-align:center;}
 
-/* ===================== Home screen ===================== */
 .home-view{background:#1b1b13;color:#f0ead8;width:auto;margin-left:calc(50% - 50vw);margin-right:calc(50% - 50vw);padding:0 0 56px;}
 .home-hero{position:relative;width:100%;background:url('hero-cups.jpg') 0% 32%/137.5% auto no-repeat;padding:20px clamp(20px,5vw,80px) 56px;aspect-ratio:1440/900;min-height:320px;max-height:max(900px,65vh);display:flex;flex-direction:column;box-sizing:border-box;}
 .home-nav{position:relative;display:flex;align-items:center;justify-content:space-between;gap:12px;}
@@ -187,7 +184,6 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 @media(max-width:640px){.home-hero{padding:16px 16px 40px;}}
 .home-nav-links button.is-active{text-decoration:underline dotted;text-underline-offset:3px;}
 
-/* ===================== Dark page chrome (shared, non-hero pages) ===================== */
 .sess-header{padding:20px clamp(20px,5vw,80px) 0;}
 .sess-title{font-family:'Source Serif 4',serif;font-weight:400;font-size:clamp(1.4rem,3vw,2rem);color:#f0ead8;text-align:center;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:40px auto 0;}
 .sess-next{display:flex;flex-wrap:wrap;width:calc(100% - (var(--page-inset) * 2));max-width:950px;margin:56px auto 0;border-radius:24px;overflow:hidden;}
@@ -199,10 +195,6 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
   .reserve-view::before{content:'';position:absolute;inset:0;background:url('Gestalt group.webp') center/cover no-repeat;opacity:.2;pointer-events:none;z-index:-1;}
   .sess-next-img{display:none;}
   .sess-next-copy{flex:1 1 100%;}
-  /* Once the photo is hidden, the card no longer needs to share the row with it — let it use
-     the same flat inset the rest of the site uses at full width, instead of the shared
-     --page-inset variable (which scales up to 20vw/10vw here for other, narrower content
-     blocks). That extra width is what keeps session titles from wrapping onto a third line. */
   .sess-next{width:calc(100% - 40px);}
   .sess-next-inner{max-width:600px;}
 }
@@ -235,7 +227,6 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 .form-panel-dark .field-error{font-size:.8rem;color:#e0a898;margin-top:4px;font-family:'IBM Plex Mono',monospace;}
 .form-panel-dark .field input.invalid,.form-panel-dark .field select.invalid,.form-panel-dark .field textarea.invalid{border-color:#e0a898;}
 
-/* ===================== About page ===================== */
 .about-wrap{width:calc(100% - (var(--page-inset) * 2));max-width:1120px;margin:168px auto 0;}
 .about-wrap.about-ai{margin-top:80px;}
 .about-intro{font-family:'Source Serif 4',serif;font-weight:400;font-size:1.7rem;margin:0 0 40px;}
@@ -266,29 +257,18 @@ table.admin-table.admin-table-dark th,table.admin-table.admin-table-dark td{bord
 <div id="app" class="home-active"><div class="loading-line">Page is brewing…</div></div>
 
 <script>
-/* ===================== Supabase config ===================== */
 const SUPA_URL = 'https://lhiquhhpiofcjlnrhiif.supabase.co';
 const SUPA_KEY = 'sb_publishable_LjqgeRMTPkd3z07rOPMVoQ_O-O4juOj';
 
-/* ===================== Email proxy (Vercel) ===================== */
-// Replace this with your Vercel deployment URL once deployed
 const PROXY_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/send-email';
 const SITE_URL  = 'https://cafegestalt.com';
 const ADMIN_NOTIFY_EMAIL = 'patiencem.stewart@gmail.com';
 
-/* ===================== admin auth (server-verified passcode) ===================== */
 const ADMIN_LOGIN_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-login';
 const ADMIN_WRITE_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/admin-write';
 const PUBLIC_SUBMIT_URL = 'https://cafe-gestalt-api-o5fr.vercel.app/api/public-submit';
-let ADMIN_TOKEN = null; // in-memory only — admin has to re-enter the passcode after a reload
+let ADMIN_TOKEN = null;
 
-// Guest-facing inserts (reservations/waitlist/talks) go through this proxy instead of straight
-// to Supabase, so they can be rate-limited server-side (browsers can't reliably rate-limit
-// themselves, and Postgres/PostgREST here has no reliable view of the caller's real IP).
-// fetch() throws a bare TypeError (message just "Failed to fetch", with no useful detail) when
-// a request never gets a response at all — offline, a blocked/refused connection, a firewall,
-// a browser extension, etc. Surface a message people can actually act on instead of that raw
-// text ending up on screen verbatim.
 async function friendlyFetch(url, opts) {
   try {
     return await fetch(url, opts);
@@ -324,8 +304,6 @@ async function adminSetPasscode(passcode) {
 async function adminUnlock(passcode) {
   ADMIN_TOKEN = (await adminLoginRequest({ action: 'unlock', passcode })).token;
 }
-// Proxy for every admin-only read/write — runs server-side with the Supabase service role key,
-// gated on the session token issued by adminSetPasscode/adminUnlock above.
 async function adminWrite(action, payload) {
   const res = await friendlyFetch(ADMIN_WRITE_URL, {
     method: 'POST',
@@ -355,13 +333,10 @@ function hoursUntil(isoDate) {
   return (event - Date.now()) / 36e5;
 }
 
-// ── Email templates ────────────────────────────────────────────
 const CAFE_ADDRESS = 'Kraatarinraitti 6 B12, Tampere';
 function emailAddressBlock() {
   return `<div style="background:#E4D9C0;color:#0F2E20;border-radius:4px;padding:12px 16px;margin:14px 0;font-family:monospace;font-size:.92rem;">${CAFE_ADDRESS}</div>`;
 }
-// Shared wrapper + subtitle line + call-to-action button markup that every email template below
-// builds on, so the styling only needs to change in one place.
 function emailShell(heading, subtitle, bodyHtml) {
   return `
   <div style="font-family:Georgia,serif;max-width:520px;margin:0 auto;color:#0F2E20;">
@@ -491,7 +466,6 @@ async function supaFetch(path, opts = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-/* ===================== data helpers ===================== */
 
 async function loadCafeInfo() {
   const rows = await supaFetch('cafe_info?id=eq.1&select=*');
@@ -520,15 +494,10 @@ async function updateEvent(ev) {
   await adminWrite('update-event', { id:ev.id, date:ev.date, time:ev.time||'', rsvpBy:ev.rsvpBy, capacity:ev.capacity, label:ev.label, presenter:ev.presenter||'', notes:ev.notes, requireConfirmation:!!ev.requireConfirmation });
 }
 
-// Reserved/waitlist counts only — no personal data — via a SECURITY DEFINER Postgres function,
-// so the public site can show "3 of 8 seats left" without any public read access to the
-// reservations/waitlist tables themselves.
 async function fetchEventStats(eventId) {
   return await supaFetch('rpc/get_event_stats', { method:'POST', body:{ p_event_id: String(eventId) } }) || { reserved_count:0, waitlist_count:0 };
 }
 
-// Admin-only, full-detail listings (name/email/dietary/notes) — go through the authenticated
-// admin-write proxy since they expose guest PII.
 async function adminListReservations(eventId) {
   return await adminWrite('list-reservations', { eventId }) || [];
 }
@@ -536,9 +505,6 @@ async function adminListWaitlist(eventId) {
   return await adminWrite('list-waitlist', { eventId }) || [];
 }
 
-// Cache of per-event reservation/waitlist stats used by the Upcoming Sessions page, so
-// purely-local UI toggles (opening/cancelling a reserve form) don't refetch over the network
-// and don't produce a "reload" flash. Cleared whenever the underlying data may have changed.
 const RESERVE_STATS_CACHE = new Map();
 function invalidateReserveStats() { RESERVE_STATS_CACHE.clear(); }
 async function getEventStats(ev) {
@@ -577,11 +543,8 @@ async function deleteWaitlistEntry(id) {
 }
 
 const WAITLIST_RESPONSE_WINDOW_HOURS = 6;
-const WAITLIST_CLAIM_CUTOFF_HOURS = 48; // waitlist seats can't be promoted/claimed once the event is this close
+const WAITLIST_CLAIM_CUTOFF_HOURS = 48;
 
-// Expires stale (unanswered) offers and notifies the next person on the waitlist, if a seat is
-// available and the event is still far enough out. All of that runs server-side inside the
-// advance_waitlist() Postgres function (SECURITY DEFINER) — the client just sends the email.
 async function advanceWaitlist(eventId, eventDate, eventLabel) {
   const next = await supaFetch('rpc/advance_waitlist', { method:'POST', body:{ p_event_id: String(eventId) } });
   if (!next) return;
@@ -610,7 +573,6 @@ async function deleteTalk(id) {
   await adminWrite('delete-talk', { id });
 }
 
-/* ===================== utils ===================== */
 function fmtDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');
@@ -619,14 +581,13 @@ function fmtDate(iso) {
 }
 function fmtTime(t) {
   if (!t) return '';
-  return t.slice(0, 5); // "HH:MM:SS" or "HH:MM" -> "HH:MM", 24-hour, no seconds
+  return t.slice(0, 5);
 }
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function isFuture(iso) { return iso >= todayISO(); }
-// Only confirmed reservations hold a seat — pending requests and declined ones don't count.
 function reservedCount(list) { return list.filter(r => (r.status || 'confirmed') === 'confirmed').reduce((s, r) => s + (parseInt(r.party_size) || 0), 0); }
 function cupIcon(filled) {
   return '<svg class="cup-icon ' + (filled ? 'is-filled' : '') + '" viewBox="0 0 22 22" aria-hidden="true">'
@@ -648,13 +609,9 @@ function capacityWidget(capacity, reserved) {
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
 }
-// Live character-count hint for a maxlength'd input/textarea — pairs with the delegated
-// 'input' listener below that keeps the count updated as the user types.
 function charCountHint(value, max) {
   return `<div class="field-hint" data-max="${max}">${(value||'').length}/${max}</div>`;
 }
-// Shared ".home-session-card" markup used on the home page, the reserve schedule, and the
-// reserve form — `stats` needs at least {spotsLeft, cap}; `actionHtml` is optional.
 function sessionCardHtml(ev, stats, actionHtml) {
   const d = new Date(ev.date + 'T00:00:00');
   const dayMonth = isNaN(d) ? '' : d.toLocaleDateString(undefined, { day:'2-digit', month:'short' });
@@ -679,7 +636,6 @@ function sessionCardHtml(ev, stats, actionHtml) {
     </div>`;
 }
 
-/* ===================== state ===================== */
 let STATE = {
   view: 'home',
   cafeInfo: null,
@@ -689,10 +645,10 @@ let STATE = {
   notice: null,
   openReserveFormFor: null,
   openEditEventFor: null,
-  declineTalkModalFor: null, // talk id currently showing the decline-reason modal
-  cancelToken: null,   // set from URL hash for cancel flow
-  claimToken: null,    // set from URL hash for waitlist claim flow
-  declineToken: null,  // set from URL hash for waitlist decline flow
+  declineTalkModalFor: null,
+  cancelToken: null,
+  claimToken: null,
+  declineToken: null,
 };
 
 async function refreshCore() {
@@ -700,15 +656,9 @@ async function refreshCore() {
   STATE.events = await loadEvents();
 }
 
-// The very first render can be triggered from more than one place (init() on page load, or a
-// 'hashchange' firing before init() finishes its initial fetch) — sharing one in-flight promise
-// here means whichever caller gets there first does the fetch and everyone else just waits on
-// it, instead of a second caller racing ahead with STATE.cafeInfo/events still unset.
 let initialLoadPromise = null;
 function ensureInitialLoad() {
   if (!initialLoadPromise) {
-    // On genuine failure (not just a race), let the next render() attempt (e.g. a nav click)
-    // retry the fetch instead of replaying the same cached rejection forever.
     initialLoadPromise = refreshCore().catch(e => { initialLoadPromise = null; throw e; });
   }
   return initialLoadPromise;
@@ -718,7 +668,6 @@ function upcomingEvents() {
   return STATE.events.filter(e => isFuture(e.date)).sort((a,b) => a.date.localeCompare(b.date));
 }
 
-/* ===================== nav ===================== */
 async function navigate(view) {
   STATE.view = view; STATE.notice = null;
   if (view !== 'reserve' && view !== 'reserveForm') STATE.openReserveFormFor = null;
@@ -728,10 +677,6 @@ async function navigate(view) {
   window.scrollTo(0, 0);
 }
 
-/* ===================== render shell ===================== */
-// The initial page load already shows the static "Page is brewing…" placeholder baked
-// into the HTML — skip render()'s own loading flash the first time so it doesn't stack
-// a second, differently-worded loading message on top of it before the real content lands.
 let firstRenderDone = false;
 async function render() {
   const app = document.getElementById('app');
@@ -756,13 +701,9 @@ async function render() {
   app.innerHTML = html;
   firstRenderDone = true;
   app.classList.add('home-active');
-  // The loading placeholder above briefly collapses the page's height, which makes the
-  // browser clamp the scroll position — restore it so in-place actions (delete, confirm,
-  // approve, etc.) don't visibly jump. Real page/tab navigation resets to top separately.
   window.scrollTo(0, scrollY);
 }
 
-/* ===================== dark page chrome (shared) ===================== */
 function darkNavHtml(activeView, opts) {
   const onFlatBg = !!(opts && opts.onFlatBg);
   const activeCls = (v) => activeView === v ? ' class="is-active"' : '';
@@ -791,7 +732,6 @@ function darkFooterHtml() {
   </div>`;
 }
 
-/* ===================== home ===================== */
 async function renderHome() {
   const info = STATE.cafeInfo;
   const next = upcomingEvents()[0];
@@ -854,7 +794,6 @@ async function renderHome() {
   `;
 }
 
-/* ===================== about ===================== */
 const ABOUT_ICON_COFFEE = `<svg width="32" height="32" viewBox="0 0 22 18.0081" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M1.86662 17.0081H16.1107M16.5258 10.1323C16.8127 8.10044 16.7037 5.79028 16.5258 4.00288C16.352 2.25576 16.1124 1.00812 16.1124 1.00812L1.86477 1.14755C1.86477 1.14755 -0.0809802 10.1323 1.86477 13.1266C3.81347 16.1255 6.14144 17.0081 9.07348 17.0081C11.4191 17.0081 15.135 14.9837 16.1124 11.9889C16.2989 11.4172 16.4331 10.7893 16.5258 10.1323ZM16.5258 4.00288C18 3.00812 21 3.00812 21 5.00114C21 6.99765 19.8704 10.2722 16.5258 10.1323" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`;
 const ABOUT_ICON_TALK = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 1C24.2783 1 31 7.72173 31 16C31 24.2783 24.2782 31 16 31H4.50195C4.25678 30.9999 4.02782 30.8848 3.88184 30.6924L3.8252 30.6055C3.68724 30.3613 3.69114 30.0622 3.83496 29.8223L4.5625 28.6094C5.1635 27.608 5.07438 26.3376 4.33984 25.4307H4.33887C2.25063 22.8541 1.00001 19.573 1 16C1 7.72172 7.72154 1 16 1ZM7.77734 13.2227C6.24402 13.2228 5 14.4666 5 16C5.00003 17.5333 6.24404 18.7772 7.77734 18.7773C9.31057 18.7773 10.5556 17.5337 10.5557 16C10.5557 14.4663 9.31059 13.2227 7.77734 13.2227ZM16 13.2227C14.4668 13.2227 13.2217 14.4663 13.2217 16C13.2217 17.5337 14.4668 18.7773 16 18.7773C17.5335 18.7773 18.7773 17.5335 18.7773 16C18.7773 14.4665 17.5335 13.2227 16 13.2227ZM24.2773 13.2227C22.744 13.2228 21.5 14.4666 21.5 16C21.5 17.5333 22.744 18.7772 24.2773 18.7773C25.8108 18.7773 27.0556 17.5335 27.0557 16C27.0557 14.4665 25.8108 13.2227 24.2773 13.2227Z" stroke="currentColor" stroke-width="2"/></svg>`;
 const ABOUT_ICON_LIGHTBULB = `<svg width="22" height="32" viewBox="0 0 22 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6.05497 25.7921H5.05497C5.05497 26.3444 5.50269 26.7921 6.05497 26.7921V25.7921ZM15.9624 25.7921V26.7921C16.5147 26.7921 16.9624 26.3444 16.9624 25.7921H15.9624ZM17.3422 19.8239L18.0305 20.5494L17.3422 19.8239ZM21 10.5737L22 10.5737L21 10.5737ZM1.00451 10.5737L0.00471944 10.5534L1.00451 10.5737ZM4.46402 19.6257L5.12504 18.8753L4.46402 19.6257ZM6.05497 25.7921V26.7921H15.9624V25.7921V24.7921H6.05497V25.7921ZM15.9624 25.7921H16.9624C16.9624 24.728 16.9646 23.6456 17.122 22.6726C17.2809 21.6903 17.5749 20.9815 18.0305 20.5494L17.3422 19.8239L16.654 19.0984C15.7297 19.9753 15.3338 21.2027 15.1477 22.3532C14.9601 23.513 14.9624 24.7602 14.9624 25.7921H15.9624ZM17.3422 19.8239L18.0305 20.5494C19.8202 18.8516 20.8319 17.175 21.3825 15.4755C21.9272 13.7943 22 12.1489 22 10.5737L21 10.5737L20 10.5737C20 12.1022 19.924 13.4881 19.4799 14.8591C19.0416 16.2118 18.2245 17.6085 16.654 19.0984L17.3422 19.8239ZM21 10.5737L22 10.5737C22 6.12026 18.5345 0 11.2818 0V1V2C17.1443 2 20 6.91564 20 10.5737L21 10.5737ZM11.2818 1V0C4.12865 0 0.111163 5.31638 0.00471944 10.5534L1.00451 10.5737L2.00431 10.594C2.09077 6.34003 5.31993 2 11.2818 2V1ZM1.00451 10.5737L0.00471944 10.5534C-0.0827632 14.8575 1.04086 17.9429 3.80301 20.3761L4.46402 19.6257L5.12504 18.8753C2.90804 16.9223 1.92567 14.4631 2.00431 10.594L1.00451 10.5737ZM4.46402 19.6257L3.80301 20.3761C4.37304 20.8782 4.6984 21.5778 4.8731 22.5131C5.05174 23.4696 5.05497 24.5629 5.05497 25.7921H6.05497H7.05497C7.05497 24.6081 7.05821 23.319 6.8391 22.1459C6.61606 20.9517 6.14596 19.7747 5.12504 18.8753L4.46402 19.6257ZM7.271 25.7921L6.28411 25.6307C6.17919 26.2723 6.15003 27.2882 6.2891 28.2712C6.35927 28.7672 6.47681 29.2887 6.66835 29.7666C6.85695 30.2372 7.14317 30.7303 7.58905 31.0932L8.22023 30.3175L8.85141 29.5419C8.76317 29.4701 8.64174 29.3143 8.52481 29.0226C8.41081 28.7381 8.32491 28.3837 8.26938 27.9911C8.15703 27.1969 8.18738 26.3847 8.25789 25.9535L7.271 25.7921ZM8.22023 30.3175L7.58905 31.0932C8.01514 31.4399 8.55779 31.6505 9.07823 31.7808C9.61273 31.9146 10.2007 31.9827 10.7807 31.9971C11.9099 32.0251 13.175 31.8521 14.0684 31.4152L13.6291 30.5169L13.1898 29.6186C12.6971 29.8595 11.7919 30.0215 10.8303 29.9977C10.3648 29.9862 9.92725 29.9316 9.56401 29.8407C9.18671 29.7462 8.95944 29.6298 8.85141 29.5419L8.22023 30.3175ZM13.6291 30.5169L14.0684 31.4152C14.661 31.1255 15.0658 30.6307 15.3373 30.1318C15.6104 29.6297 15.7834 29.0616 15.8865 28.5156C16.0867 27.4556 16.0617 26.2582 15.7951 25.4713L14.848 25.7921L13.9009 26.113C14.0225 26.4721 14.0811 27.2981 13.9213 28.1445C13.8443 28.5518 13.7265 28.9076 13.5805 29.1759C13.4328 29.4473 13.2902 29.5694 13.1898 29.6186L13.6291 30.5169Z" fill="currentColor"/></svg>`;
@@ -890,7 +829,6 @@ async function renderAbout() {
   </div>`;
 }
 
-/* ===================== reserve ===================== */
 async function renderReserve() {
   const events = upcomingEvents();
   const noticeHtml = STATE.notice ? `<div class="notice notice-${STATE.notice.type}">${escapeHtml(STATE.notice.text)}</div>` : '';
@@ -959,7 +897,6 @@ async function renderReserve() {
   `);
 }
 
-/* ===================== reserve form (dedicated page) ===================== */
 async function renderReserveForm() {
   const targetId = STATE.openReserveFormFor;
   const isWaitlist = typeof targetId === 'string' && targetId.endsWith('-waitlist');
@@ -1055,7 +992,6 @@ async function renderReserveForm() {
   `);
 }
 
-/* ===================== cancel / claim views ===================== */
 async function renderCancel() {
   const shell = (innerHtml) => `
   <div class="home-view">
@@ -1141,7 +1077,6 @@ async function renderClaim() {
     return shell(`<div class="sess-row">Sorry — the claim window for this session has closed (less than ${WAITLIST_CLAIM_CUTOFF_HOURS} hours to go).</div>`);
   }
 
-  // Check there's still a seat (the claim itself re-checks this atomically server-side too)
   const { reserved_count } = await fetchEventStats(w.event_id);
   const cap = ev ? parseInt(ev.capacity)||0 : 0;
   if (reserved_count >= cap) {
@@ -1209,17 +1144,12 @@ async function renderDeclineWaitlist() {
     </div>`);
 }
 
-/* ===================== talk — calendar picker ===================== */
-// Picker state lives outside render so selections survive re-draws
 const TALK_PICKER = {
-  openMonths: new Set(),   // 'YYYY-MM' strings of expanded months
-  selectedDays: new Set()  // 'YYYY-MM-DD' strings of chosen days
+  openMonths: new Set(),
+  selectedDays: new Set()
 };
-let TALK_MODE = 'talk'; // 'talk' or 'theme'
+let TALK_MODE = 'talk';
 
-// Picking a day/toggling a month re-renders the whole page, which would otherwise wipe
-// whatever the user already typed into the form (plain inputs aren't bound to state).
-// Capture the live field values first so renderTalk() can restore them.
 let TALK_DRAFT = { name:'', email:'', topic:'', description:'', notes:'' };
 function captureTalkDraft() {
   const form = document.querySelector('form[data-form="talk"], form[data-form="theme"]');
@@ -1229,7 +1159,6 @@ function captureTalkDraft() {
 }
 
 function pickerMonthOptions() {
-  // Build 12 months starting from current month
   const options = [];
   const now = new Date();
   for (let i = 0; i < 12; i++) {
@@ -1243,18 +1172,15 @@ function pickerMonthOptions() {
 
 function renderMonthGrid(yearMonth) {
   const [year, month] = yearMonth.split('-').map(Number);
-  const firstDay = new Date(year, month - 1, 1).getDay(); // 0=Sun
+  const firstDay = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
   const todayStr = todayISO();
 
   let grid = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:10px;">';
-  // Day headers
   ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
     grid += `<div style="font-family:'IBM Plex Mono',monospace;font-size:.68rem;text-align:center;opacity:.5;padding:2px 0;">${d}</div>`;
   });
-  // Empty cells before first day
   for (let i = 0; i < firstDay; i++) grid += '<div></div>';
-  // Day cells
   for (let day = 1; day <= daysInMonth; day++) {
     const iso = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     const isPast = iso < todayStr;
@@ -1273,7 +1199,6 @@ function renderMonthGrid(yearMonth) {
   }
   grid += '</div>';
 
-  // Selected days summary for this month
   const monthSelections = [...TALK_PICKER.selectedDays]
     .filter(d => d.startsWith(yearMonth))
     .map(d => new Date(d + 'T00:00:00').getDate())
@@ -1322,9 +1247,6 @@ function renderCalendarPicker(label = 'Which dates could you present?') {
   return html;
 }
 
-// Config driving the two near-identical submission forms below — everything that differs
-// between "give a talk" and "suggest a theme" lives here; the shared markup lives in
-// talkOrThemeFormHtml().
 const TALK_FORM_CONFIG = {
   talk: {
     intro: `<p style="margin:0 0 16px;">Have an idea worth sharing over coffee? Want to lead a workshop in a skill you know? Tell us about it — we'll follow up to confirm a date.</p>
@@ -1382,11 +1304,8 @@ async function renderTalk() {
   </div>`;
 }
 
-/* ===================== admin ===================== */
 let ADMIN_TAB = 'overview';
-// Set when "Create session from this" is clicked on a talk/theme; pre-fills the
-// Sessions tab's create-event form, and gets linked back once that session is created.
-let CREATE_EVENT_PREFILL = null; // { label, presenter, notes, date, fromTalkId }
+let CREATE_EVENT_PREFILL = null;
 
 async function renderAdmin() {
   const shell = (innerHtml) => `
@@ -1512,7 +1431,6 @@ async function renderAdminSessions() {
 
   let sessionsHtml = '';
   let pastDividerShown = false;
-  // Upcoming sessions soonest-first, then past sessions most-recent-first.
   const allSorted = [
     ...STATE.events.filter(e => isFuture(e.date)).sort((a,b) => a.date.localeCompare(b.date)),
     ...STATE.events.filter(e => !isFuture(e.date)).sort((a,b) => b.date.localeCompare(a.date)),
@@ -1649,7 +1567,6 @@ function renderAdminTalks() {
   }).join('') + modalHtml;
 }
 
-/* ===================== event delegation ===================== */
 document.addEventListener('keydown', async (e) => {
   if (e.key !== 'Enter' && e.key !== ' ') return;
   const navEl = e.target.closest('[role="link"][data-nav]');
@@ -1657,9 +1574,6 @@ document.addEventListener('keydown', async (e) => {
   e.preventDefault();
   await navigate(navEl.dataset.nav);
 });
-// Dispatch table for every [data-action] click handler, keyed by the action name. Each
-// handler receives the matched element. Kept as a table (rather than one long if/else chain)
-// so each action reads as its own small unit.
 const CLICK_ACTIONS = {
   'toggle-mobile-nav': async (el) => {
     const links = document.getElementById('homeNavLinks');
@@ -1837,7 +1751,6 @@ document.addEventListener('click', async (e) => {
   if (handler) await handler(actionEl);
 });
 
-// Keeps every maxlength'd field's live "n/max" hint (see charCountHint) in sync while typing.
 document.addEventListener('input', (e) => {
   const el = e.target;
   if (el.maxLength == null || el.maxLength < 0) return;
@@ -1845,9 +1758,7 @@ document.addEventListener('input', (e) => {
   if (hint) hint.textContent = el.value.length + '/' + el.maxLength;
 });
 
-/* ===================== inline validation ===================== */
 function validateForm(form, rules) {
-  // Clear previous errors
   form.querySelectorAll('.field-error').forEach(el => el.remove());
   form.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
 
@@ -1871,7 +1782,6 @@ function validateForm(form, rules) {
       input.closest('.field').appendChild(msg);
     }
   }
-  // Scroll to first error
   if (!valid) {
     const first = form.querySelector('.invalid');
     if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1879,15 +1789,12 @@ function validateForm(form, rules) {
   return valid;
 }
 
-// Dispatch table for every [data-form] submit handler, keyed by the form type. Each handler
-// receives the submitted form element and its FormData.
 const SUBMIT_HANDLERS = {
   reserve: async (form, fd) => {
     const valid = validateForm(form, {
       name:  { required: 'Please enter your name.' },
       email: { required: 'Please enter your email.', email: 'Please enter a valid email address.' }
     });
-    // Manual dietary check — must either tick no special needs or fill in the textarea
     const noSpecialDiet = form.querySelector('[name="noSpecialDiet"]').checked;
     const dietaryNeeds = (fd.get('dietaryNeeds')||'').trim();
     if (!noSpecialDiet && !dietaryNeeds) {
@@ -1979,8 +1886,6 @@ const SUBMIT_HANDLERS = {
     const eventDate  = form.dataset.eventDate;
     const eventLabel = form.dataset.eventLabel;
 
-    // Atomically re-checks capacity, creates the reservation, and marks the waitlist entry
-    // claimed — see claim_waitlist_by_token() in the Supabase migration.
     const claimed = await supaFetch('rpc/claim_waitlist_by_token', { method:'POST', body:{ p_token: STATE.claimToken } });
     invalidateReserveStats();
     if (!claimed) {
@@ -2148,7 +2053,6 @@ document.addEventListener('submit', async (e) => {
   if (handler) await handler(form, new FormData(form));
 });
 
-/* ===================== init ===================== */
 window.addEventListener('hashchange', async () => {
   const hash = window.location.hash.replace('#','');
   if (hash.startsWith('cancel?token=')) {
@@ -2171,7 +2075,6 @@ window.addEventListener('hashchange', async () => {
 (async function init() {
   const hash = window.location.hash.replace('#','');
 
-  // Handle cancel?token=xxx and claim?token=xxx
   if (hash.startsWith('cancel?token=')) {
     STATE.cancelToken = hash.replace('cancel?token=', '');
     STATE.view = 'cancel';
